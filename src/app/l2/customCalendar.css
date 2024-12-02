@@ -1,0 +1,32 @@
+/* customCalendar.css */
+
+/* Calendar container with Tailwind styles */
+.custom-calendar {
+    @apply bg-black text-white rounded-lg p-4;
+  }
+  
+  /* Month and Year navigation */
+  .react-calendar__navigation button {
+    @apply text-white bg-black font-semibold hover:bg-gray-800;
+  }
+  
+  /* Weekdays header (Mon, Tue, etc.) */
+  .react-calendar__month-view__weekdays {
+    @apply bg-black text-gray-400;
+  }
+  
+  /* Days grid with black theme */
+  .react-calendar__tile {
+    @apply text-white bg-black hover:bg-gray-700 rounded-lg transition-colors;
+  }
+  
+  /* Today’s date styling */
+  .react-calendar__tile--now {
+    @apply border border-gray-300;
+  }
+  
+  /* Selected day styling */
+  .react-calendar__tile--active {
+    @apply bg-blue-500 text-white rounded-lg;
+  }
+  
