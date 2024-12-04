@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { requestFcmToken } from "../../../lib/firebase";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -42,6 +43,8 @@ export default function SignupForm() {
     }
     fetchL1Users();
   }, []);
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -96,6 +99,13 @@ export default function SignupForm() {
 
   const verifyOtp = async () => {
     try {
+      // Request FCM Token
+      const fcmToken = await requestFcmToken();
+      if (!fcmToken) {
+        alert("Failed to retrieve FCM token.");
+        return;
+      }
+
       const response = await axios.get(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY3/${formData.contactNo}/${otp}`
       );
@@ -108,7 +118,7 @@ export default function SignupForm() {
         return;
       }
 
-      const { confirmPassword, ...submitData } = { ...formData, imageUrl };
+      const { confirmPassword, ...submitData } = { ...formData, imageUrl, fcmToken };
 
       const result = await fetch("/api/l2/signup", {
         method: "POST",
@@ -137,66 +147,24 @@ export default function SignupForm() {
         </h2>
         <form onSubmit={handleSubmit}>
           {/* Form Fields */}
-          {[
+          {[ 
             { label: "Name", type: "text", name: "name", required: true },
-            {
-              label: "Date of Birth",
-              type: "date",
-              name: "dob",
-              required: true,
-            },
-            {
-              label: "Contact No",
-              type: "tel",
-              name: "contactNo",
-              required: true,
-            },
-            {
-              label: "Date of Peetarohana",
-              type: "date",
-              name: "peetarohanaDate",
-              required: true,
-            },
-            {
-              label: "Gender",
-              type: "select",
-              name: "gender",
-              options: [
-                { value: "", label: "Select" },
-                { value: "male", label: "Male" },
-                { value: "female", label: "Female" },
-                { value: "other", label: "Other" },
-              ],
-              required: true,
-            },
-            {
-              label: "Name of Karthru Guru",
-              type: "text",
-              name: "karthruGuru",
-              required: true,
-            },
-            {
-              label: "Name of Dheksha Guru",
-              type: "text",
-              name: "dhekshaGuru",
-              required: true,
-            },
+            { label: "Date of Birth", type: "date", name: "dob", required: true },
+            { label: "Contact No", type: "tel", name: "contactNo", required: true },
+            { label: "Date of Peetarohana", type: "date", name: "peetarohanaDate", required: true },
+            { label: "Gender", type: "select", name: "gender", options: [
+                { value: "", label: "Select" }, 
+                { value: "male", label: "Male" }, 
+                { value: "female", label: "Female" }, 
+                { value: "other", label: "Other" }], required: true },
+            { label: "Name of Karthru Guru", type: "text", name: "karthruGuru", required: true },
+            { label: "Name of Dheksha Guru", type: "text", name: "dhekshaGuru", required: true },
             { label: "Bhage", type: "text", name: "bhage", required: true },
             { label: "Gothra", type: "text", name: "gothra", required: true },
             { label: "If Mari Present", type: "text", name: "mariPresent" },
             { label: "Address", type: "text", name: "address", required: true },
-            {
-              label: "Password",
-              type: "password",
-              name: "password",
-              required: true,
-            },
-            {
-              label: "Confirm Password",
-              type: "password",
-              name: "confirmPassword",
-              required: true,
-            },
+            { label: "Password", type: "password", name: "password", required: true },
+            { label: "Confirm Password", type: "password", name: "confirmPassword", required: true },
           ].map((field, index) => (
             <div key={index} className="mb-4">
               <label className="block mb-1 font-semibold text-black">

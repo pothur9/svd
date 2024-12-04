@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
             password,
             imageUrl,
             address,
+            fcmToken,
             
         } = await req.json();
 
@@ -64,7 +65,8 @@ export async function POST(req: NextRequest) {
             mariPresent,
             password: hashedPassword,
             imageUrl,
-            address
+            address,
+            fcmToken,
         });
 
         await newUser.save();
