@@ -1,8 +1,10 @@
-// components/SignupForm.js
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
+import Footer
+ from "../footer/footer";
+import Navbar from "@/app/l2/navbar/page";
 export default function SignupForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -19,21 +21,26 @@ export default function SignupForm() {
     password: "",
     confirmPassword: "",
     imageUrl: "",
-    address: "", // Add address field
+    address: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [otp, setOtp] = useState("");
+  const [otpSessionId, setOtpSessionId] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
-  const [userId, setUserId] = useState(""); // State to store the unique user ID
-  const [isUserIdVisible, setIsUserIdVisible] = useState(false); // State to control the visibility of the user ID modal
+  const [userId, setUserId] = useState("");
+  const [isUserIdVisible, setIsUserIdVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isResendOtpDisabled, setIsResendOtpDisabled] = useState(true);
+  const [resendTimer, setResendTimer] = useState(30);
+
+
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleImageChange = (e) => {
@@ -42,87 +49,129 @@ export default function SignupForm() {
 
   const uploadImageToCloudinary = async () => {
     if (!imageFile) return null;
-
     const imageFormData = new FormData();
     imageFormData.append("file", imageFile);
     imageFormData.append("upload_preset", "profilephoto");
-
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dxruv6swh/image/upload",
-      {
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dxruv6swh/image/upload", {
         method: "POST",
         body: imageFormData,
-      }
-    );
-
-    const data = await res.json();
-    return data.secure_url;
+      });
+      const data = await res.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      return null;
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Check if passwords match
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
+  const sendOtp = async () => {
     try {
       const response = await axios.get(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN/SVD`
       );
       console.log("OTP sent:", response.data);
-      setIsOtpSent(true); // Open OTP modal
+      setOtpSessionId(response.data.Details); // Store the session ID
+      setIsOtpSent(true);
+      setIsResendOtpDisabled(true); // Disable resend button
+      setResendTimer(30); // Reset the timer to 30 seconds
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("Failed to send OTP");
+      alert("Failed to send OTP. Please check your phone number.");
+      setIsSubmitting(false);
     }
   };
 
   const verifyOtp = async () => {
+    setIsVerifyingOtp(true);
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY3/${formData.contactNo}/${otp}`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
       );
-      console.log("OTP verified:", response.data);
-      setIsOtpVerified(true);
+      console.log("OTP verified response:", response.data);
+      if (response.data.Status === "Success") {
+        setIsOtpVerified(true);
+        const imageUrl = await uploadImageToCloudinary();
+        if (!imageUrl) {
+          alert("Image upload failed");
+          return;
+        }
 
-      // Proceed with image upload and sign-up only if OTP is verified
-      const imageUrl = await uploadImageToCloudinary();
-      if (!imageUrl) {
-        alert("Image upload failed");
-        return;
+        const { confirmPassword, ...submitData } = { ...formData, imageUrl };
+        const result = await fetch("/api/l1/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submitData),
+        });
+        const responseData = await result.json();
+        alert(responseData.message);
+        setUserId(responseData.userId);
+        setIsUserIdVisible(true);
+        setIsOtpSent(false);
+        setOtp("");
+        setFormData({
+          name: "",
+          dob: "",
+          contactNo: "",
+          peetarohanaDate: "",
+          gender: "",
+          karthruGuru: "",
+          dhekshaGuru: "",
+          peeta: "",
+          bhage: "",
+          gothra: "",
+          mariPresent: "",
+          password: "",
+          confirmPassword: "",
+          imageUrl: "",
+          address: "",
+        });
+        setImageFile(null);
+        setIsOtpSent(false);
+        setOtp("");
+      } else {
+        alert(`OTP verification failed: ${response.data.Details}`);
       }
-
-      const { confirmPassword, ...submitData } = { ...formData, imageUrl };
-
-      // Submit the form data
-      const result = await fetch("/api/l1/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submitData),
-      });
-
-      const responseData = await result.json();
-      alert(responseData.message);
-
-      // Display the unique user ID in a modal
-      setUserId(responseData.userId); // Assuming responseData contains userId
-      setIsUserIdVisible(true); // Show the user ID modal
-
-      // Close OTP modal after successful verification
-      setIsOtpSent(false);
-      setOtp(""); // Clear OTP input
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("OTP verification failed");
+      alert("An error occurred during OTP verification.");
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
+  const handleResendOtp = async () => {
+    if (!isResendOtpDisabled) {
+      await sendOtp();
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    setIsSubmitting(true);
+    await sendOtp();
+
+  };
+  const handleLoginRedirect = () => {
+    router.push("/l1/login"); // Redirect to the login page
+  };
+
+  useEffect(() => {
+    let timer;
+    if (isResendOtpDisabled && resendTimer > 0) {
+      timer = setTimeout(() => setResendTimer((prev) => prev - 1), 1000);
+    } else if (resendTimer === 0) {
+      setIsResendOtpDisabled(false); // Enable resend button when timer reaches 0
+    }
+    return () => clearTimeout(timer);
+  }, [isResendOtpDisabled, resendTimer]);
+
   return (
+    <>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-black text-center mb-6">Sign Up</h2>
@@ -198,36 +247,62 @@ export default function SignupForm() {
           </div>
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition"
+            className={`bg-blue-500 text-white px-4 py-2 rounded w-full transition ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
+            }`}
+            disabled={isSubmitting}
           >
-            Sign Up
+            {isSubmitting ? "Processing..." : "Sign Up"}
           </button>
+           <p className="text-center mt-4 text-gray-700">
+          Already have an account?{" "}
+          <button
+            onClick={handleLoginRedirect}
+            className="text-blue-500 underline hover:text-blue-600"
+          >
+            Login
+          </button>
+        </p>
         </form>
-
-        {/* OTP Modal */}
         {isOtpSent && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-sm">
-              <h2 className="text-xl font-bold mb-4 text-black">Enter OTP</h2>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl mb-4">Enter OTP</h2>
               <input
                 type="text"
                 placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="border p-2 rounded w-full bg-white text-black"
+                className="border p-2 rounded w-full"
               />
-              <div className="flex justify-end mt-4">
+              <button
+                onClick={verifyOtp}
+                className="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full"
+                disabled={isVerifyingOtp}
+              >
+                {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
+              </button>
+              <div className="flex justify-between items-center mt-4">
                 <button
-                  onClick={verifyOtp}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                  onClick={handleResendOtp}
+                  className={`${
+                    isResendOtpDisabled
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-500 hover:bg-green-600"
+                  } text-white px-4 py-2 rounded`}
+                  disabled={isResendOtpDisabled}
                 >
-                  Verify OTP
+                  {isResendOtpDisabled
+                    ? `Resend OTP (${resendTimer}s)`
+                    : "Resend OTP"}
                 </button>
+                <p className="text-gray-600 text-sm">
+                  Didn’t receive OTP? Check your network.
+                </p>
               </div>
             </div>
           </div>
         )}
-
         {/* User ID Modal */}
         {isUserIdVisible && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -247,5 +322,8 @@ export default function SignupForm() {
         )}
       </div>
     </div>
+    <Footer/>
+    </>
+
   );
 }

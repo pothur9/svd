@@ -4,6 +4,8 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
 import '../customCalendar.css'; // Import custom CSS for specific tweaks
+import Footer from '../footer/footer';
+import Navbar from '../navbar/navbar';
 
 export default function EventCalendar() {
   const [events, setEvents] = useState([]);
@@ -13,8 +15,16 @@ export default function EventCalendar() {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      // Fetch username from session storage
+      const username = sessionStorage.getItem("username");
+
+      if (!username) {
+        console.error('Username is not available');
+        return;
+      }
+
       try {
-        const response = await fetch('/api/l1/viewevents');
+        const response = await fetch(`/api/l1/viewevents/${username}`);
         if (!response.ok) throw new Error('Failed to fetch events');
         
         const data = await response.json();
@@ -23,6 +33,7 @@ export default function EventCalendar() {
         console.error('Error fetching events:', error);
       }
     };
+
     fetchEvents();
   }, []);
 
@@ -44,6 +55,10 @@ export default function EventCalendar() {
   };
 
   return (
+    <>
+    <Navbar/>
+    <div className="bg-slate-100">
+    <br/> <br/> <br/>
     <div className="p-4 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-md mt-6 sm:mt-10">
       <h2 className="text-center text-2xl font-bold text-blue-600 mb-6">Event Calendar</h2>
       <Calendar
@@ -51,10 +66,9 @@ export default function EventCalendar() {
         tileContent={tileContent}
         className="bg-black text-white rounded-lg shadow-md p-4 mx-auto w-full sm:w-auto custom-calendar"
         tileClassName={({ date }) =>
-          `text-white font-medium ${
-            selectedDate && format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-              ? 'bg-blue-500 text-white rounded-full'
-              : 'hover:bg-gray-700'
+          `text-white font-medium ${selectedDate && format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+            ? 'bg-blue-500 text-white rounded-full'
+            : 'hover:bg-gray-700'
           }`
         }
       />
@@ -80,10 +94,16 @@ export default function EventCalendar() {
               className="absolute top-3 right-3 mt-4 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
             >
               Close
-            </button>
+            </button> 
           </div>
+          
         </div>
       )}
+      <br/>
     </div>
+    <br/> <br/> <br/> <br/>
+    </div>
+    <Footer/>
+    </>
   );
 }
