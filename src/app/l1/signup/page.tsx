@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Footer
- from "../footer/footer";
+import Footer from "../footer/footer";
 import Navbar from "@/app/l2/navbar/page";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n"; // Ensure the correct path
+
 export default function SignupForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -35,8 +37,15 @@ export default function SignupForm() {
   const [isResendOtpDisabled, setIsResendOtpDisabled] = useState(true);
   const [resendTimer, setResendTimer] = useState(30);
 
-
+  const [language, setLanguage] = useState("en");
+  const { t } = useTranslation();
   const router = useRouter();
+
+  const changeLanguage = (lang) => {
+    console.log(`Changing language to: ${lang}`); // Debugging log
+    i18n.changeLanguage(lang);
+    setLanguage(lang);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,10 +62,13 @@ export default function SignupForm() {
     imageFormData.append("file", imageFile);
     imageFormData.append("upload_preset", "profilephoto");
     try {
-      const res = await fetch("https://api.cloudinary.com/v1_1/dxruv6swh/image/upload", {
-        method: "POST",
-        body: imageFormData,
-      });
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dxruv6swh/image/upload",
+        {
+          method: "POST",
+          body: imageFormData,
+        }
+      );
       const data = await res.json();
       return data.secure_url;
     } catch (error) {
@@ -154,7 +166,6 @@ export default function SignupForm() {
     }
     setIsSubmitting(true);
     await sendOtp();
-
   };
   const handleLoginRedirect = () => {
     router.push("/l1/login"); // Redirect to the login page
@@ -169,161 +180,231 @@ export default function SignupForm() {
     }
     return () => clearTimeout(timer);
   }, [isResendOtpDisabled, resendTimer]);
-
+  console.log(t("signup.title"));
   return (
     <>
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-black text-center mb-6">Sign Up</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Form Fields */}
-          {[
-            { label: "Name", type: "text", name: "name", required: true },
-            { label: "Date of Birth", type: "date", name: "dob", required: true },
-            { label: "Contact No", type: "tel", name: "contactNo", required: true },
-            { label: "Date of Peetarohana", type: "date", name: "peetarohanaDate", required: true },
-            {
-              label: "Gender",
-              type: "select",
-              name: "gender",
-              options: [
-                { value: "", label: "Select" },
-                { value: "male", label: "Male" },
-                { value: "female", label: "Female" },
-                { value: "other", label: "Other" },
-              ],
-              required: true,
-            },
-            { label: "Name of Karthru Guru", type: "text", name: "karthruGuru", required: true },
-            { label: "Name of Dheksha Guru", type: "text", name: "dhekshaGuru", required: true },
-            { label: "Peeta", type: "text", name: "peeta", required: true },
-            { label: "Bhage", type: "text", name: "bhage", required: true },
-            { label: "Gothra", type: "text", name: "gothra", required: true },
-            { label: "If Mari Present", type: "text", name: "mariPresent" },
-            { label: "Address", type: "text", name: "address", required: true }, // Add address field
-            { label: "Password", type: "password", name: "password", required: true },
-            { label: "Confirm Password", type: "password", name: "confirmPassword", required: true },
-          ].map((field, index) => (
-            <div key={index} className="mb-4">
+      <button onClick={() => changeLanguage("en")}>English</button>
+      <button onClick={() => changeLanguage("kn")}>ಕನ್ನಡ</button>
+      <button onClick={() => changeLanguage("hi")}>हिंदी</button>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src="/logo.png"
+              alt="Logo"
+              style={{ width: "110px", height: "auto" }}
+            />
+          </div>
+
+          <h2 className="text-2xl font-bold text-black text-center mb-6 mt-10">
+            {t("signup.title")}
+          </h2>
+          <form onSubmit={handleSubmit}>
+            {/* Form Fields */}
+            {[
+              {
+                label: t("signup.name"),
+                type: "text",
+                name: "name",
+                required: true,
+              },
+
+              {
+                label: "Date of Birth",
+                type: "date",
+                name: "dob",
+                required: true,
+              },
+              {
+                label: "Contact No",
+                type: "tel",
+                name: "contactNo",
+                required: true,
+              },
+              {
+                label: "Date of Peetarohana",
+                type: "date",
+                name: "peetarohanaDate",
+                required: true,
+              },
+              {
+                label: "Gender",
+                type: "select",
+                name: "gender",
+                options: [
+                  { value: "", label: "Select" },
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                  { value: "other", label: "Other" },
+                ],
+                required: true,
+              },
+              {
+                label: "Name of Karthru Guru",
+                type: "text",
+                name: "karthruGuru",
+                required: true,
+              },
+              {
+                label: "Name of Dheksha Guru",
+                type: "text",
+                name: "dhekshaGuru",
+                required: true,
+              },
+              { label: "Peeta", type: "text", name: "peeta", required: true },
+              { label: "Bhage", type: "text", name: "bhage", required: true },
+              { label: "Gothra", type: "text", name: "gothra", required: true },
+              { label: "If Mari Present", type: "text", name: "mariPresent" },
+              {
+                label: "Address",
+                type: "text",
+                name: "address",
+                required: true,
+              }, // Add address field
+              {
+                label: "Password",
+                type: "password",
+                name: "password",
+                required: true,
+              },
+              {
+                label: "Confirm Password",
+                type: "password",
+                name: "confirmPassword",
+                required: true,
+              },
+            ].map((field, index) => (
+              <div key={index} className="mb-4">
+                <label className="block mb-1 font-semibold text-black">
+                  {field.label}:
+                  {field.type === "select" ? (
+                    <select
+                      name={field.name}
+                      value={formData[field.name]}
+                      onChange={handleChange}
+                      required={field.required}
+                      className="border rounded-md p-2 w-full bg-white text-black"
+                    >
+                      {field.options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      value={formData[field.name]}
+                      onChange={handleChange}
+                      required={field.required}
+                      className="border rounded-md p-2 w-full bg-white text-black"
+                    />
+                  )}
+                </label>
+              </div>
+            ))}
+            <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {field.label}:
-                {field.type === "select" ? (
-                  <select
-                    name={field.name}
-                    value={formData[field.name]}
-                    onChange={handleChange}
-                    required={field.required}
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                  >
-                    {field.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={formData[field.name]}
-                    onChange={handleChange}
-                    required={field.required}
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                  />
-                )}
+                Upload Profile Picture:
+                <input
+                  type="file"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="border rounded-md p-2 w-full bg-white text-black"
+                />
               </label>
             </div>
-          ))}
-          <div className="mb-4">
-            <label className="block mb-1 font-semibold text-black">
-              Upload Profile Picture:
-              <input
-                type="file"
-                onChange={handleImageChange}
-                accept="image/*"
-                className="border rounded-md p-2 w-full bg-white text-black"
-              />
-            </label>
-          </div>
-          <button
-            type="submit"
-            className={`bg-blue-500 text-white px-4 py-2 rounded w-full transition ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
-            }`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Processing..." : "Sign Up"}
-          </button>
-           <p className="text-center mt-4 text-gray-700">
-          Already have an account?{" "}
-          <button
-            onClick={handleLoginRedirect}
-            className="text-blue-500 underline hover:text-blue-600"
-          >
-            Login
-          </button>
-        </p>
-        </form>
-        {isOtpSent && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl mb-4">Enter OTP</h2>
-              <input
-                type="text"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="border p-2 rounded w-full"
-              />
+            <button
+              type="submit"
+              className={`bg-blue-500 text-white px-4 py-2 rounded w-full transition ${
+                isSubmitting
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-600"
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Processing..." : "Sign Up"}
+            </button>
+            <p className="text-center mt-4 text-gray-700">
+              Already have an account?{" "}
               <button
-                onClick={verifyOtp}
-                className="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full"
-                disabled={isVerifyingOtp}
+                onClick={handleLoginRedirect}
+                className="text-blue-500 underline hover:text-blue-600"
               >
-                {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
+                Login
               </button>
-              <div className="flex justify-between items-center mt-4">
+            </p>
+          </form>
+          {isOtpSent && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h2 className="text-xl mb-4">Enter OTP</h2>
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="border p-2 rounded w-full"
+                />
                 <button
-                  onClick={handleResendOtp}
-                  className={`${
-                    isResendOtpDisabled
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-500 hover:bg-green-600"
-                  } text-white px-4 py-2 rounded`}
-                  disabled={isResendOtpDisabled}
+                  onClick={verifyOtp}
+                  className="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full"
+                  disabled={isVerifyingOtp}
                 >
-                  {isResendOtpDisabled
-                    ? `Resend OTP (${resendTimer}s)`
-                    : "Resend OTP"}
+                  {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
                 </button>
-                <p className="text-gray-600 text-sm">
-                  Didn’t receive OTP? Check your network.
+                <div className="flex justify-between items-center mt-4">
+                  <button
+                    onClick={handleResendOtp}
+                    className={`${
+                      isResendOtpDisabled
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-500 hover:bg-green-600"
+                    } text-white px-4 py-2 rounded`}
+                    disabled={isResendOtpDisabled}
+                  >
+                    {isResendOtpDisabled
+                      ? `Resend OTP (${resendTimer}s)`
+                      : "Resend OTP"}
+                  </button>
+                  <p className="text-gray-600 text-sm">
+                    Didn’t receive OTP? Check your network.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* User ID Modal */}
+          {isUserIdVisible && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-sm">
+                <h2 className="text-xl font-bold mb-4 text-black">
+                  User ID Created
+                </h2>
+                <p className="text-black">
+                  Your unique User ID is: <strong>{userId}</strong>
                 </p>
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => setIsUserIdVisible(false)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        {/* User ID Modal */}
-        {isUserIdVisible && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-sm">
-              <h2 className="text-xl font-bold mb-4 text-black">User ID Created</h2>
-              <p className="text-black">Your unique User ID is: <strong>{userId}</strong></p>
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={() => setIsUserIdVisible(false)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
-
   );
 }

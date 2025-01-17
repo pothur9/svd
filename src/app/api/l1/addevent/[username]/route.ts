@@ -3,7 +3,7 @@ import dbConnect from '@/lib/dbconnect';
 import l1cal from '@/models/l1cal';
 import l2User from '@/models/l2';  // Ensure your user model is imported
 import admin from 'firebase-admin';
-import FIREBASE_SERVICE_ACCOUNT from '../../../../config/serviceAccountKey.json';
+import FIREBASE_SERVICE_ACCOUNT from '../../../../../config/serviceAccountKey.json';
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
@@ -12,17 +12,23 @@ if (!admin.apps.length) {
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request, { params }: { params: { userId: string } }) {
   try {
     await dbConnect();
 
-    const { date, title, description, username } = await request.json();
+    // Extract userId from URL parameters
+    const username = params.username;
+
+    // Get event data from the request body
+    const { date, title, description } = await request.json();
+    
+    // Ensure all required fields are present
     if (!date || !title || !description || !username) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    // Save the event
-    const newEvent = new l1cal({ date, title, description, username });
+    // Save the event with the userId and other data
+    const newEvent = new l1cal({ date, title, description, username: username });
     await newEvent.save();
 
     // Fetch users with matching peeta value

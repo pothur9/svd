@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { requestFcmToken } from "../../../lib/firebase";
+import Image from "next/image";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -28,6 +29,8 @@ export default function SignupForm() {
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [userId, setUserId] = useState("");
   const [isUserIdVisible, setIsUserIdVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   useEffect(() => {
     async function fetchL1Users() {
@@ -43,8 +46,6 @@ export default function SignupForm() {
     }
     fetchL1Users();
   }, []);
-
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,6 +86,8 @@ export default function SignupForm() {
       return;
     }
 
+    setIsLoading(true); // Set loading to true when the signup button is clicked
+
     try {
       const response = await axios.get(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN/SVD`
@@ -94,12 +97,16 @@ export default function SignupForm() {
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("Failed to send OTP");
+    } finally {
+      setIsLoading(false); // Reset loading state after OTP process
     }
   };
 
   const verifyOtp = async () => {
+    setIsVerifyingOtp(true);
     try {
       // Request FCM Token
+
       const fcmToken = await requestFcmToken();
       if (!fcmToken) {
         alert("Failed to retrieve FCM token.");
@@ -136,12 +143,17 @@ export default function SignupForm() {
     } catch (error) {
       console.error("Error verifying OTP:", error);
       alert("OTP verification failed");
+    }finally {
+      setIsVerifyingOtp(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="flex justify-center">
+          <Image src="/logo.png" alt="Logo" width={100} height={100} />
+        </div>
         <h2 className="text-2xl font-bold text-black text-center mb-6">
           Sign Up
         </h2>
@@ -236,8 +248,13 @@ export default function SignupForm() {
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition"
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? (
+              <span>Signing Up...</span> // You can replace this with a spinner icon
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </form>
 
@@ -254,11 +271,12 @@ export default function SignupForm() {
                 className="border p-2 rounded w-full bg-white text-black"
               />
               <div className="flex justify-end mt-4">
-                <button
+              <button
                   onClick={verifyOtp}
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                  disabled={isVerifyingOtp}
                 >
-                  Verify OTP
+                  {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
                 </button>
               </div>
             </div>

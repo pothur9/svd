@@ -1,6 +1,8 @@
 // components/UserDataDisplay.js
 "use client";
 import { useEffect, useState } from 'react';
+import Footer from '../footer/footer';
+import Navbar from '../navbar/navbar';
 
 export default function UserDataDisplay() {
     const [userData, setUserData] = useState(null);
@@ -10,7 +12,7 @@ export default function UserDataDisplay() {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch(`/api/l3/viewhistory/${username}`);
+                const response = await fetch(`/api/l3/history/${username}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
                 }
@@ -36,6 +38,9 @@ export default function UserDataDisplay() {
     }
 
     return (
+        <>
+        <Navbar/><br/>
+        <div className="bg-slate-100 min-h-screen w-full"><br/><br/>
         <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8 mb-12">
             <h2 className="text-3xl font-extrabold text-blue-800 mb-6 border-b-2 border-gray-300 pb-4">User Data Overview</h2>
             
@@ -71,5 +76,8 @@ export default function UserDataDisplay() {
                 </section>
             </article>
         </div>
+        </div>
+        <Footer/>
+        </>
     );
 }

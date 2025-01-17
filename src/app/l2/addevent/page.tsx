@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import Navbar from '../navbar/page';
+import Footer from '../footer/page';
 
 export default function AddEvent() {
   const [formData, setFormData] = useState({ date: '', title: '', description: '' });
@@ -43,7 +44,9 @@ export default function AddEvent() {
 
   return (
     <>
+    <div className="bg-slate-100 min-h-screen w-full">
       <Navbar />
+      <br/>  <br/>  <br/>  <br/>  <br/>
       <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-blue-600 mb-6 text-center">Add New Event</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,7 +58,7 @@ export default function AddEvent() {
               value={formData.date}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -68,7 +71,7 @@ export default function AddEvent() {
               onChange={handleChange}
               placeholder="Event Title"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -80,7 +83,7 @@ export default function AddEvent() {
               onChange={handleChange}
               placeholder="Event Description"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
           </div>
 
@@ -92,6 +95,9 @@ export default function AddEvent() {
           </button>
         </form>
       </div>
+     
+      </div>
+      <Footer/>
     </>
   );
 }

@@ -1,0 +1,24 @@
+{
+    "signup": {
+      "title": "ಹೆಸರನ್ನು ನೋಂದಾಯಿಸಿ",
+      "name": "ಹೆಸರು",
+      "dob": "ಹುಟ್ಟಿದ ದಿನಾಂಕ",
+      "contactNo": "ಸಂಪರ್ಕ ಸಂಖ್ಯೆ",
+      "peetarohanaDate": "ಪೀಠಾರೋಹಣ ದಿನಾಂಕ",
+      "gender": "ಲಿಂಗ",
+      "karthruGuru": "ಕರ್ತೃ ಗುರುಹಿರಿಯರ ಹೆಸರು",
+      "dhekshaGuru": "ದೀಕ್ಷಾ ಗುರುಹಿರಿಯರ ಹೆಸರು",
+      "peeta": "ಪೀಠ",
+      "bhage": "ಭಾಗೆ",
+      "gothra": "ಗೋತ್ರ",
+      "mariPresent": "ಮಾರಿ ಹಾಜರಿದ್ದರೆ",
+      "address": "ವಿಳಾಸ",
+      "password": "ಗುಪ್ತಪದ",
+      "confirmPassword": "ಗುಪ್ತಪದ ದೃಢೀಕರಿಸಿ",
+      "uploadProfilePicture": "ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ಅಪ್ಲೋಡ್ ಮಾಡಿ",
+      "alreadyAccount": "ಹೀಗೆ ಖಾತೆ ಇದೆಯಾ?",
+      "login": "ಲಾಗಿನ್",
+      "submit": "ಸೈನ್ ಅಪ್ ಮಾಡಿ"
+    }
+  }
+  

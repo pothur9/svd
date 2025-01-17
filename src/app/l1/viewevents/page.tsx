@@ -1,109 +1,92 @@
 "use client";
-import { useEffect, useState } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import { format } from 'date-fns';
-import '../customCalendar.css'; // Import custom CSS for specific tweaks
-import Footer from '../footer/footer';
-import Navbar from '../navbar/navbar';
+import { useEffect, useState } from "react";
+import Footer from "../footer/footer";
+import Navbar from "../navbar/navbar";
 
-export default function EventCalendar() {
+export default function EventTable() {
   const [events, setEvents] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [eventDetails, setEventDetails] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
-      // Fetch username from session storage
       const username = sessionStorage.getItem("username");
 
       if (!username) {
-        console.error('Username is not available');
+        console.error("Username is not available");
         return;
       }
 
       try {
         const response = await fetch(`/api/l1/viewevents/${username}`);
-        if (!response.ok) throw new Error('Failed to fetch events');
-        
+        if (!response.ok) throw new Error("Failed to fetch events");
+
         const data = await response.json();
         setEvents(data);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error fetching events:", error);
       }
     };
 
     fetchEvents();
   }, []);
 
-  const handleDateClick = (date) => {
-    setSelectedDate(date);
-    const eventsForDate = events.filter(
-      (event) => format(new Date(event.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-    );
-    setEventDetails(eventsForDate);
-    setShowPopup(eventsForDate.length > 0);
-  };
-
-  const tileContent = ({ date }) => {
-    const hasEvents = events.some(
-      (event) => format(new Date(event.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-    );
-
-    return hasEvents ? <span className="inline-block w-2 h-2 mt-1 bg-red-500 rounded-full"></span> : null;
-  };
-
   return (
-    <>
-    <Navbar/>
-    <div className="bg-slate-100">
-    <br/> <br/> <br/>
-    <div className="p-4 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-md mt-6 sm:mt-10">
-      <h2 className="text-center text-2xl font-bold text-blue-600 mb-6">Event Calendar</h2>
-      <Calendar
-        onClickDay={handleDateClick}
-        tileContent={tileContent}
-        className="bg-black text-white rounded-lg shadow-md p-4 mx-auto w-full sm:w-auto custom-calendar"
-        tileClassName={({ date }) =>
-          `text-white font-medium ${selectedDate && format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-            ? 'bg-blue-500 text-white rounded-full'
-            : 'hover:bg-gray-700'
-          }`
-        }
-      />
-
-      {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-11/12 sm:w-full max-w-md relative shadow-lg">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-              Events on {format(selectedDate, 'yyyy-MM-dd')}
-            </h3>
-            {eventDetails && eventDetails.length > 0 ? (
-              eventDetails.map((event) => (
-                <div key={event._id} className="mb-4 p-4 border-b border-gray-200">
-                  <h4 className="text-lg font-medium text-blue-600">{event.title}</h4>
-                  <p className="text-gray-700 mt-1">{event.description}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-600">No events for this date.</p>
-            )}
-            <button
-              onClick={() => setShowPopup(false)}
-              className="absolute top-3 right-3 mt-4 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
-            >
-              Close
-            </button> 
+    <div className="flex flex-col min-h-screen bg-slate-100">
+      <Navbar />
+      <br/><br/><br/>
+      <div className="flex-grow">
+        <div className="p-4 max-w-4xl mx-auto bg-white rounded-lg shadow-lg mt-10">
+          <h2 className="text-center text-2xl font-bold text-blue-600 mb-6">
+            Event List
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-left">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border border-gray-300 px-4 py-2 text-gray-700">
+                    Date
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-gray-700">
+                    Name
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-gray-700">
+                    Title
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-gray-700">
+                    Description
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.length > 0 ? (
+                  events.map((event) => (
+                    <tr key={event._id} className="hover:bg-gray-100">
+                      <td className="border border-gray-300 px-4 py-2 text-black">
+                        {new Date(event.date).toLocaleDateString()}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-black">
+                        {event.username}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-black">
+                        {event.title}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-black">
+                        {event.description}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="text-center text-gray-500 py-4">
+                      No events found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-          
         </div>
-      )}
-      <br/>
+      </div>
+      <Footer />
     </div>
-    <br/> <br/> <br/> <br/>
-    </div>
-    <Footer/>
-    </>
   );
 }

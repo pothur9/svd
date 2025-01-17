@@ -1,9 +1,9 @@
 import dbConnect from "@/lib/dbconnect";
-import l3 from "@/models/l3";
+import l3User from "@/models/l3";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
-export async function POST(req) {
+export async function POST(req:NextRequest) {
   try {
     await dbConnect();
 
@@ -25,7 +25,8 @@ export async function POST(req) {
       languageKnown,
       password,
       selectedL2User,
-      photoUrl, // Receive the photo URL
+      photoUrl, 
+      fcmToken,
     } = await req.json();
 
     // Hash the password
@@ -38,11 +39,11 @@ export async function POST(req) {
       userId = `${name.substring(0, 4).toUpperCase()}${Math.floor(
         1000 + Math.random() * 9000
       )}`;
-      const existingUser = await l3.findOne({ userId });
+      const existingUser = await l3User.findOne({ userId });
       if (!existingUser) isUnique = true; // Check if userId is unique
     }
 
-    const newUser = new l3({
+    const newUser = new l3User({
       userId,
       name,
       dob,
@@ -61,7 +62,8 @@ export async function POST(req) {
       languageKnown,
       selectedL2User,
       password: hashedPassword,
-      photoUrl, // Save the photo URL
+      photoUrl, 
+      fcmToken,
     });
 
     await newUser.save();

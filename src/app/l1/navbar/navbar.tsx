@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link'; // Import Link from Next.js
 
 function Navbar() {
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        const response = await fetch('/api/totalUsers');
+        if (!response.ok) throw new Error('Failed to fetch user count');
+
+        const data = await response.json();
+        setTotalUsers(data.totalUsers); // Set the total user count
+      } catch (error) {
+        console.error('Error fetching total users:', error);
+      }
+    };
+
+    fetchUserCount();
+  }, []);
+
   return (
-    <div>
-      <div className="navbar bg-base-100">
+    <div >
+      
+
+      <div className="navbar bg-base-100 fixed">
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -33,6 +53,8 @@ function Navbar() {
             </ul>
           </div>
           <Link href="/" className="btn btn-ghost text-xl">SVD</Link> {/* Logo Link */}
+
+          
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
@@ -44,9 +66,16 @@ function Navbar() {
             <li><Link href="/l1/addhistory" className="text-lg">Add History</Link></li>
           </ul>
         </div>
+     
         <div className="navbar-end">
+                   {/* Display total users count at the top */}
+      {totalUsers !== null && (
+        <div className=" text-white p-2 text-center ">
+          Total Users: {totalUsers}
+        </div>
+      )}
           <Link href="/l1/login" className="btn">
-            Login
+            Logout
           </Link>
         </div>
       </div>

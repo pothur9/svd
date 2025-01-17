@@ -3,9 +3,12 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
+import Footer from "../footer/footer";
 
 export default function Dashboard() {
-  const [memberData, setMemberData] = useState(null);
+  const [memberData, setMemberData] = useState([]);
+  const [userData, setUserData] = useState(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -18,18 +21,22 @@ export default function Dashboard() {
 
     async function fetchMemberData() {
       try {
+        const memberResponse = await fetch(`/api/l1/dashboard`);
+        if (!memberResponse.ok) throw new Error("Failed to fetch member data");
+
+        const memberData = await memberResponse.json();
+        setMemberData(memberData);
+
         const response = await fetch(`/api/l3/dashboard/${userId}`);
         if (!response.ok) throw new Error("Network response was not ok");
 
-        const data = await response.json();
+        const userData = await response.json();
+        setUserData(userData);
 
-        // Store peeta name in session storage
-        sessionStorage.setItem("peeta", data.peeta);
-        sessionStorage.setItem("username", data.name);
-        sessionStorage.setItem("guru", data.selectedL2User);
-
-        // Include peeta in member data
-        setMemberData(data);
+        // Store peeta name and username in session storage
+        sessionStorage.setItem("peeta", userData.peeta);
+        sessionStorage.setItem("username", userData.name);
+        sessionStorage.setItem("guru", userData.selectedL2User);
       } catch (error) {
         console.error("Error fetching member data:", error);
       }
@@ -38,81 +45,186 @@ export default function Dashboard() {
     fetchMemberData();
   }, [router]);
 
-  if (!memberData) return <p>Loading...</p>;
+  if (memberData.length === 0 || !userData) return <p>Loading...</p>;
 
   return (
     <>
       <Navbar />
-      <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
-        <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800 relative">
-          <div className="absolute -top-10 sm:-top-12 left-1/2 transform -translate-x-1/2 w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full shadow-md flex items-center justify-center">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={80}
-              height={80}
-              className="rounded-full"
-            />
+      <div className="bg-slate-100">
+        <br />
+
+        <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
+          Dashboard
+        </h1>
+        <div className="flex flex-wrap justify-center gap-8 ">
+          {memberData.map(
+            ({ l1User, l2UserCount, l3UserCount, l4UserCount }) => (
+              <div
+                key={l1User._id}
+                className="flex items-center p-4 bg-white shadow-lg rounded-lg space-x-4 sm:flex-row w-full md:w-auto overflow-x-auto"
+              >
+                {/* Branch and Peeta Info */}
+                <div className="text-center">
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Branch: {l1User.name}
+                  </h2>
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Peeta: {l1User.peeta}
+                  </h2>
+                </div>
+
+                {/* L1 Users */}
+                <div className="p-2 bg-blue-50 shadow rounded-lg text-center w-44">
+                  <h3 className="text-sm font-semibold text-blue-800">
+                    L1 Users
+                  </h3>
+                  <p className="text-xl font-bold text-blue-600 mt-1">
+                    {l1User.name}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <img
+                  src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
+                  alt="Arrow Down"
+                  className="w-4 h-4"
+                />
+
+                {/* L2 Users */}
+                <div className="p-2 bg-blue-50 shadow rounded-lg text-center w-44">
+                  <h3 className="text-sm font-semibold text-blue-800">
+                    L2 Users
+                  </h3>
+                  <p className="text-xl font-bold text-blue-600 mt-1">
+                    {l2UserCount}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <img
+                  src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
+                  alt="Arrow Down"
+                  className="w-4 h-4"
+                />
+
+                {/* L3 Users */}
+                <div className="p-2 bg-green-50 shadow rounded-lg text-center w-44">
+                  <h3 className="text-sm font-semibold text-green-800">
+                    L3 Users
+                  </h3>
+                  <p className="text-xl font-bold text-green-600 mt-1">
+                    {l3UserCount}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <img
+                  src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
+                  alt="Arrow Down"
+                  className="w-4 h-4"
+                />
+
+                {/* L4 Users */}
+                <div className="p-2 bg-green-50 shadow rounded-lg text-center w-44">
+                  <h3 className="text-sm font-semibold text-green-800">
+                    L4 Users
+                  </h3>
+                  <p className="text-xl font-bold text-green-600 mt-1">
+                    {l4UserCount}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <img
+                  src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
+                  alt="Arrow Down"
+                  className="w-4 h-4"
+                />
+
+                {/* Total Users */}
+                <div className="p-2 bg-purple-50 shadow rounded-lg text-center w-44">
+                  <h3 className="text-sm font-semibold text-purple-800">
+                    Total Users
+                  </h3>
+                  <p className="text-xl font-bold text-purple-600 mt-1">
+                    {l2UserCount + l3UserCount}
+                  </p>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+        <br />
+        <br />
+        {/* Green Card with Member Details */}
+        <div
+          className="flex items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[600px]"
+          style={{
+            height: "200px",
+            backgroundColor: "#ee8628",
+          }}
+        >
+          <div className="flex-shrink-0">
+            <img src="/logo.png" alt="Logo" width={90} height={90} />
           </div>
-          <div className="text-center mt-12 sm:mt-16 mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-blue-600">
+          <div className="ml-4 flex-grow">
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
               Sanathanaveershivadharma
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500">
-              Upadhyaya Marg, New Delhi - 110002
+            <p className="text-white text-sm font-semibold ">
+              ------------------
+            </p>
+            <p className="text-white text-sm">
+              Professional description or tagline goes here
             </p>
           </div>
-          <div className="flex justify-center mt-4 sm:mt-6">
-            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-blue-600 shadow-md">
-              <Image
-                src={memberData.imageUrl}
-                alt="Profile Image"
-                width={112}
-                height={112}
-                className="object-cover"
-              />
-            </div>
-          </div>
-          <div className="mt-6 sm:mt-8 bg-gray-50 p-4 sm:p-6 rounded-lg shadow-inner">
-            <div className="space-y-3 sm:space-y-4 text-gray-700">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-600">Name:</span>
-                <span className="text-sm sm:text-base">{memberData.name}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-600">
-                  Phone Number:
-                </span>
-                <span className="text-sm sm:text-base">
-                  {memberData.contactNo}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-600">
-                  Membership No:
-                </span>
-                <span className="text-sm sm:text-base">
-                  {memberData.userId}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-600">Peeta:</span>
-                <span className="text-sm sm:text-base">
-                  {memberData.peeta}
-                </span>{" "}
-                {/* Display Peeta */}
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-600">Guru</span>
-                <span className="text-sm sm:text-base">
-                  {memberData.selectedL2User}
-                </span>{" "}
-                
-              </div>
-            </div>
+          <div className="absolute top-1/2 right-4 transform -translate-y-1/2 sm:top-1/2 sm:right-4 sm:-translate-y-1/2 sm:mt-[0px] mt-[90px]">
+            <img
+              src={userData.
+                photoUrl}
+              alt="Secondary Logo"
+              width={100} // Smaller size for mobile
+              height={100} // Smaller size for mobile
+              className="rounded-full border-4 border-green-700 shadow-lg " // Larger size for larger screens
+            />
           </div>
         </div>
+
+        {/* White Section with Dynamic Data */}
+        <div
+          className="bg-white p-6 shadow-lg mx-auto max-w-[90%] sm:max-w-[600px]"
+          style={{ height: "300px" }}
+        >
+          <p className="text-black text-base font-semibold mt-4">
+            Name: {userData.name}
+          </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Membership No: {userData.userId}
+          </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Phone: {userData.contactNo}
+          </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Date:{" "}
+            {userData.dob && !isNaN(Date.parse(userData.dob))
+              ? new Date(userData.dob).toISOString().split("T")[0]
+              : "N/A"}
+          </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Address: {userData.permanentAddress || "N/A"}
+          </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Peeta: {userData.peeta || "N/A"}
+          </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Guru: {userData.selectedL2User || "N/A"}
+          </p>
+        </div>
+
+        <br />
+        <br />
       </div>
+      <Footer/>
     </>
   );
 }

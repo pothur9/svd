@@ -13,7 +13,7 @@ const l2calSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  userName: {
+  username: {
     type: String,
     required: true, // Username is required to associate event with a user
   },

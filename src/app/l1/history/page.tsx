@@ -39,7 +39,7 @@ export default function UserDataDisplay() {
 
   return (
     <>
-      <Navbar />
+      <Navbar /><br/><br/>
       <div className="bg-slate-200 ">
         <br />
         <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8  ">

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check for duplicate entries by username
-    const existingUser = await l1history.findOne({ username });
+    const existingUser = await l1history.findOne({ username});
     if (existingUser) {
       return NextResponse.json({ message: 'User data already exists' }, { status: 409 }); // Conflict error
     }
