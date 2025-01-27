@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
+import { ChangeEvent , FormEvent } from "react"; // Import ChangeEvent
 
 export default function UserDataForm() {
   const [formData, setFormData] = useState({
@@ -25,12 +26,12 @@ export default function UserDataForm() {
     }
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -109,7 +110,7 @@ export default function UserDataForm() {
                 onChange={handleChange}
                 placeholder="Write the history here..."
                 required
-                rows="4"
+                rows={4} 
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
@@ -129,7 +130,7 @@ export default function UserDataForm() {
                 onChange={handleChange}
                 placeholder="Write the Gurus Timeline here..."
                 required
-                rows="4"
+                rows={4} 
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
@@ -149,7 +150,7 @@ export default function UserDataForm() {
                 onChange={handleChange}
                 placeholder="Write about special developments..."
                 required
-                rows="4"
+                rows={4} 
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
@@ -169,7 +170,7 @@ export default function UserDataForm() {
                 onChange={handleChange}
                 placeholder="List institutes (e.g., Education, Medical, etc.)"
                 required
-                rows="4"
+                rows={4} 
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>

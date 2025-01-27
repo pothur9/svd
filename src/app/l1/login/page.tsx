@@ -1,15 +1,17 @@
 "use client";
-import { useState } from "react";
+
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Footer from "../footer/footer";
 
-const LoginPage = () => {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // State for loading
+const LoginPage: React.FC = () => {
+  const [userId, setUserId] = useState<string>(""); // Type for userId
+  const [password, setPassword] = useState<string>(""); // Type for password
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Type for loading state
   const router = useRouter();
 
-  const handleLogin = async (e) => {
+  // Type for handleLogin event
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission
     setIsLoading(true); // Set loading to true when login starts
 
@@ -22,12 +24,11 @@ const LoginPage = () => {
         body: JSON.stringify({ userId, password }), // Send userId and password to the server
       });
 
-      const data = await response.json(); // Parse the JSON response
+      const data: { message: string } = await response.json(); // Type for the response data
 
       if (response.ok) {
         // If the response is successful
         sessionStorage.setItem("userId", userId); // Store userId in session storage
-        // Notify the user
         router.push("/l1/dashboard"); // Redirect to dashboard or another page
       } else {
         alert(data.message); // Show error message if login fails
@@ -97,7 +98,7 @@ const LoginPage = () => {
             {isLoading ? "Logging in..." : "Login"} {/* Show loading text */}
           </button>
           <p className="text-center mt-4">
-            Don't have an account?
+            Dont have an account?
             <a
               href="/l1/signup"
               className="text-blue-500 hover:text-blue-700"

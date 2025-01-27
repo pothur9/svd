@@ -4,7 +4,7 @@ import serviceAccount from '../config/serviceAccountKey.json'; // Adjust path ba
 // Initialize Firebase Admin SDK if not already initialized
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
   });
 }
 

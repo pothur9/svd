@@ -19,6 +19,7 @@ export async function GET(req: Request, { params }: { params: { userId: string }
 
         // Exclude password from response
         const { password, ...userData } = user.toObject();
+        console.log(password)
         return NextResponse.json(userData, { status: 200 });
     } catch (error) {
         console.error("Fetch user error:", error);

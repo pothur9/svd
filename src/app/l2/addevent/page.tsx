@@ -2,16 +2,17 @@
 import { useState } from 'react';
 import Navbar from '../navbar/page';
 import Footer from '../footer/page';
+import { ChangeEvent , FormEvent } from "react"; // Import ChangeEvent
 
 export default function AddEvent() {
   const [formData, setFormData] = useState({ date: '', title: '', description: '' });
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Get the username from session storage

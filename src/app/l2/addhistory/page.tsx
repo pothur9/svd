@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../navbar/page";
 import Footer from "../footer/page";
+import { ChangeEvent , FormEvent } from "react"; // Import ChangeEvent
 
 export default function UserDataForm() {
   const [formData, setFormData] = useState({
@@ -20,12 +21,12 @@ export default function UserDataForm() {
     }
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -65,7 +66,7 @@ export default function UserDataForm() {
           onChange={handleChange}
           placeholder="History"
           required
-          rows="5"
+          rows={5} 
           className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500  bg-white text-black"
         />
         <textarea
@@ -74,7 +75,7 @@ export default function UserDataForm() {
           onChange={handleChange}
           placeholder="Gurus Timeline"
           required
-          rows="5"
+          rows={5} 
           className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500  bg-white text-black"
         />
         <textarea
@@ -83,7 +84,7 @@ export default function UserDataForm() {
           onChange={handleChange}
           placeholder="Special Developments"
           required
-          rows="5"
+          rows={5} 
           className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
         />
         <textarea
@@ -92,7 +93,7 @@ export default function UserDataForm() {
           onChange={handleChange}
           placeholder="Institutes (e.g., Education, Medical, etc.)"
           required
-          rows="5"
+          rows={5} 
           className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500  bg-white text-black"
         />
         <button

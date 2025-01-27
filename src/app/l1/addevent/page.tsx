@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
+import { ChangeEvent , FormEvent } from "react"; // Import ChangeEvent
 
 export default function AddEvent() {
   const [formData, setFormData] = useState({
     date: "",
     title: "",
     description: "",
-    userId: "",
+    username: "",
   });
   const [loading, setLoading] = useState(false); // Loading state
 
@@ -20,18 +21,19 @@ export default function AddEvent() {
     }
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  // Update the type of e to FormEvent<HTMLFormElement>
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const { username } = formData;
 
     if (!username) {
-      alert("User ID is missing.");
+      alert("User name is missing.");
       return;
     }
 
@@ -49,7 +51,7 @@ export default function AddEvent() {
           date: "",
           title: "",
           description: "",
-          userId: formData.userId,
+          username: formData.username,
         });
       } else {
         alert("Error adding event");
@@ -71,7 +73,7 @@ export default function AddEvent() {
             Create New Event
           </h2>
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit} // Use the correct type here
             className="space-y-6 bg-white p-8 rounded-lg shadow-lg"
           >
             <div className="flex flex-col">

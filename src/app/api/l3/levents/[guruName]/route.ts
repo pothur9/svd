@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbconnect'; // Adjust path if needed
 import l2cal from '@/models/l2cal';
 // Handler for fetching events
-export async function GET(req: NextRequest) {
+export async function GET() {
     await dbConnect(); // Ensure DB connection
 
     try {
@@ -17,10 +17,3 @@ export async function GET(req: NextRequest) {
     }
 }
 
-// Catch-all for unsupported HTTP methods
-export async function handler(req: NextRequest) {
-    return NextResponse.json(
-        { message: 'Method not allowed' },
-        { status: 405 }
-    );
-}

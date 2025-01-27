@@ -1,32 +1,50 @@
-// components/UserDataDisplay.js
+// components/UserDataDisplay.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
-export default function UserDataDisplay() {
-  const [userData, setUserData] = useState(null);
-  const [error, setError] = useState(null);
-  const username = sessionStorage.getItem("username"); // Fetch userId from session storage
+// Define the type for user data
+interface UserData {
+  username: string;
+  history: string;
+  gurusTimeline: string;
+  specialDevelopments: string;
+  institutes: string;
+}
+
+export default function UserDataDisplay(): JSX.Element {
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const username = typeof window !== "undefined" ? sessionStorage.getItem("username") : null; // Fetch username from session storage
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        if (!username) {
+          setError("No username found in session storage.");
+          return;
+        }
+
         const response = await fetch(`/api/l1/history/${username}`);
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }
-        const data = await response.json();
+        const data: UserData = await response.json();
         setUserData(data);
-      } catch (error) {
-        setError(error.message);
-        console.error("Error fetching user data:", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message);
+          console.error("Error fetching user data:", error.message);
+        } else {
+          setError("An unexpected error occurred.");
+          console.error("Unexpected error:", error);
+        }
       }
+      
     };
 
-    if (username) {
-      fetchUserData();
-    }
+    fetchUserData();
   }, [username]);
 
   if (error) {
@@ -39,16 +57,17 @@ export default function UserDataDisplay() {
 
   return (
     <>
-      <Navbar /><br/><br/>
-      <div className="bg-slate-200 ">
+      <Navbar />
+      <br /><br />
+      <div className="bg-slate-200">
         <br />
-        <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8  ">
+        <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
           <h2 className="text-3xl font-extrabold text-blue-800 mb-6 border-b-2 border-gray-300 pb-4">
             User Data Overview
           </h2>
 
           <article className="space-y-8">
-            {/* User ID */}
+            {/* User Name */}
             <section className="border-l-4 border-blue-400 pl-4">
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
                 User Name
@@ -99,9 +118,8 @@ export default function UserDataDisplay() {
             </section>
           </article>
         </div>
-        <br/><br />
+        <br /><br />
       </div>
-      
       <Footer />
     </>
   );

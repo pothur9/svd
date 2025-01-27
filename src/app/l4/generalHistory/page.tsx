@@ -4,17 +4,39 @@ import { format } from "date-fns";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
+// Define types for the user, event, and user details
+interface User {
+  _id: string;
+  name: string;
+}
+
+interface Event {
+  id: string;
+  date: string;
+  username: string;
+  title: string;
+  description: string;
+}
+
+interface UserDetails {
+  _id: string;
+  username: string;
+  history: string;
+  gurusTimeline: string;
+  specialDevelopments: string;
+  institutes: string;
+}
+
 export default function UserSelection() {
   const levels = ["l1", "l2", "l3", "l4"]; // Static levels
-  const [users, setUsers] = useState([]); // Users based on selected level
-  const [selectedLevel, setSelectedLevel] = useState(""); // Selected level
-  const [selectedUser, setSelectedUser] = useState(""); // Selected user
-  const [userDetails, setUserDetails] = useState(null); // Store fetched user details
-  const [events, setEvents] = useState([]); // User's calendar events
-  const [calendarDate, setCalendarDate] = useState(null); // Selected date for calendar events
-  const [eventDetails, setEventDetails] = useState([]); // Events for a selected date
-  const [showModal, setShowModal] = useState(false); // Control visibility of the modal
-  const [selectedEvent, setSelectedEvent] = useState(null); // Store selected event for popup
+  const [users, setUsers] = useState<User[]>([]); // Users based on selected level
+  const [selectedLevel, setSelectedLevel] = useState<string>(""); // Selected level
+  const [selectedUser, setSelectedUser] = useState<string>(""); // Selected user
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null); // Store fetched user details
+  const [events, setEvents] = useState<Event[]>([]); // User's calendar events
+
+  const [showModal, setShowModal] = useState<boolean>(false); // Control visibility of the modal
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null); // Store selected event for popup
 
   // Fetch users when a level is selected
   useEffect(() => {
@@ -58,7 +80,7 @@ export default function UserSelection() {
     fetchUserDetails();
   }, [selectedUser]);
 
-  const handleEventClick = (event) => {
+  const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
     setShowModal(true); // Show the popup
   };
@@ -106,9 +128,9 @@ export default function UserSelection() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
               >
                 <option value="">-- Select User --</option>
-                {users.map((user, index) => (
-                  <option key={index} value={user._id || user}> {/* Handle string or object */}
-                    {user.name || user} {/* Display user name or string */}
+                {users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name}
                   </option>
                 ))}
               </select>

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbconnect';
 import l2 from '@/models/l2';  // Assuming L2User model exists
 
 // GET: Fetch all L2 users for the dropdown
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await dbConnect();
 

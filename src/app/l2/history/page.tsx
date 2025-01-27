@@ -1,54 +1,83 @@
-// components/UserDataDisplay.js
 "use client";
+
 import { useEffect, useState } from "react";
 import Navbar from "../navbar/page";
 import Footer from "../footer/page";
 
+interface UserData {
+  username: string;
+  history: string;
+  gurusTimeline: string;
+  specialDevelopments: string;
+  institutes: string;
+}
+
 export default function UserDataDisplay() {
-  const [userData, setUserData] = useState(null);
-  const [error, setError] = useState(null);
-  const username = sessionStorage.getItem("peeta")
+  const [userData, setUserData] = useState<UserData | null>(null); // State for user data
+  const [error, setError] = useState<string | null>(null); // State for error
+  const [username, setUsername] = useState<string | null>(null); // State for session storage value
+
+  // Retrieve `peeta` from sessionStorage in useEffect to prevent SSR issues
+  useEffect(() => {
+    const storedUsername = sessionStorage.getItem("peeta");
+    if (!storedUsername) {
+      setError("No username found in session storage.");
+    } else {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!username) return; // Wait until username is set
+
       try {
         const response = await fetch(`/api/l2/viewhistory/${username}`);
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }
-        const data = await response.json();
+
+        const data: UserData = await response.json(); // Explicitly type the response data
         setUserData(data);
-      } catch (error) {
-        setError(error.message);
-        console.error("Error fetching user data:", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message || "An unexpected error occurred.");
+          console.error("Error fetching user data:", error.message);
+        } else {
+          setError("An unexpected error occurred.");
+          console.error("Unknown error:", error);
+        }
       }
     };
 
-    if (username) {
-      fetchUserData();
-    }
+    fetchUserData();
   }, [username]);
 
+  // Render error message
   if (error) {
     return <div className="text-red-600 font-semibold p-4">Error: {error}</div>;
   }
 
+  // Render loading message
   if (!userData) {
     return <div className="text-gray-600 p-4">Loading...</div>;
   }
 
+  // Render the user data
   return (
     <>
       <Navbar />
       <div className="bg-slate-100 min-h-screen w-full">
-        <br /><br/><br/>
-        <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8  ">
+        <br />
+        <br />
+        <br />
+        <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
           <h2 className="text-3xl font-extrabold text-blue-800 mb-6 border-b-2 border-gray-300 pb-4">
             User Data Overview
           </h2>
 
           <article className="space-y-8">
-            {/* User ID */}
+            {/* User Name */}
             <section className="border-l-4 border-blue-400 pl-4">
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
                 User Name
@@ -99,10 +128,10 @@ export default function UserDataDisplay() {
             </section>
           </article>
         </div>
-        <br/><br />
+        <br />
+        <br />
       </div>
-      <Footer/>
-      
+      <Footer />
     </>
   );
 }

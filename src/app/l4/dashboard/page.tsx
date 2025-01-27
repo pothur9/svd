@@ -1,13 +1,36 @@
 "use client";
-import Image from "next/image";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
+// Define types for the fetched data
+interface MemberData {
+  l1User: {
+    _id: string;
+    name: string;
+    peeta: string;
+  };
+  l2UserCount: number;
+  l3UserCount: number;
+  l4UserCount: number;
+}
+
+interface UserData {
+  name: string;
+  userId: string;
+  contactNo: string;
+  dob: string;
+  peeta: string;
+  selectedL2User: string;
+  permanentAddress: string;
+  imageUrl: string;
+}
+
 export default function Dashboard() {
-  const [memberData, setMemberData] = useState([]);
-  const [userData, setUserData] = useState(null);
+  const [memberData, setMemberData] = useState<MemberData[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const router = useRouter();
 
@@ -24,19 +47,19 @@ export default function Dashboard() {
         const memberResponse = await fetch(`/api/l1/dashboard`);
         if (!memberResponse.ok) throw new Error("Failed to fetch member data");
 
-        const memberData = await memberResponse.json();
+        const memberData: MemberData[] = await memberResponse.json();
         setMemberData(memberData);
 
         const response = await fetch(`/api/l4/dashboard/${userId}`);
         if (!response.ok) throw new Error("Network response was not ok");
 
-        const userData = await response.json();
+        const userData: UserData = await response.json();
         setUserData(userData);
 
         // Store peeta name and username in session storage
         sessionStorage.setItem("peeta", userData.peeta);
         sessionStorage.setItem("username", userData.name);
-        sessionStorage.setItem("guru", userData.selectedL2User)
+        sessionStorage.setItem("guru", userData.selectedL2User);
       } catch (error) {
         console.error("Error fetching member data:", error);
       }
@@ -49,9 +72,9 @@ export default function Dashboard() {
 
   return (
     <>
-       <Navbar /><br/>
-      <div className="bg-slate-100"><br/><br/><br />
-       
+      <Navbar /><br />
+      <div className="bg-slate-100"><br /><br /><br />
+
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 ">
           Dashboard
         </h1>
@@ -203,13 +226,11 @@ export default function Dashboard() {
             Phone: {userData.contactNo}
           </p>
           <p className="text-black text-base font-semibold mt-2">
-    Date of Birth:{" "}
-    {userData.dob && !isNaN(Date.parse(userData.dob))
-      ? new Date(userData.dob)
-          .toLocaleDateString("en-GB") // This formats as day/month/year
-      : "N/A"}
-</p>
-
+            Date of Birth:{" "}
+            {userData.dob && !isNaN(Date.parse(userData.dob))
+              ? new Date(userData.dob).toLocaleDateString("en-GB") // This formats as day/month/year
+              : "N/A"}
+          </p>
 
           <p className="text-black text-base font-semibold mt-2">
             Peeta: {userData.peeta || "N/A"}
@@ -225,7 +246,7 @@ export default function Dashboard() {
         <br />
         <br />
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 }

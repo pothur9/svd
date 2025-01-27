@@ -1,19 +1,26 @@
 "use client";
 import { useEffect, useState } from "react";
-import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
 import "../customCalendar.css";
 import Navbar from "../navbar/page";
 import Footer from "../footer/page";
 
+// Define the structure of an event
+interface Event {
+  _id: string;
+  date: string;
+  username: string;
+  title: string;
+  description: string;
+}
+
 export default function EventCalendar() {
-  const [events, setEvents] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [events, setEvents] = useState<Event[]>([]); // Type for events state
 
   useEffect(() => {
     const guruName = sessionStorage.getItem("peeta");
-    const decodedGuruName = decodeURIComponent(guruName);
+    const decodedGuruName = decodeURIComponent(guruName || "");
     if (!guruName) {
       console.error("Guru name not found in session storage");
       return;
@@ -68,29 +75,22 @@ export default function EventCalendar() {
                   </tr>
                 </thead>
                 <tbody>
-                  {events
-                    .filter((event) =>
-                      selectedDate
-                        ? format(new Date(event.date), "yyyy-MM-dd") ===
-                          format(selectedDate, "yyyy-MM-dd")
-                        : true
-                    )
-                    .map((event) => (
-                      <tr key={event._id}>
-                        <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
-                          {format(new Date(event.date), "yyyy-MM-dd")}
-                        </td>
-                        <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
-                          {event.username}
-                        </td>
-                        <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
-                          {event.title}
-                        </td>
-                        <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
-                          {event.description}
-                        </td>
-                      </tr>
-                    ))}
+                  {events.map((event) => (
+                    <tr key={event._id}>
+                      <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
+                        {format(new Date(event.date), "yyyy-MM-dd")}
+                      </td>
+                      <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
+                        {event.username}
+                      </td>
+                      <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
+                        {event.title}
+                      </td>
+                      <td className="border border-gray-300 px-2 sm:px-4 py-2 text-black">
+                        {event.description}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

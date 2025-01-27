@@ -1,15 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+
+
 const LoginPage = () => {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [userId, setUserId] = useState<string>(""); // Type for userId
+  const [password, setPassword] = useState<string>(""); // Type for password
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Type for loading state
   const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission
 
     setIsLoading(true); // Start loading
@@ -27,7 +29,6 @@ const LoginPage = () => {
       if (response.ok) {
         // If the response is successful
         sessionStorage.setItem("userId", userId); // Store userId in session storage
-       
         router.push("/l4/dashboard"); // Redirect to dashboard or another page
       } else {
         alert(data.message); // Show error message if login fails

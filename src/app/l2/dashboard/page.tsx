@@ -1,12 +1,36 @@
 "use client";
-import Image from "next/image";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/page";
 
-export default function Dashboard() {
-  const [memberData, setMemberData] = useState([]);
-  const [userData, setUserData] = useState(null);
+interface L1User {
+  _id: string;
+  name: string;
+  peeta: string;
+}
+
+interface MemberData {
+  l1User: L1User;
+  l2UserCount: number;
+  l3UserCount: number;
+  l4UserCount: number;
+}
+
+interface UserData {
+  name: string;
+  userId: string;
+  contactNo: string;
+  dob?: string;
+  address?: string;
+  peeta?: string;
+  dhekshaGuru?: string;
+  imageUrl: string;
+}
+
+export default function Dashboard(): JSX.Element {
+  const [memberData, setMemberData] = useState<MemberData[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const router = useRouter();
 
@@ -18,28 +42,27 @@ export default function Dashboard() {
       return;
     }
 
-    async function fetchMemberData() {
+    const fetchMemberData = async () => {
       try {
         const memberResponse = await fetch(`/api/l1/dashboard`);
         if (!memberResponse.ok) throw new Error("Failed to fetch member data");
 
-        const memberData = await memberResponse.json();
+        const memberData: MemberData[] = await memberResponse.json();
         setMemberData(memberData);
 
-        const response = await fetch(`/api/l2/dashboard/${userId}`);
-        if (!response.ok) throw new Error("Network response was not ok");
+        const userResponse = await fetch(`/api/l2/dashboard/${userId}`);
+        if (!userResponse.ok) throw new Error("Failed to fetch user data");
 
-        const userData = await response.json();
+        const userData: UserData = await userResponse.json();
         setUserData(userData);
 
         // Store peeta name and username in session storage
-        sessionStorage.setItem("peeta", userData.peeta);
+        sessionStorage.setItem("peeta", userData.peeta || "");
         sessionStorage.setItem("username", userData.name);
-       
       } catch (error) {
-        console.error("Error fetching member data:", error);
+        console.error("Error fetching data:", error);
       }
-    }
+    };
 
     fetchMemberData();
   }, [router]);
@@ -62,7 +85,6 @@ export default function Dashboard() {
                 key={l1User._id}
                 className="flex items-center p-4 bg-white shadow-lg rounded-lg space-x-4 sm:flex-row w-full md:w-auto overflow-x-auto"
               >
-                {/* Branch and Peeta Info */}
                 <div className="text-center">
                   <h2 className="text-lg font-bold text-gray-800">
                     Branch: {l1User.name}
@@ -72,7 +94,6 @@ export default function Dashboard() {
                   </h2>
                 </div>
 
-                {/* L1 Users */}
                 <div className="p-2 bg-blue-50 shadow rounded-lg text-center w-44">
                   <h3 className="text-sm font-semibold text-blue-800">
                     L1 Users
@@ -82,14 +103,12 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                {/* Arrow */}
                 <img
                   src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
                   alt="Arrow Down"
                   className="w-4 h-4"
                 />
 
-                {/* L2 Users */}
                 <div className="p-2 bg-blue-50 shadow rounded-lg text-center w-44">
                   <h3 className="text-sm font-semibold text-blue-800">
                     L2 Users
@@ -99,14 +118,12 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                {/* Arrow */}
                 <img
                   src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
                   alt="Arrow Down"
                   className="w-4 h-4"
                 />
 
-                {/* L3 Users */}
                 <div className="p-2 bg-green-50 shadow rounded-lg text-center w-44">
                   <h3 className="text-sm font-semibold text-green-800">
                     L3 Users
@@ -116,14 +133,12 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                {/* Arrow */}
                 <img
                   src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
                   alt="Arrow Down"
                   className="w-4 h-4"
                 />
 
-                {/* L4 Users */}
                 <div className="p-2 bg-green-50 shadow rounded-lg text-center w-44">
                   <h3 className="text-sm font-semibold text-green-800">
                     L4 Users
@@ -133,14 +148,12 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                {/* Arrow */}
                 <img
                   src="https://img.icons8.com/?size=100&id=99982&format=png&color=000000"
                   alt="Arrow Down"
                   className="w-4 h-4"
                 />
 
-                {/* Total Users */}
                 <div className="p-2 bg-purple-50 shadow rounded-lg text-center w-44">
                   <h3 className="text-sm font-semibold text-purple-800">
                     Total Users
@@ -155,7 +168,6 @@ export default function Dashboard() {
         </div>
         <br />
         <br />
-        {/* Green Card with Member Details */}
         <div
           className="flex items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[600px]"
           style={{
@@ -181,14 +193,13 @@ export default function Dashboard() {
             <img
               src={userData.imageUrl}
               alt="Secondary Logo"
-              width={100} // Smaller size for mobile
-              height={100} // Smaller size for mobile
-              className="rounded-full border-4 border-green-700 shadow-lg " // Larger size for larger screens
+              width={100}
+              height={100}
+              className="rounded-full border-4 border-green-700 shadow-lg "
             />
           </div>
         </div>
 
-        {/* White Section with Dynamic Data */}
         <div
           className="bg-white p-6 shadow-lg mx-auto max-w-[90%] sm:max-w-[600px]"
           style={{ height: "300px" }}
@@ -218,7 +229,6 @@ export default function Dashboard() {
             Guru: {userData.dhekshaGuru || "N/A"}
           </p>
         </div>
-
         <br />
         <br />
       </div>

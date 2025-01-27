@@ -5,10 +5,31 @@ import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
+interface MemberData {
+  l1User: {
+    _id: string;
+    name: string;
+    peeta: string;
+  };
+  l2UserCount: number;
+  l3UserCount: number;
+  l4UserCount: number;
+}
+
+interface UserData {
+  name: string;
+  userId: string;
+  dob: string;
+  contactNo: string;
+  peeta: string | null;
+  dhekshaGuru: string | null;
+  imageUrl: string;
+}
+
 export default function Dashboard() {
-  const [memberData, setMemberData] = useState([]);
-  const [userData, setUserData] = useState(null);
-  const [userId, setUserId] = useState(null);
+  const [memberData, setMemberData] = useState<MemberData[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -18,7 +39,7 @@ export default function Dashboard() {
       router.push("/l1/login");
       return;
     }
-
+  
     async function fetchData() {
       try {
         // Fetch member data
@@ -30,23 +51,24 @@ export default function Dashboard() {
         } else {
           setUserId(storedUserId);
         }
+
         const memberResponse = await fetch(`/api/l1/dashboard`);
         if (!memberResponse.ok) throw new Error("Failed to fetch member data");
 
-        const memberData = await memberResponse.json();
+        const memberData: MemberData[] = await memberResponse.json();
         setMemberData(memberData);
 
         // Fetch user data
-        const userResponse = await fetch(`/api/l1/userdata/${userId}`);
+        const userResponse = await fetch(`/api/l1/userdata/${storedUserId}`);
         if (!userResponse.ok) throw new Error("Failed to fetch user data");
 
-        const userData = await userResponse.json();
+        const userData: UserData = await userResponse.json();
         setUserData(userData);
-                // Save username to localStorage
-                if (userData && userData.name) {
-                  sessionStorage.setItem("username", userData.name);
-                }
-        
+
+        // Save username to sessionStorage
+        if (userData && userData.name) {
+          sessionStorage.setItem("username", userData.name);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -56,7 +78,7 @@ export default function Dashboard() {
   }, [router]);
 
   if (!userData) return <p>Loading...</p>;
-
+ console.log(userId)
   return (
     <>
       <Navbar />
@@ -209,15 +231,15 @@ export default function Dashboard() {
             Membership No: {userData.userId}
           </p>
           <p className="text-black text-base font-semibold mt-2">
-  Date:{" "}
-  {userData.dob && !isNaN(Date.parse(userData.dob))
-    ? new Date(userData.dob).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }) // Format as dd/mm/yyyy
-    : "N/A"}
-</p>
+            Date:{" "}
+            {userData.dob && !isNaN(Date.parse(userData.dob))
+              ? new Date(userData.dob).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                }) // Format as dd/mm/yyyy
+              : "N/A"}
+          </p>
 
           <p className="text-black text-base font-semibold mt-2">
             Phone: {userData.contactNo}

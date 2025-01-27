@@ -3,8 +3,18 @@ import { useEffect, useState } from "react";
 import Footer from "../footer/footer";
 import Navbar from "../navbar/navbar";
 
+// Define the shape of an event object
+interface Event {
+  _id: string;
+  date: string;
+  username: string;
+  title: string;
+  description: string;
+}
+
 export default function EventTable() {
-  const [events, setEvents] = useState([]);
+  // Use the correct type for the events state
+  const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -32,7 +42,7 @@ export default function EventTable() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-100">
       <Navbar />
-      <br/><br/><br/>
+      <br /><br /><br />
       <div className="flex-grow">
         <div className="p-4 max-w-4xl mx-auto bg-white rounded-lg shadow-lg mt-10">
           <h2 className="text-center text-2xl font-bold text-blue-600 mb-6">
@@ -76,7 +86,7 @@ export default function EventTable() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center text-gray-500 py-4">
+                    <td colSpan={4} className="text-center text-gray-500 py-4">
                       No events found.
                     </td>
                   </tr>

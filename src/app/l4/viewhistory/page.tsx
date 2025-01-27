@@ -1,32 +1,49 @@
-// components/UserDataDisplay.js
 "use client";
 import { useEffect, useState } from 'react';
 import Footer from '../footer/footer';
 import Navbar from '../navbar/navbar';
 
+// Define the shape of the user data that will be returned from the API
+interface UserData {
+    username: string;
+    history: string;
+    gurusTimeline: string;
+    specialDevelopments: string;
+    institutes: string;
+}
+
 export default function UserDataDisplay() {
-    const [userData, setUserData] = useState(null);
-    const [error, setError] = useState(null);
+    const [userData, setUserData] = useState<UserData | null>(null); // Type userData as UserData or null
+    const [error, setError] = useState<string | null>(null); // Type error as string or null
     const username = sessionStorage.getItem('guru'); // Fetch userId from session storage
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
+                if (!username) {
+                    setError("Username not found in session storage.");
+                    return;
+                }
+
                 const response = await fetch(`/api/l4/history/${username}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
                 }
-                const data = await response.json();
+                const data: UserData = await response.json(); // Type the API response data
                 setUserData(data);
-            } catch (error) {
-                setError(error.message);
-                console.error('Error fetching user data:', error);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    setError(error.message);
+                    console.error('Error fetching user data:', error);
+                } else {
+                    setError('An unknown error occurred');
+                    console.error('Unexpected error:', error);
+                }
             }
+            
         };
 
-        if (username) {
-            fetchUserData();
-        }
+        fetchUserData();
     }, [username]);
 
     if (error) {

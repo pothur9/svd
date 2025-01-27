@@ -6,7 +6,7 @@ import l2User from '@/models/l2'; // Adjust path if needed
 import l3User from '@/models/l3'; // Adjust path if needed
 import l4User from '@/models/l4'; // Adjust path if needed
 
-export async function GET(req: Request) {
+export async function GET() {
     await dbConnect(); // Ensure DB connection
 
     try {

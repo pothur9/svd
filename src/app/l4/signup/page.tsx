@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect ,ChangeEvent, FormEvent} from "react";
 import { useRouter } from "next/navigation";
 import { requestFcmToken } from "../../../lib/firebase";
 import Image from "next/image";
@@ -31,7 +31,7 @@ export default function PersonalDetailsForm() {
     selectedL2User: "",
     password: "",
     confirmPassword: "",
-    photoUrl: "",
+    photoUrl: "" as File | string,
   });
 
   useEffect(() => {
@@ -48,25 +48,28 @@ export default function PersonalDetailsForm() {
     fetchL2Users();
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
     if (file) {
       setFormData((prevData) => ({ ...prevData, photoUrl: file }));
     }
   };
 
-  const handleOtpChange = (e) => {
+  const handleOtpChange = (e: ChangeEvent<HTMLInputElement>) => {
     setOtp(e.target.value);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { contactNo, photoUrl } = formData;
+    console.log(photoUrl)
     setIsLoading(true); // Set loading to true when the signup button is clicked
     try {
       const otpResponse = await fetch(

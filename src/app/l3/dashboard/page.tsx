@@ -1,13 +1,34 @@
 "use client";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
+interface MemberData {
+  l1User: {
+    _id: string;
+    name: string;
+    peeta: string;
+  };
+  l2UserCount: number;
+  l3UserCount: number;
+  l4UserCount: number;
+}
+
+interface UserData {
+  name: string;
+  userId: string;
+  contactNo: string;
+  dob: string;
+  permanentAddress: string | null;
+  peeta: string | null;
+  selectedL2User: string | null;
+  photoUrl: string;
+}
+
 export default function Dashboard() {
-  const [memberData, setMemberData] = useState([]);
-  const [userData, setUserData] = useState(null);
+  const [memberData, setMemberData] = useState<MemberData[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const router = useRouter();
 
@@ -34,9 +55,9 @@ export default function Dashboard() {
         setUserData(userData);
 
         // Store peeta name and username in session storage
-        sessionStorage.setItem("peeta", userData.peeta);
+        sessionStorage.setItem("peeta", userData.peeta || "");
         sessionStorage.setItem("username", userData.name);
-        sessionStorage.setItem("guru", userData.selectedL2User);
+        sessionStorage.setItem("guru", userData.selectedL2User || "");
       } catch (error) {
         console.error("Error fetching member data:", error);
       }
@@ -180,8 +201,7 @@ export default function Dashboard() {
           </div>
           <div className="absolute top-1/2 right-4 transform -translate-y-1/2 sm:top-1/2 sm:right-4 sm:-translate-y-1/2 sm:mt-[0px] mt-[90px]">
             <img
-              src={userData.
-                photoUrl}
+              src={userData.photoUrl}
               alt="Secondary Logo"
               width={100} // Smaller size for mobile
               height={100} // Smaller size for mobile
@@ -224,7 +244,7 @@ export default function Dashboard() {
         <br />
         <br />
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 }

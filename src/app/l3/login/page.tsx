@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const LoginPage = () => {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [userId, setUserId] = useState<string>(""); // userId as string
+  const [password, setPassword] = useState<string>(""); // password as string
+  const [isLoading, setIsLoading] = useState<boolean>(false); // isLoading as boolean
   const router = useRouter();
 
-  const handleLogin = async (e) => {
+  // Define the type of the event for the form submission
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission
 
     setIsLoading(true); // Start loading

@@ -1,19 +1,37 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbconnect';
 import l1User from '@/models/l1';
 import l2User from '@/models/l2';
 import l3User from '@/models/l3';
 import l4User from '@/models/l4'; // Assuming there's an L4 model
 
-export async function GET(req: NextRequest) {
+interface L2User {
+    name: string;
+    peeta: string;
+    // Add other fields based on your model
+}
+
+interface L3User {
+    name: string;
+    selectedL2User: string;
+    // Add other fields based on your model
+}
+
+interface L4User {
+    name: string;
+    selectedL2User: string;
+    // Add other fields based on your model
+}
+
+export async function GET() {
     await dbConnect();
 
     try {
         // Fetch all L1, L2, L3, and L4 users
         const l1Users = await l1User.find().lean();
-        const l2Users = await l2User.find().lean();
-        const l3Users = await l3User.find().lean();
-        const l4Users = await l4User.find().lean(); // Fetch L4 users
+        const l2Users = (await l2User.find().lean()) as unknown as L2User[]; // Cast to unknown first, then L2User[]
+        const l3Users = (await l3User.find().lean()) as unknown as L3User[]; // Cast to unknown first, then L3User[]
+        const l4Users = (await l4User.find().lean()) as unknown as L4User[]; // Cast to unknown first, then L4User[]
 
         if (!l1Users || l1Users.length === 0) {
             console.warn('No L1 users found');
@@ -21,34 +39,34 @@ export async function GET(req: NextRequest) {
         }
 
         // Group L2 users by their peeta (L1 user name)
-        const groupedL2Users = l2Users.reduce((acc, user) => {
-            const { peeta } = user; // 'peeta' is the L1 user's name
+        const groupedL2Users = l2Users.reduce((acc, user: L2User) => {
+            const { peeta } = user;
             if (peeta) {
                 if (!acc[peeta]) acc[peeta] = [];
                 acc[peeta].push(user);
             }
             return acc;
-        }, {} as Record<string, any[]>);
+        }, {} as Record<string, L2User[]>);
 
         // Group L3 users by their selectedL2User (L2 user's name)
-        const groupedL3Users = l3Users.reduce((acc, user) => {
-            const { selectedL2User } = user; // 'selectedL2User' is the L2 user's name
+        const groupedL3Users = l3Users.reduce((acc, user: L3User) => {
+            const { selectedL2User } = user;
             if (selectedL2User) {
                 if (!acc[selectedL2User]) acc[selectedL2User] = [];
                 acc[selectedL2User].push(user);
             }
             return acc;
-        }, {} as Record<string, any[]>);
+        }, {} as Record<string, L3User[]>);
 
         // Group L4 users by their selectedL2User (L2 user's name)
-        const groupedL4Users = l4Users.reduce((acc, user) => {
-            const { selectedL2User } = user; // 'selectedL2User' is the L2 user's name
+        const groupedL4Users = l4Users.reduce((acc, user: L4User) => {
+            const { selectedL2User } = user;
             if (selectedL2User) {
                 if (!acc[selectedL2User]) acc[selectedL2User] = [];
                 acc[selectedL2User].push(user);
             }
             return acc;
-        }, {} as Record<string, any[]>);
+        }, {} as Record<string, L4User[]>);
 
         // Combine L1, L2, L3, and L4 data
         const response = l1Users.map((l1) => {
@@ -57,12 +75,12 @@ export async function GET(req: NextRequest) {
 
             const l3UsersForL1 = l2UsersForL1.reduce((acc, l2) => {
                 return acc.concat(groupedL3Users[l2.name] || []);
-            }, [] as any[]);
+            }, [] as L3User[]);
             const l3UserCount = l3UsersForL1.length;
 
             const l4UsersForL1 = l2UsersForL1.reduce((acc, l2) => {
                 return acc.concat(groupedL4Users[l2.name] || []);
-            }, [] as any[]);
+            }, [] as L4User[]);
             const l4UserCount = l4UsersForL1.length;
 
             const totalUserCount = l2UserCount + l3UserCount + l4UserCount; // Correct total calculation
@@ -72,7 +90,7 @@ export async function GET(req: NextRequest) {
                 l2UserCount,
                 l3UserCount,
                 l4UserCount,
-                totalUserCount, // Corrected total
+                totalUserCount,
                 l2Users: l2UsersForL1,
                 l3Users: l3UsersForL1,
                 l4Users: l4UsersForL1,

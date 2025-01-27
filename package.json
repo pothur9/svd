@@ -15,7 +15,7 @@
     "bcryptjs": "^2.4.3",
     "date-fns": "^4.1.0",
     "firebase": "^11.0.2",
-    "firebase-admin": "^13.0.1",
+    "firebase-admin": "^13.0.2",
     "i18next": "^24.2.0",
     "mongoose": "^8.6.3",
     "next": "14.2.12",
@@ -26,6 +26,7 @@
     "react-i18next": "^15.2.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

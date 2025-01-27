@@ -4,17 +4,38 @@ import { format } from "date-fns";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
+interface User {
+  _id: string;
+  name: string;
+}
+
+interface UserDetails {
+  _id: string;
+  username: string;
+  history: string;
+  gurusTimeline: string;
+  specialDevelopments: string;
+  institutes: string;
+}
+
+interface Event {
+  id: string;
+  date: string;
+  username: string;
+  title: string;
+  description: string;
+}
+
 export default function UserSelection() {
   const levels = ["l1", "l2", "l3", "l4"]; // Static levels
-  const [users, setUsers] = useState([]); // Users based on selected level
-  const [selectedLevel, setSelectedLevel] = useState(""); // Selected level
-  const [selectedUser, setSelectedUser] = useState(""); // Selected user
-  const [userDetails, setUserDetails] = useState(null); // Store fetched user details
-  const [events, setEvents] = useState([]); // User's calendar events
-  const [calendarDate, setCalendarDate] = useState(null); // Selected date for calendar events
-  const [eventDetails, setEventDetails] = useState([]); // Events for a selected date
+  const [users, setUsers] = useState<User[]>([]); // Users array type updated
+  const [selectedLevel, setSelectedLevel] = useState<string>(""); // Selected level
+  const [selectedUser, setSelectedUser] = useState<string>(""); // Selected user
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null); // Store fetched user details
+  const [events, setEvents] = useState<Event[]>([]); // User's calendar events
+
   const [showModal, setShowModal] = useState(false); // Control visibility of the modal
-  const [selectedEvent, setSelectedEvent] = useState(null); // Store selected event for popup
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null); // Store selected event for popup
 
   // Fetch users when a level is selected
   useEffect(() => {
@@ -25,7 +46,7 @@ export default function UserSelection() {
         const response = await fetch(`/api/${selectedLevel}/users`);
         const data = await response.json();
         console.log("Fetched users:", data); // Log to verify structure
-        setUsers(data); // Assuming `data` is an array of user names or objects
+        setUsers(data); // Assuming `data` is an array of user objects
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -44,10 +65,7 @@ export default function UserSelection() {
         );
         const eventsResponse = await fetch(`/api/${selectedLevel}/lEvents/${selectedUser}/`);
 
-        const [historyData, eventsData] = await Promise.all([
-          historyResponse.json(),
-          eventsResponse.json(),
-        ]);
+        const [historyData, eventsData] = await Promise.all([historyResponse.json(), eventsResponse.json()]);
 
         setUserDetails(historyData); // Store entire user data
         setEvents(eventsData);
@@ -58,7 +76,7 @@ export default function UserSelection() {
     fetchUserDetails();
   }, [selectedUser]);
 
-  const handleEventClick = (event) => {
+  const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
     setShowModal(true); // Show the popup
   };
@@ -70,8 +88,8 @@ export default function UserSelection() {
 
   return (
     <>
-      <Navbar /><br/>
-      <div className="bg-slate-100 min-h-screen w-full"><br/><br/>
+      <Navbar /><br />
+      <div className="bg-slate-100 min-h-screen w-full"><br /><br />
         <div className="p-4 sm:p-6 max-w-4xl mx-auto bg-gray-50 rounded-lg shadow-md mt-6">
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-blue-600 mb-6">
             Search History
@@ -107,8 +125,8 @@ export default function UserSelection() {
               >
                 <option value="">-- Select User --</option>
                 {users.map((user, index) => (
-                  <option key={index} value={user._id || user}> {/* Handle string or object */}
-                    {user.name || user} {/* Display user name or string */}
+                  <option key={index} value={user._id}>
+                    {user.name}
                   </option>
                 ))}
               </select>
@@ -181,7 +199,7 @@ export default function UserSelection() {
               </div>
             </div>
           )}
-        </div><br/><br/>
+        </div><br /><br />
       </div>
       <Footer />
     </>

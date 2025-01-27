@@ -8,11 +8,17 @@ import FIREBASE_SERVICE_ACCOUNT from '../../../../../config/serviceAccountKey.js
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(FIREBASE_SERVICE_ACCOUNT),
+    credential: admin.credential.cert(FIREBASE_SERVICE_ACCOUNT as admin.ServiceAccount),
   });
 }
 
-export async function POST(request: Request, { params }: { params: { userId: string } }) {
+// Define L2User type based on your schema
+interface L2User {
+  peeta: string;
+  fcmToken: string;
+}
+
+export async function POST(request: Request, { params }: { params: { username: string } }) {
   try {
     await dbConnect();
 
@@ -27,15 +33,15 @@ export async function POST(request: Request, { params }: { params: { userId: str
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    // Save the event with the userId and other data
+    // Save the event with the username and other data
     const newEvent = new l1cal({ date, title, description, username: username });
     await newEvent.save();
 
-    // Fetch users with matching peeta value
+    // Fetch users with matching peeta value (use the L2User type here)
     const users = await l2User.find({ peeta: username }).select('fcmToken');
 
     // Send notifications to matching users
-    const tokens = users.map((user: any) => user.fcmToken).filter((token: string) => token);
+    const tokens = users.map((user: L2User) => user.fcmToken).filter((token: string) => token);
 
     if (tokens.length > 0) {
       const promises = tokens.map((token) => {
