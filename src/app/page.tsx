@@ -1,31 +1,13 @@
 "use client";
 import Image from "next/image";
-import { useEffect } from "react";
-import { useFirebaseServiceWorker } from "../hooks/useFirebaseServiceWorker"; // Ensure the path is correct
-import { requestFcmToken } from "../lib/firebase"; // Ensure the path is correct
+
+
 
 export default function Home() {
   // Use Firebase service worker hook for registration
-  useFirebaseServiceWorker();
 
-  useEffect(() => {
-    // Function to initialize FCM and get the token
-    const initializeFCM = async () => {
-      try {
-        const token = await requestFcmToken();
-        if (token) {
-          console.log("FCM Token received:", token);
-          // Handle the token (e.g., send it to your backend for saving)
-        }
-      } catch (error) {
-        console.error("FCM Initialization Error:", error);
-      }
-    };
 
-    // Call the function to initialize FCM
-    initializeFCM();
-  }, []); // Empty dependency array to run only once on component mount
-
+ 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
