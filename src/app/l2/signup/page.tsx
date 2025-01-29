@@ -2,7 +2,7 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { requestFcmToken } from "../../../lib/firebase";
+
 import Image from "next/image";
 
 interface FormData {
@@ -21,7 +21,7 @@ interface FormData {
   confirmPassword: string;
   imageUrl: string;
   address: string;
-  [key: string]: string; // Allow dynamic keys for form data
+  [key: string]: string;
 }
 
 export default function SignupForm() {
@@ -60,7 +60,6 @@ export default function SignupForm() {
         setL1Users(response.data || []);
       } catch (error) {
         console.error("Error fetching l1 users:", error);
-        setL1Users([]);
       }
     }
     fetchL1Users();
@@ -77,18 +76,22 @@ export default function SignupForm() {
 
   const uploadImageToCloudinary = async (): Promise<string | null> => {
     if (!imageFile) return null;
+    try {
+      const imageFormData = new FormData();
+      imageFormData.append("file", imageFile);
+      imageFormData.append("upload_preset", "profilephoto");
 
-    const imageFormData = new FormData();
-    imageFormData.append("file", imageFile);
-    imageFormData.append("upload_preset", "profilephoto");
+      const res = await fetch("https://api.cloudinary.com/v1_1/dxruv6swh/image/upload", {
+        method: "POST",
+        body: imageFormData,
+      });
 
-    const res = await fetch("https://api.cloudinary.com/v1_1/dxruv6swh/image/upload", {
-      method: "POST",
-      body: imageFormData,
-    });
-
-    const data = await res.json();
-    return data.secure_url;
+      const data = await res.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      return null;
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -118,11 +121,7 @@ export default function SignupForm() {
   const verifyOtp = async () => {
     setIsVerifyingOtp(true);
     try {
-      const fcmToken = await requestFcmToken();
-      if (!fcmToken) {
-        alert("Failed to retrieve FCM token.");
-        return;
-      }
+     
 
       const response = await axios.get(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY3/${formData.contactNo}/${otp}`
@@ -139,8 +138,9 @@ export default function SignupForm() {
       const { confirmPassword, ...submitData } = {
         ...formData,
         imageUrl,
-        fcmToken,
-      };  console.log(confirmPassword)
+   
+      };
+      console.log(confirmPassword)
       const result = await fetch("/api/l2/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -161,7 +161,6 @@ export default function SignupForm() {
       setIsVerifyingOtp(false);
     }
   };
-  console.log(isOtpVerified);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">

@@ -15,9 +15,16 @@ interface UserData {
 export default function UserDataDisplay() {
     const [userData, setUserData] = useState<UserData | null>(null); // Type userData as UserData or null
     const [error, setError] = useState<string | null>(null); // Type error as string or null
-    const username = sessionStorage.getItem('guru'); // Fetch userId from session storage
+    const [isClient, setIsClient] = useState(false); // State to check if we are on the client side
 
     useEffect(() => {
+        setIsClient(true); // Set to true after component mounts (client-side)
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) return; // Prevent code from running on server-side
+
+        const username = sessionStorage.getItem('guru'); // Fetch userId from session storage
         const fetchUserData = async () => {
             try {
                 if (!username) {
@@ -40,11 +47,10 @@ export default function UserDataDisplay() {
                     console.error('Unexpected error:', error);
                 }
             }
-            
         };
 
         fetchUserData();
-    }, [username]);
+    }, [isClient]); // Depend on isClient to run after it's true
 
     if (error) {
         return <div className="text-red-600 font-semibold p-4">Error: {error}</div>;

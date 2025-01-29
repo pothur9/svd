@@ -17,7 +17,7 @@ const l2UserSchema = new mongoose.Schema({
   password:{ type: String, required: true },
   imageUrl:{ type: String, required: true },
   address:{ type: String, required: true },
-  fcmToken:{ type: String, required: true },
+ 
 });
 
 export default mongoose.models.l2User || mongoose.model('l2User', l2UserSchema);

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect ,ChangeEvent, FormEvent} from "react";
 import { useRouter } from "next/navigation";
-import { requestFcmToken } from "../../../lib/firebase";
+
 import Image from "next/image";
 export default function PersonalDetailsForm() {
   const [l2Users, setL2Users] = useState([]);
@@ -94,12 +94,7 @@ export default function PersonalDetailsForm() {
   const handleVerifyOtp = async () => {
     setIsVerifyingOtp(true);
     try {
-      // Request FCM Token
-      const fcmToken = await requestFcmToken();
-      if (!fcmToken) {
-        alert("Failed to retrieve FCM token.");
-        return;
-      }
+     
       const verifyResponse = await fetch(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${sessionId}/${otp}`
       );
@@ -134,7 +129,7 @@ export default function PersonalDetailsForm() {
             photoUrl: photoData.secure_url, 
 
             selectedL2User: formData.selectedL2User,
-            fcmToken
+          
           }),
         });
 

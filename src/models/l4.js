@@ -21,7 +21,7 @@ const l4UserSchema = new mongoose.Schema({
   password:{ type: String, required: true },
   photoUrl:{ type: String, required: true },
   selectedL2User:{ type: String, required: true },
-  fcmToken:{ type: String, required: true },
+  
 });
 
 export default mongoose.models.l4User || mongoose.model('l4User', l4UserSchema);

@@ -1,8 +1,32 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { requestFcmToken } from "../../../lib/firebase";
+
+
+interface FormData {
+  name: string;
+  dob: string;
+  gender: string;
+  contactNo: string;
+  mailId: string;
+  karthruGuru: string;
+  peeta: string;
+  bhage: string;
+  gothra: string;
+  nationality: string;
+  presentAddress: string;
+  permanentAddress: string;
+  qualification: string;
+  occupation: string;
+  languageKnown: string;
+  selectedL2User: string;
+  password: string;
+  confirmPassword: string;
+  photoUrl: File | string;
+}
+
+export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
 
 export default function PersonalDetailsForm() {
   const [l2Users, setL2Users] = useState([]);
@@ -11,9 +35,7 @@ export default function PersonalDetailsForm() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const router = useRouter();
-
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     dob: "",
     gender: "",
@@ -32,22 +54,25 @@ export default function PersonalDetailsForm() {
     selectedL2User: "",
     password: "",
     confirmPassword: "",
-    photoUrl: "" as File | string,
+    photoUrl: "",
   });
 
-  useEffect(() => {
-    const fetchL2Users = async () => {
-      try {
-        const response = await fetch("/api/l3/findl2users");
-        if (!response.ok) throw new Error("Failed to fetch L2 users.");
-        const users = await response.json();
-        setL2Users(users);
-      } catch (error) {
-        console.error("Error fetching L2 users:", error);
-      }
-    };
-    fetchL2Users();
+  const router = useRouter();
+
+  const fetchL2Users = useCallback(async () => {
+    try {
+      const response = await fetch("/api/l3/findl2users");
+      if (!response.ok) throw new Error("Failed to fetch L2 users.");
+      const users = await response.json();
+      setL2Users(users);
+    } catch (error) {
+      console.error("Error fetching L2 users:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchL2Users();
+  }, [fetchL2Users]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -69,9 +94,7 @@ export default function PersonalDetailsForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { contactNo } = formData;
-
-    if (!contactNo) {
+    if (!formData.contactNo) {
       alert("Please enter a valid contact number.");
       return;
     }
@@ -79,7 +102,7 @@ export default function PersonalDetailsForm() {
     setIsLoading(true);
     try {
       const otpResponse = await fetch(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN/SVD`
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN/SVD`
       );
       const otpData = await otpResponse.json();
 
@@ -103,21 +126,17 @@ export default function PersonalDetailsForm() {
       return;
     }
 
-    if (!formData.photoUrl || typeof formData.photoUrl !== "object") {
+    if (!formData.photoUrl || !(formData.photoUrl instanceof File)) {
       alert("Please upload a valid photo.");
       return;
     }
 
     setIsVerifyingOtp(true);
     try {
-      const fcmToken = await requestFcmToken();
-      if (!fcmToken) {
-        alert("Failed to retrieve FCM token.");
-        return;
-      }
+      
 
       const verifyResponse = await fetch(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${sessionId}/${otp}`
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`
       );
       const verifyData = await verifyResponse.json();
 
@@ -125,11 +144,12 @@ export default function PersonalDetailsForm() {
         alert("OTP verified successfully. Completing signup...");
 
         const photoFormData = new FormData();
-        photoFormData.append("file", formData.photoUrl as File);
-        photoFormData.append("upload_preset", "profilephoto");
+        photoFormData.append("file", formData.photoUrl);
+        photoFormData.append("upload_preset", `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`);
 
         const photoResponse = await fetch(
-          "https://api.cloudinary.com/v1_1/dxruv6swh/image/upload",
+          `${process.env.NEXT_PUBLIC_CLOUDINARY_API_URL}/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+
           {
             method: "POST",
             body: photoFormData,
@@ -144,9 +164,8 @@ export default function PersonalDetailsForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
-            photoUrl: photoData.secure_url,
-            selectedL2User: formData.selectedL2User,
-            fcmToken,
+            photoUrl: photoData.secure_url
+           
           }),
         });
 

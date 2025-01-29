@@ -26,7 +26,7 @@ export async function POST(req:NextRequest) {
       password,
       selectedL2User,
       photoUrl, 
-      fcmToken,
+     
     } = await req.json();
 
     // Hash the password
@@ -63,7 +63,7 @@ export async function POST(req:NextRequest) {
       selectedL2User,
       password: hashedPassword,
       photoUrl, 
-      fcmToken,
+     
     });
 
     await newUser.save();

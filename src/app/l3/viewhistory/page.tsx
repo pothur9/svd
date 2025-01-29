@@ -16,29 +16,36 @@ export default function UserDataDisplay() {
     // State types: userData is either a UserData object or null, error is a string or null
     const [userData, setUserData] = useState<UserData | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const username = sessionStorage.getItem('guru'); // Fetch userId from session storage
+    const [isClient, setIsClient] = useState<boolean>(false); // To track if we're on the client side
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const response = await fetch(`/api/l3/history/${username}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
-                const data: UserData = await response.json(); // Type the fetched data
-                setUserData(data);
-            } catch (error) {
-                if (error instanceof Error) {
-                    setError(error.message);
-                }
-                console.error('Error fetching user data:', error);
-            }
-        };
+        setIsClient(true); // Set to true once on the client side
+    }, []);
 
-        if (username) {
-            fetchUserData();
+    useEffect(() => {
+        if (isClient) {
+            const username = sessionStorage.getItem('guru'); // Fetch userId from session storage
+            const fetchUserData = async () => {
+                try {
+                    const response = await fetch(`/api/l3/history/${username}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user data');
+                    }
+                    const data: UserData = await response.json(); // Type the fetched data
+                    setUserData(data);
+                } catch (error) {
+                    if (error instanceof Error) {
+                        setError(error.message);
+                    }
+                    console.error('Error fetching user data:', error);
+                }
+            };
+
+            if (username) {
+                fetchUserData();
+            }
         }
-    }, [username]);
+    }, [isClient]);
 
     if (error) {
         return <div className="text-red-600 font-semibold p-4">Error: {error}</div>;
