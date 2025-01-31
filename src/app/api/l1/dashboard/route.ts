@@ -5,6 +5,7 @@ import l2User from '@/models/l2';
 import l3User from '@/models/l3';
 import l4User from '@/models/l4'; // Assuming there's an L4 model
 
+
 interface L2User {
     name: string;
     peeta: string;
@@ -33,10 +34,7 @@ export async function GET() {
         const l3Users = (await l3User.find().lean()) as unknown as L3User[]; // Cast to unknown first, then L3User[]
         const l4Users = (await l4User.find().lean()) as unknown as L4User[]; // Cast to unknown first, then L4User[]
 
-        if (!l1Users || l1Users.length === 0) {
-            console.warn('No L1 users found');
-            return NextResponse.json({ message: 'No L1 users found' }, { status: 404 });
-        }
+      
 
         // Group L2 users by their peeta (L1 user name)
         const groupedL2Users = l2Users.reduce((acc, user: L2User) => {
