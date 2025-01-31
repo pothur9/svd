@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent, FormEvent, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
-
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n"; // Ensure the correct path
 
 interface FormData {
   name: string;
@@ -38,7 +45,6 @@ export default function PersonalDetailsForm() {
   const [userId, setUserId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    
     name: "",
     dob: "",
     gender: "",
@@ -59,16 +65,22 @@ export default function PersonalDetailsForm() {
     confirmPassword: "",
     photoUrl: "",
   });
-
+  const [language, setLanguage] = useState<string>("en");
+  const { t } = useTranslation();
   const router = useRouter();
 
+  const changeLanguage = (lang: string) => {
+    console.log(`Changing language to: ${lang}`); // Debugging log
+    i18n.changeLanguage(lang);
+    setLanguage(lang);
+  };
   const fetchL2Users = useCallback(async () => {
     try {
       const response = await fetch("/api/l3/findl2users");
       if (!response.ok) throw new Error("Failed to fetch L2 users.");
       const users = await response.json();
       setL2Users(users);
-      console.log(l2Users)
+      console.log(l2Users);
     } catch (error) {
       console.error("Error fetching L2 users:", error);
     }
@@ -81,7 +93,7 @@ export default function PersonalDetailsForm() {
   useEffect(() => {
     console.log("Updated L2 Users:", l2Users);
   }, [l2Users]);
-  
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -141,8 +153,6 @@ export default function PersonalDetailsForm() {
 
     setIsVerifyingOtp(true);
     try {
-      
-
       const verifyResponse = await fetch(
         `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`
       );
@@ -153,7 +163,10 @@ export default function PersonalDetailsForm() {
 
         const photoFormData = new FormData();
         photoFormData.append("file", formData.photoUrl);
-        photoFormData.append("upload_preset", `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`);
+        photoFormData.append(
+          "upload_preset",
+          `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`
+        );
 
         const photoResponse = await fetch(
           `${process.env.NEXT_PUBLIC_CLOUDINARY_API_URL}/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -172,17 +185,14 @@ export default function PersonalDetailsForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
-            photoUrl: photoData.secure_url
-           
+            photoUrl: photoData.secure_url,
           }),
-          
         });
 
         if (response.ok) {
-          const result = await response.json(); 
+          const result = await response.json();
           setUserId(result.userId);
           setShowSuccessModal(true);
-         
         } else {
           alert("Failed to sign up user.");
         }
@@ -195,391 +205,430 @@ export default function PersonalDetailsForm() {
     } finally {
       setIsVerifyingOtp(false);
     }
-  };
+  };console.log(language)
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
-      <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
-         <div className="flex justify-center">
-                  <img src="/logo.png" alt="Logo" width={100} height={100} />
-                </div>
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Personal Details
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-semibold">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-              
-            />
-          </div>
-
-          <div>
-            <label htmlFor="dob" className="block text-sm font-semibold">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              name="dob"
-              id="dob"
-              value={formData.dob}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="gender" className="block text-sm font-semibold">
-              Gender
-            </label>
-            <select
-              name="gender"
-              id="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="contactNo" className="block text-sm font-semibold">
-              Contact No.
-            </label>
-            <input
-              type="tel"
-              name="contactNo"
-              id="contactNo"
-              value={formData.contactNo}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="mailId" className="block text-sm font-semibold">
-              Mail ID
-            </label>
-            <input
-              type="email"
-              name="mailId"
-              id="mailId"
-              value={formData.mailId}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="karthruGuru"
-              className="block text-sm font-semibold"
-            >
-              Karthru Guru
-            </label>
-            <input
-              type="text"
-              name="karthruGuru"
-              id="karthruGuru"
-              value={formData.karthruGuru}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="peeta" className="block text-sm font-semibold">
-              Peeta
-            </label>
-            <input
-              type="text"
-              name="peeta"
-              id="peeta"
-              value={formData.peeta}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="bhage" className="block text-sm font-semibold">
-              Bhage
-            </label>
-            <input
-              type="text"
-              name="bhage"
-              id="bhage"
-              value={formData.bhage}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="gothra" className="block text-sm font-semibold">
-              Gothra
-            </label>
-            <input
-              type="text"
-              name="gothra"
-              id="gothra"
-              value={formData.gothra}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="nationality"
-              className="block text-sm font-semibold"
-            >
-              Nationality
-            </label>
-            <input
-              type="text"
-              name="nationality"
-              id="nationality"
-              value={formData.nationality}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="presentAddress"
-              className="block text-sm font-semibold"
-            >
-              Present Address
-            </label>
-            <input
-              type="text"
-              name="presentAddress"
-              id="presentAddress"
-              value={formData.presentAddress}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="permanentAddress"
-              className="block text-sm font-semibold"
-            >
-              Permanent Address
-            </label>
-            <input
-              type="text"
-              name="permanentAddress"
-              id="permanentAddress"
-              value={formData.permanentAddress}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="qualification"
-              className="block text-sm font-semibold"
-            >
-              Qualification
-            </label>
-            <select
-              name="qualification"
-              id="qualification"
-              value={formData.qualification}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            >
-              <option value="">Select Qualification</option>
-              <option value="Business">Business</option>
-              <option value="Job">Job</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="occupation" className="block text-sm font-semibold">
-              Occupation
-            </label>
-            <input
-              type="text"
-              name="occupation"
-              id="occupation"
-              value={formData.occupation}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="languageKnown"
-              className="block text-sm font-semibold"
-            >
-              Languages Known
-            </label>
-            <input
-              type="text"
-              name="languageKnown"
-              id="languageKnown"
-              value={formData.languageKnown}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="selectedL2User"
-              className="block text-sm font-semibold"
-            >
-              Select L2 User
-            </label>
-            <select
-              name="selectedL2User"
-              id="selectedL2User"
-              value={formData.selectedL2User}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            >
-              <option value="">Select L2 User</option>
-              {l2Users.map((user: { name: string }, index: number) => (
-                <option key={index} value={user.name}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="photo" className="block text-sm font-semibold">
-              Upload Photo
-            </label>
-            <input
-              type="file"
-              name="photoUrl"
-              id="photoUrl"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-semibold">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-
-          {/* Confirm Password Field */}
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-semibold"
-            >
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              id="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              required
-            />
-          </div>
-
+    <>
+      <div className="flex flex-col items-center p-6 bg-gray-100 rounded-xl shadow-md">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+          Select Your Language
+        </h1>
+        <div className="flex space-x-4">
           <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition"
-            disabled={isLoading}
+            onClick={() => changeLanguage("en")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
           >
-            {isLoading ? (
-              <span>Signing Up...</span> // You can replace this with a spinner icon
-            ) : (
-              "Sign Up"
-            )}
+            English
           </button>
-        </form>
+          <button
+            onClick={() => changeLanguage("kn")}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+          >
+            ಕನ್ನಡ
+          </button>
+          <button
+            onClick={() => changeLanguage("hi")}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
+          >
+            हिंदी
+          </button>
+        </div>
       </div>
-      {showOtpPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm">
-            <h3 className="text-lg font-semibold mb-4">Enter OTP</h3>
-            <input
-              type="text"
-              value={otp}
-              onChange={handleOtpChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              placeholder="Enter OTP"
-            />
-            <div className="flex space-x-4 mt-4">
+      <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
+        <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
+          <div className="flex justify-center">
+            <img src="/logo.png" alt="Logo" width={100} height={100} />
+          </div>
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            {t("signupl1.title")}
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-semibold">
+                {t("signupl1.name")}
+              </label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="dob" className="block text-sm font-semibold">
+                {t("signupl1.dob")}
+              </label>
+              <input
+                type="date"
+                name="dob"
+                id="dob"
+                value={formData.dob}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gender" className="block text-sm font-semibold">
+                {t("signupl1.gender")}
+              </label>
+              <select
+                name="gender"
+                id="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="contactNo"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.contactNo")}
+              </label>
+              <input
+                type="tel"
+                name="contactNo"
+                id="contactNo"
+                value={formData.contactNo}
+                onChange={handleInputChange}
+                onBlur={() => {
+                  if (!/^\d{10}$/.test(formData.contactNo)) {
+                    alert("Please enter a valid 10-digit phone number.");
+                  }
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="mailId" className="block text-sm font-semibold">
+                {t("signupl1.mailId")}
+              </label>
+              <input
+                type="email"
+                name="mailId"
+                id="mailId"
+                value={formData.mailId}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="karthruGuru"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.karthruGuru")}
+              </label>
+              <input
+                type="text"
+                name="karthruGuru"
+                id="karthruGuru"
+                value={formData.karthruGuru}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="peeta" className="block text-sm font-semibold">
+                {t("signupl1.peeta")}
+              </label>
+              <input
+                type="text"
+                name="peeta"
+                id="peeta"
+                value={formData.peeta}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="bhage" className="block text-sm font-semibold">
+                {t("signupl1.bhage")}
+              </label>
+              <input
+                type="text"
+                name="bhage"
+                id="bhage"
+                value={formData.bhage}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gothra" className="block text-sm font-semibold">
+                {t("signupl1.gothra")}
+              </label>
+              <input
+                type="text"
+                name="gothra"
+                id="gothra"
+                value={formData.gothra}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="nationality"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.nationality")}
+              </label>
+              <input
+                type="text"
+                name="nationality"
+                id="nationality"
+                value={formData.nationality}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="presentAddress"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.presentAddress")}
+              </label>
+              <input
+                type="text"
+                name="presentAddress"
+                id="presentAddress"
+                value={formData.presentAddress}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="permanentAddress"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.permanentAddress")}
+              </label>
+              <input
+                type="text"
+                name="permanentAddress"
+                id="permanentAddress"
+                value={formData.permanentAddress}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="qualification"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.qualification")}
+              </label>
+              <select
+                name="qualification"
+                id="qualification"
+                value={formData.qualification}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              >
+                <option value="">Select Qualification</option>
+                <option value="Job">Degree</option>
+                <option value="Business"> puc</option>
+                <option value="Job">10</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="occupation"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.occupation")}
+              </label>
+              <input
+                type="text"
+                name="occupation"
+                id="occupation"
+                value={formData.occupation}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="languageKnown"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.languageKnown")}
+              </label>
+              <input
+                type="text"
+                name="languageKnown"
+                id="languageKnown"
+                value={formData.languageKnown}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="selectedL2User"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.selectedL2User")}
+              </label>
+              <select
+                name="selectedL2User"
+                id="selectedL2User"
+                value={formData.selectedL2User}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select L2 User</option>
+                {l2Users.map((user: { name: string }, index: number) => (
+                  <option key={index} value={user.name}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="photo" className="block text-sm font-semibold">
+                {t("signupl1.photoUrl")}
+              </label>
+              <input
+                type="file"
+                name="photoUrl"
+                id="photoUrl"
+                onChange={handleFileChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold">
+                {t("signupl1.password")}
+              </label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl1.confirmPassword")}
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              />
+            </div>
+
             <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span>Signing Up...</span> // You can replace this with a spinner icon
+              ) : (
+                "Sign Up"
+              )}
+            </button>
+          </form>
+        </div>
+        {showOtpPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm">
+              <h3 className="text-lg font-semibold mb-4">Enter OTP</h3>
+              <input
+                type="text"
+                value={otp}
+                onChange={handleOtpChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                placeholder="Enter OTP"
+              />
+              <div className="flex space-x-4 mt-4">
+                <button
                   onClick={handleVerifyOtp}
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                   disabled={isVerifyingOtp}
                 >
                   {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
                 </button>
+                <button
+                  onClick={() => setShowOtpPopup(false)}
+                  className="flex-1 p-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showSuccessModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-8 shadow-xl w-96">
+              <h2 className="text-2xl font-semibold mb-4">
+                Signup Successful!
+              </h2>
+              <p className="mb-4">
+                Your User ID is: <strong>{userId}</strong>
+              </p>
               <button
-                onClick={() => setShowOtpPopup(false)}
-                className="flex-1 p-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.push("/l3/login");
+                }}
               >
-                Cancel
+                Proceed to Login
               </button>
             </div>
           </div>
-        </div>
-      )}
-         {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 shadow-xl w-96">
-            <h2 className="text-2xl font-semibold mb-4">Signup Successful!</h2>
-            <p className="mb-4">
-              Your User ID is: <strong>{userId}</strong>
-            </p>
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-              onClick={() => {
-                setShowSuccessModal(false);
-                router.push("/l3/login");
-              }}
-            >
-              Proceed to Login
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

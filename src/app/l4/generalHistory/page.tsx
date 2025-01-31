@@ -4,9 +4,7 @@ import { format } from "date-fns";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
-// Define types for the user, event, and user details
 interface User {
-  _id: string;
   name: string;
 }
 
@@ -28,72 +26,84 @@ interface UserDetails {
 }
 
 export default function UserSelection() {
-  const levels = ["l1", "l2", "l3", "l4"]; // Static levels
-  const [users, setUsers] = useState<User[]>([]); // Users based on selected level
-  const [selectedLevel, setSelectedLevel] = useState<string>(""); // Selected level
-  const [selectedUser, setSelectedUser] = useState<string>(""); // Selected user
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null); // Store fetched user details
-  const [events, setEvents] = useState<Event[]>([]); // User's calendar events
+  const levels: string[] = ["l1", "l2", "l3", "l4"];
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
-  const [showModal, setShowModal] = useState<boolean>(false); // Control visibility of the modal
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null); // Store selected event for popup
-
-  // Fetch users when a level is selected
   useEffect(() => {
     if (!selectedLevel) return;
 
     const fetchUsers = async () => {
       try {
         const response = await fetch(`/api/${selectedLevel}/users`);
-        const data = await response.json();
-        console.log("Fetched users:", data); // Log to verify structure
-        setUsers(data); // Assuming `data` is an array of user names or objects
+        const data: string[] = await response.json();
+        console.log("Fetched users:", data);
+
+        // Trim spaces and update the users state
+        const users = data.map((name) => ({
+          name: name.trim(), // Trim any extra spaces
+        }));
+
+        setUsers(users);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
     };
+
     fetchUsers();
   }, [selectedLevel]);
 
-  // Fetch user details and events when a user is selected
   useEffect(() => {
     if (!selectedUser) return;
 
     const fetchUserDetails = async () => {
       try {
         const historyResponse = await fetch(
-          `/api/${selectedLevel}/history/${selectedUser}/`
+          `/api/${selectedLevel}/history/${selectedUser}`
         );
-        const eventsResponse = await fetch(`/api/${selectedLevel}/lEvents/${selectedUser}/`);
+        const eventsResponse = await fetch(
+          `/api/${selectedLevel}/lEvents/${selectedUser}`
+        );
 
         const [historyData, eventsData] = await Promise.all([
           historyResponse.json(),
           eventsResponse.json(),
         ]);
 
-        setUserDetails(historyData); // Store entire user data
-        setEvents(eventsData);
+        setUserDetails(historyData as UserDetails);
+        setEvents(eventsData as Event[]);
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
     };
+
     fetchUserDetails();
   }, [selectedUser]);
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
-    setShowModal(true); // Show the popup
+    setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedEvent(null); // Clear selected event
+    setSelectedEvent(null);
   };
+
+  console.log("Fetched users:", users); // Debug log to check users
 
   return (
     <>
-      <Navbar /><br/>
-      <div className="bg-slate-100 min-h-screen w-full"><br/><br/>
+      <Navbar />
+      <br />
+      <div className="bg-slate-100 min-h-screen w-full">
+        <br />
+        <br />
         <div className="p-4 sm:p-6 max-w-4xl mx-auto bg-gray-50 rounded-lg shadow-md mt-6">
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-blue-600 mb-6">
             Search History
@@ -107,7 +117,7 @@ export default function UserSelection() {
             <select
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
             >
               <option value="">-- Select Level --</option>
               {levels.map((level, index) => (
@@ -121,15 +131,17 @@ export default function UserSelection() {
           {/* User Dropdown */}
           {users.length > 0 && (
             <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">Select User:</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Select User:
+              </label>
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
               >
                 <option value="">-- Select User --</option>
-                {users.map((user) => (
-                  <option key={user._id} value={user._id}>
+                {users.map((user, index) => (
+                  <option key={index} value={user.name}>
                     {user.name}
                   </option>
                 ))}
@@ -140,7 +152,9 @@ export default function UserSelection() {
           {/* Event Table */}
           {selectedUser && events.length > 0 && (
             <div className="mb-4 overflow-auto">
-              <h3 className="text-xl font-semibold text-blue-600 mb-2">Events:</h3>
+              <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                Events:
+              </h3>
               <table className="min-w-full bg-white text-gray-800 border border-gray-300 rounded-lg text-sm sm:text-base">
                 <thead>
                   <tr className="bg-blue-100">
@@ -173,14 +187,29 @@ export default function UserSelection() {
           {/* User Details */}
           {selectedUser && userDetails && (
             <div className="mb-4">
-              <h3 className="text-xl font-semibold text-blue-600 mb-2">User Details:</h3>
+              <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                User Details:
+              </h3>
               <ul className="list-disc ml-6 text-sm sm:text-base">
-                <li><strong>ID:</strong> {userDetails._id}</li>
-                <li><strong>Username:</strong> {userDetails.username}</li>
-                <li><strong>History:</strong> {userDetails.history}</li>
-                <li><strong>Gurus Timeline:</strong> {userDetails.gurusTimeline}</li>
-                <li><strong>Special Developments:</strong> {userDetails.specialDevelopments}</li>
-                <li><strong>Institutes:</strong> {userDetails.institutes}</li>
+                <li>
+                  <strong>ID:</strong> {userDetails._id}
+                </li>
+                <li>
+                  <strong>Username:</strong> {userDetails.username}
+                </li>
+                <li>
+                  <strong>History:</strong> {userDetails.history}
+                </li>
+                <li>
+                  <strong>Gurus Timeline:</strong> {userDetails.gurusTimeline}
+                </li>
+                <li>
+                  <strong>Special Developments:</strong>{" "}
+                  {userDetails.specialDevelopments}
+                </li>
+                <li>
+                  <strong>Institutes:</strong> {userDetails.institutes}
+                </li>
               </ul>
             </div>
           )}
@@ -192,8 +221,13 @@ export default function UserSelection() {
                 <h3 className="text-xl font-semibold text-blue-600 mb-2">
                   {selectedEvent.title}
                 </h3>
-                <p><strong>Date:</strong> {format(new Date(selectedEvent.date), "yyyy-MM-dd")}</p>
-                <p><strong>Description:</strong> {selectedEvent.description}</p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {format(new Date(selectedEvent.date), "yyyy-MM-dd")}
+                </p>
+                <p>
+                  <strong>Description:</strong> {selectedEvent.description}
+                </p>
                 <button
                   onClick={closeModal}
                   className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md w-full sm:w-auto"
@@ -203,7 +237,9 @@ export default function UserSelection() {
               </div>
             </div>
           )}
-        </div><br/><br/>
+        </div>
+        <br />
+        <br />
       </div>
       <Footer />
     </>

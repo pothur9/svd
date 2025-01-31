@@ -40,6 +40,27 @@
       "alreadyAccount": "पहले से खाता है?",
       "login": "लॉगिन",
       "submit": "साइन अप"
-    }
+    },"signupl3": {
+    "title": "नाम दर्ज करें",
+    "name": "नाम",
+    "dob": "जन्म तिथि",
+    "gender": "लिंग",
+    "contactNo": "संपर्क नंबर",
+    "mailId": "ईमेल आईडी",
+    "karthruGuru": "कर्तृ गुरु का नाम",
+    "peeta": "पीठ",
+    "bhage": "भागे",
+    "gothra": "गोत्र",
+    "nationality": "राष्ट्रीयता",
+    "presentAddress": "वर्तमान पता",
+    "permanentAddress": "स्थायी पता",
+    "qualification": "योग्यता",
+    "occupation": "पेशा",
+    "languageKnown": "ज्ञात भाषाएँ",
+    "selectedL2User": "चयनित L2 उपयोगकर्ता",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "photoUrl": "प्रोफ़ाइल तस्वीर"
+  }
   }
   

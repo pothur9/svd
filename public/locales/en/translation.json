@@ -39,6 +39,27 @@
       "alreadyAccount": "Already have an account?",
       "login": "Login",
       "submit": "Sign Up"
-    }
+    },"signupl3": {
+    "title": "Register Name",
+    "name": "Name",
+    "dob": "Date of Birth",
+    "gender": "Gender",
+    "contactNo": "Contact Number",
+    "mailId": "Email ID",
+    "karthruGuru": "Karthru Guru Name",
+    "peeta": "Peeta",
+    "bhage": "Bhage",
+    "gothra": "Gothra",
+    "nationality": "Nationality",
+    "presentAddress": "Present Address",
+    "permanentAddress": "Permanent Address",
+    "qualification": "Qualification",
+    "occupation": "Occupation",
+    "languageKnown": "Language Known",
+    "selectedL2User": "Selected L2 User",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "photoUrl": "Profile Picture"
+  }
   }
   

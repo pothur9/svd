@@ -73,6 +73,14 @@ const LoginPage = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
           />
         </label>
+        <p className="text-right mt-1 mb-5">
+            <a
+              href="/l4/forgotpass"
+              className="text-blue-500 hover:text-blue-700"
+            >
+             Forgot Password ?
+            </a>
+          </p>
         <button
           type="submit"
           disabled={isLoading} // Disable button while loading

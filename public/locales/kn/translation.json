@@ -39,6 +39,27 @@
       "alreadyAccount": "ಹೀಗೆ ಖಾತೆ ಇದೆಯಾ?",
       "login": "ಲಾಗಿನ್",
       "submit": "ಸೈನ್ ಅಪ್ ಮಾಡಿ"
-    }
+    },"signupl3": {
+    "title": "ಹೆಸರನ್ನು ನೋಂದಾಯಿಸಿ",
+    "name": "ಹೆಸರು",
+    "dob": "ಹುಟ್ಟಿದ ದಿನಾಂಕ",
+    "gender": "ಲಿಂಗ",
+    "contactNo": "ಸಂಪರ್ಕ ಸಂಖ್ಯೆ",
+    "mailId": "ಇಮೇಲ್ ID",
+    "karthruGuru": "ಕರ್ತೃ ಗುರುಹಿರಿಯರ ಹೆಸರು",
+    "peeta": "ಪೀಠ",
+    "bhage": "ಭಾಗೆ",
+    "gothra": "ಗೋತ್ರ",
+    "nationality": "ಜಾತಿಯತೆ",
+    "presentAddress": "ಪ್ರಸ್ತುತ ವಿಳಾಸ",
+    "permanentAddress": "ಶಾಶ್ವತ ವಿಳಾಸ",
+    "qualification": "ಅರ್ಹತೆ",
+    "occupation": "ಉದ್ಯೋಗ",
+    "languageKnown": "ತಿಳಿದ ಭಾಷೆಗಳು",
+    "selectedL2User": "ಆಯ್ಕೆ ಮಾಡಿದ L2 ಬಳಕೆದಾರ",
+    "password": "ಗುಪ್ತಪದ",
+    "confirmPassword": "ಗುಪ್ತಪದ ದೃಢೀಕರಿಸಿ",
+    "photoUrl": "ಪ್ರೊಫೈಲ್ ಚಿತ್ರ"
+  }
   }
   
