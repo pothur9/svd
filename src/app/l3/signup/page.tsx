@@ -68,6 +68,7 @@ export default function PersonalDetailsForm() {
       if (!response.ok) throw new Error("Failed to fetch L2 users.");
       const users = await response.json();
       setL2Users(users);
+      console.log(l2Users)
     } catch (error) {
       console.error("Error fetching L2 users:", error);
     }
@@ -77,6 +78,10 @@ export default function PersonalDetailsForm() {
     fetchL2Users();
   }, [fetchL2Users]);
 
+  useEffect(() => {
+    console.log("Updated L2 Users:", l2Users);
+  }, [l2Users]);
+  
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
