@@ -28,7 +28,7 @@ export default function UserDataDisplay(): JSX.Element {
 
         const response = await fetch(`/api/l1/history/${username}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch user data");
+          throw new Error("History is not Present");
         }
         const data: UserData = await response.json();
         setUserData(data);
@@ -41,7 +41,7 @@ export default function UserDataDisplay(): JSX.Element {
           console.error("Unexpected error:", error);
         }
       }
-      
+
     };
 
     fetchUserData();
@@ -83,7 +83,7 @@ export default function UserDataDisplay(): JSX.Element {
                 History
               </h3>
               <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-                {userData.history}
+                {userData.history || "History is not present."}
               </p>
             </section>
 

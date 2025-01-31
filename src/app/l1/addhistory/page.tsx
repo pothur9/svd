@@ -17,6 +17,7 @@ export default function UserDataForm() {
   useEffect(() => {
     // Fetch the userId from sessionStorage when the component mounts
     const usernameFromStorage = sessionStorage.getItem("username");
+    
     if (usernameFromStorage) {
       console.log("User ID from sessionStorage:", usernameFromStorage);
       setFormData((prevData) => ({

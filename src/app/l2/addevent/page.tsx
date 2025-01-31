@@ -16,14 +16,14 @@ export default function AddEvent() {
     e.preventDefault();
 
     // Get the username from session storage
-    const userName = sessionStorage.getItem('username');
-    if (!userName) {
+    const username = sessionStorage.getItem('username');
+    if (!username) {
       alert("UserId not found in session. Please log in again.");
       return;
     }
 
     // Add username to the form data
-    const dataToSubmit = { ...formData, userName };
+    const dataToSubmit = { ...formData, username };
 
     try {
       const response = await fetch('/api/l2/addevent', {

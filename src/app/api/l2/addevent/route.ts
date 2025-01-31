@@ -7,10 +7,10 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect(); // Connect to MongoDB
 
-    const { date, title, description, userName } = await request.json();
+    const { date, title, description, username } = await request.json();
 
     // Validate required fields
-    if (!date || !title || !description || !userName) {
+    if (!date || !title || !description || !username) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       date,
       title,
       description,
-      userName,
+      username,
     });
 
     // Save the event to the database

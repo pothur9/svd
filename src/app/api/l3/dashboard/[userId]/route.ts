@@ -8,7 +8,7 @@ export async function GET(req: Request, { params }: { params: { userId: string }
 
     const { userId } = params; // Get userId from params
 
-    console.log("Received userId:", userId); // Debug log
+ 
 
     try {
         const user = await l3User.findOne({ userId }); // Find user by userId

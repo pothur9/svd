@@ -35,7 +35,10 @@ export default function PersonalDetailsForm() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
+    
     name: "",
     dob: "",
     gender: "",
@@ -167,11 +170,14 @@ export default function PersonalDetailsForm() {
             photoUrl: photoData.secure_url
            
           }),
+          
         });
 
         if (response.ok) {
-          alert("User signed up successfully!");
-          router.push("/l3/login");
+          const result = await response.json(); 
+          setUserId(result.userId);
+          setShowSuccessModal(true);
+         
         } else {
           alert("Failed to sign up user.");
         }
@@ -547,6 +553,25 @@ export default function PersonalDetailsForm() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+         {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 shadow-xl w-96">
+            <h2 className="text-2xl font-semibold mb-4">Signup Successful!</h2>
+            <p className="mb-4">
+              Your User ID is: <strong>{userId}</strong>
+            </p>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.push("/l3/login");
+              }}
+            >
+              Proceed to Login
+            </button>
           </div>
         </div>
       )}

@@ -381,6 +381,19 @@ console.log(isOtpVerified)
             </div>
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
+               Address
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  className="border rounded-md p-2 w-full bg-white text-black"
+                />
+              </label>
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 font-semibold text-black">
                 Password:
                 <input
                   type="password"
@@ -448,19 +461,7 @@ console.log(isOtpVerified)
                     Resend OTP ({resendTimer}s)
                   </button>
                 </div>
-                <div className="mb-4">
-                  <label className="block mb-1 font-semibold text-black">
-                    Enter OTP:
-                    <input
-                      type="text"
-                      name="otp"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      required
-                      className="border rounded-md p-2 w-full bg-white text-black"
-                    />
-                  </label>
-                </div>
+               
                 <div className="flex justify-center mb-4">
                   <button
                     type="button"

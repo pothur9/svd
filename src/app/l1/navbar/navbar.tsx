@@ -18,6 +18,10 @@ function Navbar() {
     };
 
     fetchUserCount();
+    // Fetch every 10 minutes (600000 ms)
+    const interval = setInterval(fetchUserCount, 600000);
+
+    return () => clearInterval(interval); // Cleanup interval on unmount
   }, []);
 
   return (

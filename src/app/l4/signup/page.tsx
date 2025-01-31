@@ -1,18 +1,44 @@
 "use client";
-import { useState, useEffect ,ChangeEvent, FormEvent} from "react";
+
+import { useState, useEffect, ChangeEvent, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import Image from "next/image";
+
+interface FormData {
+  name: string;
+  dob: string;
+  gender: string;
+  contactNo: string;
+  mailId: string;
+  karthruGuru: string;
+  peeta: string;
+  bhage: string;
+  gothra: string;
+  nationality: string;
+  presentAddress: string;
+  permanentAddress: string;
+  qualification: string;
+  occupation: string;
+  languageKnown: string;
+  selectedL2User: string;
+  password: string;
+  confirmPassword: string;
+  photoUrl: File | string;
+}
+
+export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
+
 export default function PersonalDetailsForm() {
   const [l2Users, setL2Users] = useState([]);
   const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [otp, setOtp] = useState("");
-  const [sessionId, setSessionId] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const router = useRouter();
-
-  const [formData, setFormData] = useState({
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    
     name: "",
     dob: "",
     gender: "",
@@ -31,22 +57,25 @@ export default function PersonalDetailsForm() {
     selectedL2User: "",
     password: "",
     confirmPassword: "",
-    photoUrl: "" as File | string,
+    photoUrl: "",
   });
 
-  useEffect(() => {
-    async function fetchL2Users() {
-      try {
-        const response = await fetch("/api/l3/findl2users");
-        if (!response.ok) throw new Error("Failed to fetch L2 users");
-        const users = await response.json();
-        setL2Users(users);
-      } catch (error) {
-        console.error(error);
-      }
+  const router = useRouter();
+
+  const fetchL2Users = useCallback(async () => {
+    try {
+      const response = await fetch("/api/l3/findl2users");
+      if (!response.ok) throw new Error("Failed to fetch L2 users.");
+      const users = await response.json();
+      setL2Users(users);
+    } catch (error) {
+      console.error("Error fetching L2 users:", error);
     }
-    fetchL2Users();
   }, []);
+
+  useEffect(() => {
+    fetchL2Users();
+  }, [fetchL2Users]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -56,7 +85,7 @@ export default function PersonalDetailsForm() {
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
+    const file = e.target.files?.[0];
     if (file) {
       setFormData((prevData) => ({ ...prevData, photoUrl: file }));
     }
@@ -68,12 +97,15 @@ export default function PersonalDetailsForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { contactNo, photoUrl } = formData;
-    console.log(photoUrl)
-    setIsLoading(true); // Set loading to true when the signup button is clicked
+    if (!formData.contactNo) {
+      alert("Please enter a valid contact number.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const otpResponse = await fetch(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN/SVD`
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN/SVD`
       );
       const otpData = await otpResponse.json();
 
@@ -86,56 +118,66 @@ export default function PersonalDetailsForm() {
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("An error occurred while sending the OTP.");
-    }finally {
-      setIsLoading(false); // Reset loading state after OTP process
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
+    if (!sessionId) {
+      alert("Session ID is missing. Please retry OTP verification.");
+      return;
+    }
+
+    if (!formData.photoUrl || !(formData.photoUrl instanceof File)) {
+      alert("Please upload a valid photo.");
+      return;
+    }
+
     setIsVerifyingOtp(true);
     try {
-     
+      
+
       const verifyResponse = await fetch(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${sessionId}/${otp}`
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`
       );
       const verifyData = await verifyResponse.json();
 
       if (verifyData.Status === "Success") {
         alert("OTP verified successfully. Completing signup...");
 
-        // Upload photo to Cloudinary
         const photoFormData = new FormData();
-        photoFormData.append("file", formData.photoUrl); // Ensure you're appending the actual file here
-        photoFormData.append("upload_preset", "profilephoto");
+        photoFormData.append("file", formData.photoUrl);
+        photoFormData.append("upload_preset", `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`);
 
         const photoResponse = await fetch(
-          "https://api.cloudinary.com/v1_1/dxruv6swh/image/upload",
+          `${process.env.NEXT_PUBLIC_CLOUDINARY_API_URL}/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+
           {
             method: "POST",
             body: photoFormData,
           }
         );
 
-        if (!photoResponse.ok) throw new Error("Failed to upload photo");
+        if (!photoResponse.ok) throw new Error("Failed to upload photo.");
         const photoData = await photoResponse.json();
 
         const response = await fetch("/api/l4/signup", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
-            photoUrl: photoData.secure_url, 
-
-            selectedL2User: formData.selectedL2User,
-          
+            photoUrl: photoData.secure_url
+           
           }),
+          
         });
 
         if (response.ok) {
-          alert("User signed up successfully!");
-          router.push("/l4/login");
+          const result = await response.json(); 
+          setUserId(result.userId);
+          setShowSuccessModal(true);
+         
         } else {
           alert("Failed to sign up user.");
         }
@@ -145,7 +187,7 @@ export default function PersonalDetailsForm() {
     } catch (error) {
       console.error("Error verifying OTP:", error);
       alert("An error occurred during OTP verification.");
-    }finally {
+    } finally {
       setIsVerifyingOtp(false);
     }
   };
@@ -154,7 +196,7 @@ export default function PersonalDetailsForm() {
     <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
       <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
          <div className="flex justify-center">
-                  <Image src="/logo.png" alt="Logo" width={100} height={100} />
+                  <img src="/logo.png" alt="Logo" width={100} height={100} />
                 </div>
         <h2 className="text-2xl font-semibold text-center mb-6">
           Personal Details
@@ -511,6 +553,25 @@ export default function PersonalDetailsForm() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+         {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 shadow-xl w-96">
+            <h2 className="text-2xl font-semibold mb-4">Signup Successful!</h2>
+            <p className="mb-4">
+              Your User ID is: <strong>{userId}</strong>
+            </p>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.push("/l3/login");
+              }}
+            >
+              Proceed to Login
+            </button>
           </div>
         </div>
       )}
