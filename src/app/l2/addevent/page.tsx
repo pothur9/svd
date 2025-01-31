@@ -59,7 +59,7 @@ export default function AddEvent() {
               value={formData.date}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
             />
           </div>
           
@@ -72,7 +72,7 @@ export default function AddEvent() {
               onChange={handleChange}
               placeholder="Event Title"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
             />
           </div>
           
@@ -84,7 +84,7 @@ export default function AddEvent() {
               onChange={handleChange}
               placeholder="Event Description"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg  focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white text-black"
             />
           </div>
 

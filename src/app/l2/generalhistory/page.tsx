@@ -5,7 +5,6 @@ import Navbar from "../navbar/page";
 import Footer from "../footer/page";
 
 interface User {
-  _id: string;
   name: string;
 }
 
@@ -42,9 +41,15 @@ export default function UserSelection() {
     const fetchUsers = async () => {
       try {
         const response = await fetch(`/api/${selectedLevel}/users`);
-        const data: User[] = await response.json();
+        const data: string[] = await response.json();
         console.log("Fetched users:", data);
-        setUsers(data);
+
+        // Trim spaces and update the users state
+        const users = data.map((name) => ({
+          name: name.trim(), // Trim any extra spaces
+        }));
+
+        setUsers(users);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -59,10 +64,10 @@ export default function UserSelection() {
     const fetchUserDetails = async () => {
       try {
         const historyResponse = await fetch(
-          `/api/${selectedLevel}/history/${selectedUser}/`
+          `/api/${selectedLevel}/history/${selectedUser}`
         );
         const eventsResponse = await fetch(
-          `/api/${selectedLevel}/lEvents/${selectedUser}/`
+          `/api/${selectedLevel}/lEvents/${selectedUser}`
         );
 
         const [historyData, eventsData] = await Promise.all([
@@ -90,6 +95,8 @@ export default function UserSelection() {
     setSelectedEvent(null);
   };
 
+  console.log("Fetched users:", users); // Debug log to check users
+
   return (
     <>
       <Navbar />
@@ -110,7 +117,7 @@ export default function UserSelection() {
             <select
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
             >
               <option value="">-- Select Level --</option>
               {levels.map((level, index) => (
@@ -130,11 +137,11 @@ export default function UserSelection() {
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
               >
                 <option value="">-- Select User --</option>
                 {users.map((user, index) => (
-                  <option key={index} value={user._id}>
+                  <option key={index} value={user.name}>
                     {user.name}
                   </option>
                 ))}

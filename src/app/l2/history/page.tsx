@@ -32,7 +32,7 @@ export default function UserDataDisplay() {
       if (!username) return; // Wait until username is set
 
       try {
-        const response = await fetch(`/api/l2/viewhistory/${username}`);
+        const response = await fetch(`/api/l2/viewhistory/${encodeURIComponent(username)}`);
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }

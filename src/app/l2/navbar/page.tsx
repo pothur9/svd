@@ -29,7 +29,7 @@ function Navbar() {
 
   return (
     <div>
-      <div className="navbar bg-base-100 fixed">
+      <div className="navbar bg-white text-black fixed">
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -50,7 +50,7 @@ function Navbar() {
             </div>
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+              className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow"
             >
               <li><Link href="/l2/dashboard" className="text-lg">Home</Link></li>
               <li><Link href="/l2/addevent" className="text-lg">Add Event</Link></li>
@@ -60,9 +60,9 @@ function Navbar() {
               <li><Link href="/l2/generalhistory" className="text-lg">General History</Link></li>
             </ul>
           </div>
-          <Link href="/" className="btn btn-ghost text-xl">SVD</Link>
+          <Link href="/l2/dashboard" className="btn btn-ghost text-xl">SVD</Link>
         </div>
-        
+
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li><Link href="/l2/dashboard" className="text-lg">Home</Link></li>
@@ -76,7 +76,7 @@ function Navbar() {
 
         <div className="navbar-end">
           {totalUsers !== null && (
-            <div className="text-white p-2 text-center">
+            <div className="text-black p-2 text-center">
               Total Users: {totalUsers}
             </div>
           )}

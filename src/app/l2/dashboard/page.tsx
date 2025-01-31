@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/page";
+import Footer from "../footer/page";
 
 interface L1User {
   _id: string;
@@ -168,42 +169,37 @@ export default function Dashboard(): JSX.Element {
         </div>
         <br />
         <br />
-        <div
-          className="flex items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[600px]"
-          style={{
-            height: "200px",
-            backgroundColor: "#ee8628",
-          }}
+          
+      {/* Green Card with Member Details */}
+      <div
+          className="flex flex-col sm:flex-row items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[600px] bg-orange-600 rounded-xl overflow-hidden"
+          style={{ height: "auto", minHeight: "200px" }}
         >
           <div className="flex-shrink-0">
-            <img src="/logo.png" alt="Logo" width={90} height={90} />
+            <img src="/logo.png" alt="Logo" className="w-[70px] sm:w-[90px]" />
           </div>
-          <div className="ml-4 flex-grow">
+          <div className="ml-0 sm:ml-4 mt-2 sm:mt-0 flex-grow text-center sm:text-left">
             <h1 className="text-xl sm:text-2xl font-bold text-white">
               Sanathanaveershivadharma
             </h1>
-            <p className="text-white text-sm font-semibold ">
+            <p className="text-white text-sm font-semibold">
               ------------------
             </p>
             <p className="text-white text-sm">
               Professional description or tagline goes here
             </p>
           </div>
-          <div className="absolute top-1/2 right-4 transform -translate-y-1/2 sm:top-1/2 sm:right-4 sm:-translate-y-1/2 sm:mt-[0px] mt-[90px]">
+          <div className="mt-4 sm:mt-0 absolute sm:static top-[90%] sm:top-auto right-4 sm:right-auto transform -translate-y-1/2 sm:transform-none">
             <img
               src={userData.imageUrl}
               alt="Secondary Logo"
-              width={100}
-              height={100}
-              className="rounded-full border-4 border-green-700 shadow-lg "
+              className="w-[80px] sm:w-[100px] h-[80px] sm:h-[100px] rounded-full border-4 border-green-700 shadow-lg object-cover mb-16"
             />
           </div>
         </div>
 
-        <div
-          className="bg-white p-6 shadow-lg mx-auto max-w-[90%] sm:max-w-[600px]"
-          style={{ height: "300px" }}
-        >
+        {/* White Section with Dynamic Data */}
+        <div className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[600px] rounded-xl " style={{marginTop:"-10px"}}>
           <p className="text-black text-base font-semibold mt-4">
             Name: {userData.name}
           </p>
@@ -211,16 +207,17 @@ export default function Dashboard(): JSX.Element {
             Membership No: {userData.userId}
           </p>
           <p className="text-black text-base font-semibold mt-2">
-            Phone: {userData.contactNo}
-          </p>
-          <p className="text-black text-base font-semibold mt-2">
             Date:{" "}
             {userData.dob && !isNaN(Date.parse(userData.dob))
-              ? new Date(userData.dob).toISOString().split("T")[0]
+              ? new Date(userData.dob).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
               : "N/A"}
           </p>
           <p className="text-black text-base font-semibold mt-2">
-            Address: {userData.address || "N/A"}
+            Phone: {userData.contactNo}
           </p>
           <p className="text-black text-base font-semibold mt-2">
             Peeta: {userData.peeta || "N/A"}
@@ -228,10 +225,14 @@ export default function Dashboard(): JSX.Element {
           <p className="text-black text-base font-semibold mt-2">
             Guru: {userData.dhekshaGuru || "N/A"}
           </p>
+          <p className="text-black text-base font-semibold mt-2">
+            Address: {userData.address || "N/A"}
+          </p>
         </div>
         <br />
         <br />
       </div>
+      <Footer/>
     </>
   );
 }

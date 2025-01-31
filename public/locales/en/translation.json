@@ -19,6 +19,26 @@
       "alreadyAccount": "Already have an account?",
       "login": "Login",
       "submit": "Sign Up"
+    },"signupl2": {
+      "title": "Sign Up",
+      "name": "Name",
+      "dob": "Date of Birth",
+      "contactNo": "Contact No",
+      "peetarohanaDate": "Date of Peetarohana",
+      "gender": "Gender",
+      "karthruGuru": "Name of Karthru Guru",
+      "dhekshaGuru": "Name of Dheksha Guru",
+      "peeta": "Peeta",
+      "bhage": "Bhage",
+      "gothra": "Gothra",
+      "mariPresent": "If Mari Present",
+      "address": "Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "uploadProfilePicture": "Upload Profile Picture",
+      "alreadyAccount": "Already have an account?",
+      "login": "Login",
+      "submit": "Sign Up"
     }
   }
   

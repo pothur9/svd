@@ -6,12 +6,12 @@ import l2history from '@/models/l2history'; // Import the model safely
 export async function GET(req: NextRequest, { params }: { params: { username: string } }) {
     await dbConnect(); // Ensure DB connection
 
-    const { username } = params; // Get userId from params
-
+    let { username } = params; // Get userId from params
+    username = username.replace(/\s+/g, ''); // Remove all spaces from the username
     console.log("Fetching data for userId:", username); // Debug log
 
     try {
-        const user = await l2history.findOne({ username }); // Find user by userId
+        const user = await l2history.findOne({ username }); // Find user by username
 
         if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
