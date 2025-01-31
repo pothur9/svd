@@ -33,7 +33,7 @@ const ForgotPasswordPage: React.FC = () => {
       setIsOtpSent(true);
       setResendTimer(30);
       setMessage("OTP sent successfully!");
-    } catch (error) {
+    } catch {
       setMessage("Failed to send OTP. Please check your phone number.");
     }
   };
@@ -49,7 +49,7 @@ const ForgotPasswordPage: React.FC = () => {
       } else {
         setMessage("OTP verification failed.");
       }
-    } catch (error) {
+    } catch {
       setMessage("Error verifying OTP.");
     }
   };
@@ -77,7 +77,7 @@ const ForgotPasswordPage: React.FC = () => {
       } else {
         setMessage(data.message);
       }
-    } catch (error) {
+    } catch {
       setMessage("An error occurred. Please try again.");
     }
   };

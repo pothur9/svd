@@ -107,7 +107,7 @@ export default function SignupForm() {
       setOtpSessionId(response.data.Details); // Store the session ID
       setIsOtpSent(true);
       setIsResendOtpDisabled(true); // Disable resend button
-      setResendTimer(30); // Reset the timer to 30 seconds
+      setResendTimer(150); // Reset the timer to 30 seconds
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("Failed to send OTP. Please check your phone number.");
@@ -292,13 +292,12 @@ export default function SignupForm() {
                   name="contactNo"
                   value={formData.contactNo}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow only numeric values with max 10 digits
+                    const { value } = e.target; // destructure value directly
                     if (/^\d{0,10}$/.test(value)) {
                       handleChange(e);
                     }
                   }}
-                  onBlur={(e) => {
+                  onBlur={() => {
                     if (formData.contactNo.length !== 10) {
                       alert("Phone number must be exactly 10 digits.");
                     }
@@ -465,7 +464,7 @@ export default function SignupForm() {
                 />
               </label>
             </div>
-         
+
             {isOtpSent ? (
               <>
                 <div className="mb-4">
@@ -489,7 +488,7 @@ export default function SignupForm() {
                   >
                     {isSubmitting ? "Sending OTP..." : "Send OTP"}
                   </button>
-           
+
                   <button
                     type="button"
                     onClick={handleResendOtp}
@@ -534,13 +533,10 @@ export default function SignupForm() {
               </button>
             </div>
           )}
-                 <p>
+          <p>
             have an account?
-            <a
-              href="/l1/login"
-              className="text-blue-500 hover:text-blue-700"
-            >
-              &nbsp; Move to Login
+            <a href="/l1/login" className="text-blue-500 hover:text-blue-700">
+              &nbsp; Move to login
             </a>
           </p>
         </div>
