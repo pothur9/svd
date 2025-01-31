@@ -46,7 +46,7 @@ const LoginPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <form
           onSubmit={handleLogin}
-          className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
+          className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"style={{marginTop:'-80px'}}
         >
           <div
             style={{
@@ -85,7 +85,16 @@ const LoginPage: React.FC = () => {
               required
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
             />
+           
           </label>
+          <p className="text-right mt-1 mb-5">
+            <a
+              href="/l1/forgotpass"
+              className="text-blue-500 hover:text-blue-700"
+            >
+             Forgot Password ?
+            </a>
+          </p>
           <button
             type="submit"
             disabled={isLoading} // Disable button when loading

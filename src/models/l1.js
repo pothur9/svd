@@ -13,7 +13,7 @@ const l1UserSchema = new mongoose.Schema({
   peeta: { type: String, required: true },
   bhage: { type: String, required: true },
   gothra: { type: String, required: true },
-  mariPresent: { type: String, required: true },
+  mariPresent: { type: String,  },
   password:{ type: String, required: true },
   imageUrl:{ type: String, required: true },
   address:{ type: String, required: true },

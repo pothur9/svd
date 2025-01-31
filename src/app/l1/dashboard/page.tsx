@@ -186,8 +186,9 @@ export default function Dashboard() {
         <br />
         <br />
 
-        {/* Green Card with Member Details */}
-        <div
+      
+      {/* Green Card with Member Details */}
+      <div
           className="flex flex-col sm:flex-row items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[600px] bg-orange-600 rounded-xl overflow-hidden"
           style={{ height: "auto", minHeight: "200px" }}
         >
@@ -215,7 +216,7 @@ export default function Dashboard() {
         </div>
 
         {/* White Section with Dynamic Data */}
-        <div className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[600px] rounded-xl">
+        <div className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[600px] rounded-xl " style={{marginTop:"-10px"}}>
           <p className="text-black text-base font-semibold mt-4">
             Name: {userData.name}
           </p>
@@ -242,7 +243,7 @@ export default function Dashboard() {
             Guru: {userData.dhekshaGuru || "N/A"}
           </p>
         </div>
-
+        
         <br />
         <br />
       </div>

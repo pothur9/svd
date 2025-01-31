@@ -6,7 +6,7 @@ import l1history from '@/models/l1history'; // Import the model safely
 export async function GET(req: NextRequest, { params }: { params: { username: string } }) {
     await dbConnect(); // Ensure DB connection
 
-    const { username } = params; // Get userId from params
+    const username = decodeURIComponent(params.username);
 
     console.log("Fetching data for userId:", username); // Debug log
 

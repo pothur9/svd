@@ -26,7 +26,7 @@ export default function UserDataDisplay(): JSX.Element {
           return;
         }
 
-        const response = await fetch(`/api/l1/history/${username}`);
+        const response = await fetch(`/api/l1/history/${encodeURIComponent(username)}`);
         if (!response.ok) {
           throw new Error("History is not Present");
         }
