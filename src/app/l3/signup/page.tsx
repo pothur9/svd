@@ -316,7 +316,7 @@ export default function PersonalDetailsForm() {
 
             <div>
               <label htmlFor="mailId" className="block text-sm font-semibold">
-                {t("signupl1.mailId")}
+                {t("signupl3.mailId")}
               </label>
               <input
                 type="email"
@@ -333,7 +333,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="karthruGuru"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.karthruGuru")}
+                {t("signupl3.karthruGuru")}
               </label>
               <input
                 type="text"
@@ -348,7 +348,7 @@ export default function PersonalDetailsForm() {
 
             <div>
               <label htmlFor="peeta" className="block text-sm font-semibold">
-                {t("signupl1.peeta")}
+                {t("signupl3.peeta")}
               </label>
               <input
                 type="text"
@@ -363,7 +363,7 @@ export default function PersonalDetailsForm() {
 
             <div>
               <label htmlFor="bhage" className="block text-sm font-semibold">
-                {t("signupl1.bhage")}
+                {t("signupl3.bhage")}
               </label>
               <input
                 type="text"
@@ -377,7 +377,7 @@ export default function PersonalDetailsForm() {
 
             <div>
               <label htmlFor="gothra" className="block text-sm font-semibold">
-                {t("signupl1.gothra")}
+                {t("signupl3.gothra")}
               </label>
               <input
                 type="text"
@@ -394,7 +394,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="nationality"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.nationality")}
+                {t("signupl3.nationality")}
               </label>
               <input
                 type="text"
@@ -411,7 +411,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="presentAddress"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.presentAddress")}
+                {t("signupl3.presentAddress")}
               </label>
               <input
                 type="text"
@@ -428,7 +428,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="permanentAddress"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.permanentAddress")}
+                {t("signupl3.permanentAddress")}
               </label>
               <input
                 type="text"
@@ -445,7 +445,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="qualification"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.qualification")}
+                {t("signupl3.qualification")}
               </label>
               <select
                 name="qualification"
@@ -466,7 +466,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="occupation"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.occupation")}
+                {t("signupl3.occupation")}
               </label>
               <input
                 type="text"
@@ -483,7 +483,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="languageKnown"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.languageKnown")}
+                {t("signupl3.languageKnown")}
               </label>
               <input
                 type="text"
@@ -500,7 +500,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="selectedL2User"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.selectedL2User")}
+                {t("signupl3.selectedL2User")}
               </label>
               <select
                 name="selectedL2User"
@@ -520,7 +520,7 @@ export default function PersonalDetailsForm() {
             </div>
             <div>
               <label htmlFor="photo" className="block text-sm font-semibold">
-                {t("signupl1.photoUrl")}
+                {t("signupl3.photoUrl")}
               </label>
               <input
                 type="file"
@@ -552,7 +552,7 @@ export default function PersonalDetailsForm() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-semibold"
               >
-                {t("signupl1.confirmPassword")}
+                {t("signupl3.confirmPassword")}
               </label>
               <input
                 type="password"
