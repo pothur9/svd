@@ -107,7 +107,7 @@ export default function SignupForm() {
       setOtpSessionId(response.data.Details); // Store the session ID
       setIsOtpSent(true);
       setIsResendOtpDisabled(true); // Disable resend button
-      setResendTimer(150); // Reset the timer to 30 seconds
+      setResendTimer(10); // Reset the timer to 30 seconds
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("Failed to send OTP. Please check your phone number.");
