@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [memberData, setMemberData] = useState<MemberData[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [refresh, setRefresh] = useState(false); // Added refresh state
   const router = useRouter();
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function Dashboard() {
         } else {
           setUserId(storedUserId);
         }
-        
+
         // Fetch member data with no caching
         const memberResponse = await fetch(`/api/l1/dashboard?timestamp=${Date.now()}`, {
           method: "GET",
@@ -60,6 +61,7 @@ export default function Dashboard() {
             Expires: "0",
           },
         });
+
         if (!memberResponse.ok) throw new Error("Failed to fetch member data");
         const memberData: MemberData[] = await memberResponse.json();
         setMemberData(memberData);
@@ -74,6 +76,7 @@ export default function Dashboard() {
             Expires: "0",
           },
         });
+
         if (!userResponse.ok) throw new Error("Failed to fetch user data");
         const userData: UserData = await userResponse.json();
         setUserData(userData);
@@ -87,10 +90,15 @@ export default function Dashboard() {
     }
 
     fetchData();
-  }, [router]);
+  }, [router, refresh]); // Refresh dependency added
+
+  // Function to trigger refresh
+  const handleRefresh = () => {
+    setRefresh((prev) => !prev);
+  };
 
   if (!userData) return <p>Loading...</p>;
-console.log(userId)
+
   return (
     <>
       <Navbar />
@@ -98,6 +106,17 @@ console.log(userId)
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
           Dashboard
         </h1>
+
+        {/* Refresh Button */}
+        <div className="flex justify-center mb-4">
+          <button
+            onClick={handleRefresh}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            Refresh Data
+          </button>
+        </div>
+
         <div>
           {/* User Info Section */}
           <div
