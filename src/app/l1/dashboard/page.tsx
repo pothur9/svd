@@ -87,7 +87,7 @@ export default function Dashboard() {
     }
 
     fetchData();
-  }, [router ,refresh]);
+  }, [router]);
 
   if (!userData) return <p>Loading...</p>;
 console.log(userId)
