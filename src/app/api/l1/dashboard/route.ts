@@ -5,6 +5,7 @@ import l2User from '@/models/l2';
 import l3User from '@/models/l3';
 import l4User from '@/models/l4'; // Assuming there's an L4 model
 
+export const dynamic = "force-dynamic";
 
 interface L2User {
     name: string;
