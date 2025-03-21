@@ -97,7 +97,7 @@ export default function Dashboard() {
   }, [router]);
 
   if (!userData) return <p>Loading...</p>;
-
+console.log(userId)
   return (
     <>
       <Navbar />
