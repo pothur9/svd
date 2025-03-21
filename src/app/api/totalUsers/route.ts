@@ -5,7 +5,7 @@ import l1User from '@/models/l1'; // Adjust path if needed
 import l2User from '@/models/l2'; // Adjust path if needed
 import l3User from '@/models/l3'; // Adjust path if needed
 import l4User from '@/models/l4'; // Adjust path if needed
-
+export const dynamic = "force-dynamic";
 export async function GET() {
     await dbConnect(); // Ensure DB connection
 
