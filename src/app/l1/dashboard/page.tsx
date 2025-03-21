@@ -91,7 +91,7 @@ export default function Dashboard() {
 
     fetchData();
   }, [router, refresh]); // Refresh dependency added
-
+  console.log(userId)
   // Function to trigger refresh
   const handleRefresh = () => {
     setRefresh((prev) => !prev);
