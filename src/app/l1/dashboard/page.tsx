@@ -30,12 +30,10 @@ export default function Dashboard() {
   const [memberData, setMemberData] = useState<MemberData[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [refresh, setRefresh] = useState(false); // Added refresh state
   const router = useRouter();
 
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
-
     if (!userId) {
       router.push("/l1/login");
       return;
@@ -44,14 +42,13 @@ export default function Dashboard() {
     async function fetchData() {
       try {
         const storedUserId = sessionStorage.getItem("userId");
-
         if (!storedUserId) {
           router.push("/l1/login");
-        } else {
-          setUserId(storedUserId);
+          return;
         }
+        setUserId(storedUserId);
 
-        // Fetch member data with no caching
+        // Fetch member data
         const memberResponse = await fetch(`/api/l1/dashboard?timestamp=${Date.now()}`, {
           method: "GET",
           cache: "no-store",
@@ -66,7 +63,7 @@ export default function Dashboard() {
         const memberData: MemberData[] = await memberResponse.json();
         setMemberData(memberData);
 
-        // Fetch user data with no caching
+        // Fetch user data
         const userResponse = await fetch(`/api/l1/userdata/${storedUserId}?timestamp=${Date.now()}`, {
           method: "GET",
           cache: "no-store",
@@ -89,13 +86,15 @@ export default function Dashboard() {
       }
     }
 
+    // Initial fetch
     fetchData();
-  }, [router, refresh]); // Refresh dependency added
-  console.log(userId)
-  // Function to trigger refresh
-  const handleRefresh = () => {
-    setRefresh((prev) => !prev);
-  };
+
+    // Fetch data every 10 seconds
+    const intervalId = setInterval(fetchData, 10000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, [router]);
 
   if (!userData) return <p>Loading...</p>;
 
@@ -104,74 +103,30 @@ export default function Dashboard() {
       <Navbar />
       <div className="bg-slate-100 py-6">
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
-          Dashboard
+          Dashboard (Auto Refresh Every 10s)
         </h1>
 
-        {/* Refresh Button */}
-        <div className="flex justify-center mb-4">
-          <button
-            onClick={handleRefresh}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Refresh Data
-          </button>
+        {/* User Info Section */}
+        <div className="items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[500px] bg-orange-600 rounded-xl overflow-hidden mt-6">
+          <h1 className="text-lg sm:text-2xl font-bold text-white float-right">
+            &nbsp; Sanathanaveershivadharma
+          </h1>
+          <div className="flex-shrink-0 float-left">
+            <img src="/logomain1.png" alt="Logo" className="w-[80px] sm:w-[110px]" />
+          </div>
         </div>
 
-        <div>
-          {/* User Info Section */}
-          <div
-            className="items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[500px] bg-orange-600 rounded-xl overflow-hidden mt-6"
-            style={{ height: "100px" }}
-          >
-            <h1 className="text-lg sm:text-2xl font-bold text-white float-right">
-              &nbsp; Sanathanaveershivadharma
-            </h1>
-            <div className="flex-shrink-0 float-left">
-              <img
-                src="/logomain1.png"
-                alt="Logo"
-                className="w-[80px] sm:w-[110px]"
-                style={{ marginTop: "-35px" }}
-              />
-            </div>
+        {/* User Personal Details */}
+        <div className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[500px] rounded-xl bg-yellow-100">
+          <div className="flex-shrink-0 float-right">
+            <img src={userData.imageUrl} alt="User" className="w-[80px] sm:w-[110px] h-[80px] sm:h-[110px] rounded-full object-cover mb-16 float-right" />
           </div>
-
-          {/* User Personal Details */}
-          <div
-            className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[500px] rounded-xl bg-yellow-100"
-            style={{ marginTop: "-30px", fontSize: "5px" }}
-          >
-            <div
-              className="flex-shrink-0 float-right"
-              style={{ marginTop: "10px" }}
-            >
-              <img
-                src={userData.imageUrl}
-                alt="User"
-                className="w-[80px] sm:w-[110px] h-[80px] sm:h-[110px] rounded-full object-cover mb-16 float-right"
-              />
-            </div>
-            <p className="text-black text-base font-semibold mt-4" style={{ fontSize: "15px" }}>
-              Name: {userData.name}
-            </p>
-            <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-              Membership No: {userData.userId}
-            </p>
-            <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-              Date: {userData.dob && !isNaN(Date.parse(userData.dob)) 
-                ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) 
-                : "N/A"}
-            </p>
-            <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-              Phone: {userData.contactNo}
-            </p>
-            <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-              Peeta: {userData.peeta || "N/A"}
-            </p>
-            <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-              Guru: {userData.dhekshaGuru || "N/A"}
-            </p>
-          </div>
+          <p className="text-black text-base font-semibold mt-4">Name: {userData.name}</p>
+          <p className="text-black text-base font-semibold mt-1">Membership No: {userData.userId}</p>
+          <p className="text-black text-base font-semibold mt-1">Date: {userData.dob ? new Date(userData.dob).toLocaleDateString("en-GB") : "N/A"}</p>
+          <p className="text-black text-base font-semibold mt-1">Phone: {userData.contactNo}</p>
+          <p className="text-black text-base font-semibold mt-1">Peeta: {userData.peeta || "N/A"}</p>
+          <p className="text-black text-base font-semibold mt-1">Guru: {userData.dhekshaGuru || "N/A"}</p>
         </div>
 
         {/* Responsive Table */}
@@ -195,7 +150,7 @@ export default function Dashboard() {
                   <td className="border p-1 sm:p-2 text-center">{l2UserCount}</td>
                   <td className="border p-1 sm:p-2 text-center">{l3UserCount}</td>
                   <td className="border p-1 sm:p-2 text-center">{l4UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l2UserCount + l3UserCount}</td>
+                  <td className="border p-1 sm:p-2 text-center">{l2UserCount + l3UserCount + l4UserCount}</td>
                 </tr>
               ))}
             </tbody>
