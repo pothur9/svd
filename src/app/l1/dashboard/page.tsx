@@ -16,9 +16,9 @@ interface MemberData {
   l3UserCount: number;
   l4UserCount: number;
   totalUserCount: number;
-  l2Users: any[];
-  l3Users: any[];
-  l4Users: any[];
+  l2Users: number;
+  l3Users: number;
+  l4Users: number;
 }
 
 interface UserData {
