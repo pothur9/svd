@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { username, history, gurusTimeline, specialDevelopments, institutes } = body;
+    const { username, history, gurusTimeline, specialDevelopments, institutes,contactDetails } = body;
 
     // Validate input
     if (!username) {
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       gurusTimeline,
       specialDevelopments,
       institutes,
+      contactDetails,
     });
 
     await newUserData.save();

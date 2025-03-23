@@ -212,6 +212,27 @@ export default function SignupForm() {
           <h2 className="text-2xl font-bold text-black text-center mb-6">
             {t("signupl2.title")}
           </h2>
+           {/* Dropdown for Peeta (l2 users) */}
+           <div className="mb-4">
+              <label className="block mb-1 font-semibold text-black">
+                {t("signupl1.peeta")}
+                <select
+                  name="peeta"
+                  value={formData.peeta}
+                  onChange={handleChange}
+                  required
+                  className="border rounded-md p-2 w-full bg-white text-black"
+                >
+                  {" "}
+                  <option value="">Select L2 User</option>
+                  {l1Users.map((user) => (
+                    <option key={user} value={user}>
+                      {user}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           <form onSubmit={handleSubmit}>
             {/* Form Fields */}
             {[
@@ -328,27 +349,7 @@ export default function SignupForm() {
               </div>
             ))}
 
-            {/* Dropdown for Peeta (l2 users) */}
-            <div className="mb-4">
-              <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.peeta")}
-                <select
-                  name="peeta"
-                  value={formData.peeta}
-                  onChange={handleChange}
-                  required
-                  className="border rounded-md p-2 w-full bg-white text-black"
-                >
-                  {" "}
-                  <option value="">Select L2 User</option>
-                  {l1Users.map((user) => (
-                    <option key={user} value={user}>
-                      {user}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+           
 
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">

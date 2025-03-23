@@ -8,6 +8,7 @@ const l1HistorySchema = new mongoose.Schema({
   gurusTimeline: { type: String, required: true },
   specialDevelopments: { type: String, required: true },
   institutes: { type: String, required: true },
+  contactDetails: { type: String, required: true },
 });
 
 // Ensure the model is exported correctly, and check for existing models with the same name

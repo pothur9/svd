@@ -10,10 +10,15 @@ interface MemberData {
     _id: string;
     name: string;
     peeta: string;
+    userId?: string;
   };
   l2UserCount: number;
   l3UserCount: number;
   l4UserCount: number;
+  totalUserCount: number;
+  l2Users: any[];
+  l3Users: any[];
+  l4Users: any[];
 }
 
 interface UserData {
@@ -30,6 +35,8 @@ export default function Dashboard() {
   const [memberData, setMemberData] = useState<MemberData[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [total, setTotal] = useState<number>(0);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +70,12 @@ export default function Dashboard() {
         if (!memberResponse.ok) throw new Error("Failed to fetch member data");
         const memberData: MemberData[] = await memberResponse.json();
         setMemberData(memberData);
+        console.log(memberData);
+         // Calculate total user count
+         const totalUsers = memberData.reduce((acc, member) => {
+          return acc + member.l2UserCount + member.l3UserCount + member.l4UserCount;
+        }, 0);
+        setTotal(totalUsers);
 
         // Fetch user data with no caching
         const userResponse = await fetch(`/api/l1/userdata/${storedUserId}?timestamp=${Date.now()}`, {
@@ -90,6 +103,17 @@ export default function Dashboard() {
   }, [router]);
 
   if (!userData) return <p>Loading...</p>;
+
+  // Define background colors for peetas in a repeating pattern
+  const bgColors = [
+    "bg-yellow-300",
+    "bg-green-400",
+    "bg-red-400",
+    "bg-blue-400",
+    "bg-gray-300",
+    "bg-yellow-200",
+    "bg-orange-300"
+  ];
 console.log(userId)
   return (
     <>
@@ -155,34 +179,81 @@ console.log(userId)
           </div>
         </div>
 
-        {/* Responsive Table */}
-        <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[800px] mt-10">
-          <table className="w-full border-collapse border border-gray-300 bg-white shadow-lg text-xs sm:text-sm">
+        {/* Table Structure with API Data */}
+        <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
+          <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
             <thead>
-              <tr className="bg-orange-600 text-white">
-                <th className="border p-1 sm:p-2 text-left">Peeta</th>
-                <th className="border p-1 sm:p-2 text-center">L1</th>
-                <th className="border p-1 sm:p-2 text-center">L2</th>
-                <th className="border p-1 sm:p-2 text-center">L3</th>
-                <th className="border p-1 sm:p-2 text-center">L4</th>
-                <th className="border p-1 sm:p-2 text-center">Total</th>
+              <tr>
+                <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center">Level / Peeta</th>
+                {memberData.map((member, index) => (
+                  <th 
+                    key={index} 
+                    className={`border border-gray-800 p-1 sm:p-2 text-center ${bgColors[index % bgColors.length]}`}
+                  >
+                    {member.l1User.peeta}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {memberData.map(({ l1User, l2UserCount, l3UserCount, l4UserCount }) => (
-                <tr key={l1User._id} className="hover:bg-gray-100 text-black">
-                  <td className="border p-1 sm:p-2">{l1User.peeta}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l1User.name}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l2UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l3UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l4UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l2UserCount + l3UserCount}</td>
-                </tr>
-              ))}
+              {/* L1 Row - Names */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L1 (Name)</td>
+                {memberData.map((member, index) => (
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
+                    {member.l1User.name || "N/A"}
+                  </td>
+                ))}
+              </tr>
+              
+              {/* L2 Row - User Counts */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L2 Count</td>
+                {memberData.map((member, index) => (
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
+                    {member.l2UserCount}
+                  </td>
+                ))}
+              </tr>
+              
+              {/* L3 Row - User Counts */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L3 Count</td>
+                {memberData.map((member, index) => (
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
+                    {member.l3UserCount}
+                  </td>
+                ))}
+              </tr>
+              
+              {/* L4 Row - User Counts */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L4 Count</td>
+                {memberData.map((member, index) => (
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
+                    {member.l4UserCount}
+                  </td>
+                ))}
+              </tr>
+              
+              {/* Total Row */}
+              <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
+                {memberData.map((member, index) => (
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
+                    {member.l2UserCount + member.l3UserCount + member.l4UserCount}
+                  </td>
+                ))}
+              </tr>
             </tbody>
           </table>
         </div>
+       {/* Display Overall Total */}
+       <h1 className="text-center font-bold text-black mt-6 text-lg sm:text-2xl">
+          Grand Total: {total}
+        </h1>
       </div>
+     
       <Footer />
     </>
   );
