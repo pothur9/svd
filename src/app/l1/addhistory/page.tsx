@@ -59,6 +59,7 @@ export default function UserDataForm() {
           gurusTimeline: "",
           specialDevelopments: "",
           institutes: "",
+          contactDetails:""
         });
       } else {
         alert("Error saving data");
