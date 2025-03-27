@@ -73,6 +73,14 @@ export default function Dashboard(): JSX.Element {
 
         const userData: UserData = await userResponse.json();
         setUserData(userData);
+          // Calculate total user count
+          const totalUsers = memberData.reduce((acc, member) => {
+            return (
+              acc + member.l2UserCount + member.l3UserCount + member.l4UserCount
+            );
+          }, 0);
+          setTotal(totalUsers);
+  
 
         // Store peeta name and username in session storage
         sessionStorage.setItem("peeta", userData.peeta || "");
@@ -104,6 +112,7 @@ export default function Dashboard(): JSX.Element {
     "Sri Kashi Peeta श्री काशी पीठ ಶ್ರೀ ಕಾಶಿ ಪೀಠ": "/img5.jpg",
     "Sri viraktha parmpare श्री विरक्त  परंपरा ಶ್ರೀ ವಿರಕ್ತ  ಪರಂಪರೆ": "/img6.jpg",
   };
+  console.log(total)
   return (
     <>
       <Navbar />
