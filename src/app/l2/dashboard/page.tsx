@@ -32,7 +32,7 @@ interface UserData {
 export default function Dashboard(): JSX.Element {
   const [memberData, setMemberData] = useState<MemberData[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
-
+  const [total, setTotal] = useState<number>(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -86,7 +86,24 @@ export default function Dashboard(): JSX.Element {
   }, [router]);
 
   if (memberData.length === 0 || !userData) return <p>Loading...</p>;
+  // Define background colors for peetas in a repeating pattern
+  const bgColors = [
+    "bg-green-400",
+    "bg-red-400",
+    "bg-blue-400",
+    "bg-gray-300",
+    "bg-yellow-300",
 
+    "bg-orange-400",
+  ];
+  const peetaImages: { [key: string]: string } = {
+    "Sri Rambhpuri Peeta श्री रम्भापुरी पीठ ಶ್ರೀ ರಂಭಾಪುರಿ ಪೀಠ": "/img1.jpg",
+    "Sri Ujjayani Peeta श्री उज्जयनी पीठ ಶ್ರೀ ಉಜ್ಜಯನಿ ಪೀಠ": "/img2.jpg",
+    "Sri Kedhara peeta श्री केदारा पीठ ಶ್ರೀ ಕೇದಾರ ಪೀಠ": "/img3.jpg",
+    "Sri SriShaila Peeta श्री श्रीशैल पीठ ಶ್ರೀ ಶ್ರೀಶೈಲ ಪೀಠ": "/img4.jpg",
+    "Sri Kashi Peeta श्री काशी पीठ ಶ್ರೀ ಕಾಶಿ ಪೀಠ": "/img5.jpg",
+    "Sri viraktha parmpare श्री विरक्त  परंपरा ಶ್ರೀ ವಿರಕ್ತ  ಪರಂಪರೆ": "/img6.jpg",
+  };
   return (
     <>
       <Navbar />
@@ -98,7 +115,144 @@ export default function Dashboard(): JSX.Element {
         </h1>
   
           
-     {/* User Info Section */}
+
+         {/* Responsive Table */}
+               {/* Table Structure with API Data */}
+               <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
+          <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
+          <thead>
+  <tr>
+    <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
+      Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
+    </th>
+
+    {memberData.map((member, index) => {
+      // Modify the image matching logic
+      const peetaKey = member.l1User.peeta.trim().toLowerCase();
+      console.log('Original Peeta:', member.l1User.peeta);
+      console.log('Processed Peeta Key:', peetaKey);
+      console.log('Available Peeta Image Keys:', Object.keys(peetaImages));
+      
+      const matchedPeetaKey = Object.keys(peetaImages).find(
+        key => key.trim().toLowerCase() === peetaKey
+      );
+      
+      console.log('Matched Peeta Key:', matchedPeetaKey);
+      const imageUrl = matchedPeetaKey ? peetaImages[matchedPeetaKey] : "/img2.jpg";
+      console.log('Image URL:', imageUrl);
+
+      return (
+        <th
+          key={index}
+          className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${
+            bgColors[index % bgColors.length]
+          }`}
+        >
+          <div className="flex flex-col items-center">
+            <img
+              src={imageUrl}
+              alt={member.l1User.peeta}
+              className="rounded-full mb-1 object-cover"
+              style={{ width: "65px", height: "100px" }}
+              onError={(e) => {
+                console.error('Image load error for:', member.l1User.peeta);
+                e.currentTarget.src = "/img2.jpg"; // Fallback image
+              }}
+            />
+          </div>
+          <span className="block mt-1 text-sm font-semibold">{member.l1User.peeta}</span>
+        </th>
+      );
+    })}
+  </tr>
+</thead>
+
+            <tbody>
+              {/* L1 Row - Names */}
+              {/* <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L1 (Name)</td>
+                {memberData.map((member, index) => (
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
+                    {member.l1User.name || "N/A"}
+                  </td>
+                ))}
+              </tr> */}
+
+              {/* L2 Row - User Counts */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
+                Sri 108 Pattacharyaru श्री 108 पट्टाचार्यरु ಶ್ರೀ ೧೦೮ ಪಟ್ಟಾಚಾರ್ಯರುa
+                </td>
+                {memberData.map((member, index) => (
+                  <td
+                    key={index}
+                    className="border border-gray-800 p-1 sm:p-2 text-center"
+                  >
+                    {member.l2UserCount}
+                  </td>
+                ))}
+              </tr>
+
+              {/* L3 Row - User Counts */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
+                Sri guru Jangam श्री गुरु जंगम ಶ್ರೀ ಗುರು ಜಂಗಮ
+                </td>
+                {memberData.map((member, index) => (
+                  <td
+                    key={index}
+                    className="border border-gray-800 p-1 sm:p-2 text-center"
+                  >
+                    {member.l3UserCount}
+                  </td>
+                ))}
+              </tr>
+
+              {/* L4 Row - User Counts */}
+              <tr className="border border-gray-800 hover:bg-yellow-100">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
+                Sri Veerashiva श्री वीरशिव ಶ್ರೀ ವೀರಶೈವ
+                </td>
+                {memberData.map((member, index) => (
+                  <td
+                    key={index}
+                    className="border border-gray-800 p-1 sm:p-2 text-center"
+                  >
+                    {member.l4UserCount}
+                  </td>
+                ))}
+              </tr>
+
+              {/* Total Row */}
+              <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
+                <td className="border border-gray-800 p-1 sm:p-2 text-center">
+                  Total
+                </td>
+                {memberData.map((member, index) => (
+                  <td
+                    key={index}
+                    className="border border-gray-800 p-1 sm:p-2 text-center"
+                  >
+                    {member.l2UserCount +
+                      member.l3UserCount +
+                      member.l4UserCount}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="flex items-center justify-center gap-4 mt-6">
+  <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
+  <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
+  <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>  
+  <span className="ml-4 text-3xl mt-3">Total: {total}</span>
+</h1>
+
+
+</div>
+        <br/>
+             {/* User Info Section */}
      <div
             className="items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[500px] bg-orange-600 rounded-xl overflow-hidden mt-6"
             style={{ height: "100px" }}
@@ -160,34 +314,6 @@ export default function Dashboard(): JSX.Element {
           </div>
         <br />
         <br />
-         {/* Responsive Table */}
-         <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[800px] mt-10">
-          <table className="w-full border-collapse border border-gray-300 bg-white shadow-lg text-xs sm:text-sm">
-            <thead>
-              <tr className="bg-orange-600 text-white">
-                <th className="border p-1 sm:p-2 text-left">Peeta</th>
-                <th className="border p-1 sm:p-2 text-center">L1</th>
-                <th className="border p-1 sm:p-2 text-center">L2</th>
-                <th className="border p-1 sm:p-2 text-center">L3</th>
-                <th className="border p-1 sm:p-2 text-center">L4</th>
-                <th className="border p-1 sm:p-2 text-center">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {memberData.map(({ l1User, l2UserCount, l3UserCount, l4UserCount }) => (
-                <tr key={l1User._id} className="hover:bg-gray-100 text-black">
-                  <td className="border p-1 sm:p-2">{l1User.peeta}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l1User.name}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l2UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l3UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l4UserCount}</td>
-                  <td className="border p-1 sm:p-2 text-center">{l2UserCount + l3UserCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <br/>
       </div>
       <Footer/>
     </>
