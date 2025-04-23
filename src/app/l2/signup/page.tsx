@@ -207,7 +207,7 @@ export default function SignupForm() {
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
           <div className="flex justify-center">
-            <Image src="/logo.png" alt="Logo" width={100} height={100} />
+            <Image src="/logomain1.png" alt="Logo" width={100} height={100} />
           </div>
           <h2 className="text-2xl font-bold text-black text-center mb-6">
             {t("signupl2.title")}

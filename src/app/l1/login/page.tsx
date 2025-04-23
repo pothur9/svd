@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
             }}
           >
             <img
-              src="/logo.png"
+              src="/logomain1.png"
               alt="Logo"
               style={{ width: "80px", height: "auto" }}
             />

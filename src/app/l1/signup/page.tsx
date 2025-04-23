@@ -248,7 +248,7 @@ export default function SignupForm() {
             }}
           >
             <img
-              src="/logo.png"
+              src="/logomain1.png"
               alt="Logo"
               style={{ width: "110px", height: "auto" }}
             />

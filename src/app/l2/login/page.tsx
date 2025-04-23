@@ -46,7 +46,7 @@ const LoginPage: React.FC = () => {
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm " style={{marginTop:"-80px"}}
       >
         <div className="flex justify-center">
-          <Image src="/logo.png" alt="Logo" width={100} height={100} />
+          <Image src="/logomain1.png" alt="Logo" width={100} height={100} />
         </div>
         <h2 className="text-2xl font-bold mb-6 text-center text-black mt-4">
           Login
