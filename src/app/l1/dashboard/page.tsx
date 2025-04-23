@@ -208,7 +208,9 @@ console.log("peeta images log:", peetaImages);
               {/* L2 Row - User Counts */}
               <tr className="border border-gray-800 hover:bg-yellow-100">
                 <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
-                Sri 108 Pattacharyaru श्री 108 पट्टाचार्यरु ಶ್ರೀ ೧೦೮ ಪಟ್ಟಾಚಾರ್ಯರುa
+                Sri 108 Prabhu shivachrya
+श्री 108 प्रभु शिवाचार्य ಶ್ರೀ 108 ಪ್ರಭು ಶಿವಾಚಾರ್ಯರು
+
                 </td>
                 {memberData.map((member, index) => (
                   <td
