@@ -92,6 +92,13 @@ const LoginPage = () => {
         >
           {isLoading ? "Logging in..." : "Login"}
         </button>
+        {/* Signup Link */}
+        <p className="text-center mt-4 text-gray-700">
+          Don&apos;t have an account?{' '}
+          <a href="/l3/signup" className="text-blue-500 hover:text-blue-700 font-medium">
+            Move to Signup
+          </a>
+        </p>
       </form>
       {/* Loading Spinner */}
       {isLoading && (
