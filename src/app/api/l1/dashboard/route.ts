@@ -37,12 +37,12 @@ export async function GET() {
 
       
 
-        // Group L2 users by their peeta (L1 user name)
+        // Group L2 users by their peeta (L1 user peeta, case-insensitive, trimmed)
         const groupedL2Users = l2Users.reduce((acc, user: L2User) => {
-            const { peeta } = user;
-            if (peeta) {
-                if (!acc[peeta]) acc[peeta] = [];
-                acc[peeta].push(user);
+            const peetaKey = user.peeta?.trim().toLowerCase();
+            if (peetaKey) {
+                if (!acc[peetaKey]) acc[peetaKey] = [];
+                acc[peetaKey].push(user);
             }
             return acc;
         }, {} as Record<string, L2User[]>);
@@ -69,7 +69,8 @@ export async function GET() {
 
         // Combine L1, L2, L3, and L4 data
         const response = l1Users.map((l1) => {
-            const l2UsersForL1 = groupedL2Users[l1.name] || [];
+            const l1PeetaKey = l1.peeta?.trim().toLowerCase();
+            const l2UsersForL1 = groupedL2Users[l1PeetaKey] || [];
             const l2UserCount = l2UsersForL1.length;
 
             const l3UsersForL1 = l2UsersForL1.reduce((acc, l2) => {

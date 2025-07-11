@@ -68,6 +68,13 @@ export default function PersonalDetailsForm() {
   const [language, setLanguage] = useState<string>("en");
   const { t } = useTranslation();
   const router = useRouter();
+  const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
+  const [selectedPresentState, setSelectedPresentState] = useState<string>("");
+  const [selectedPresentDistrict, setSelectedPresentDistrict] = useState<string>("");
+  const [presentCity, setPresentCity] = useState<string>("");
+  const [selectedPermanentState, setSelectedPermanentState] = useState<string>("");
+  const [selectedPermanentDistrict, setSelectedPermanentDistrict] = useState<string>("");
+  const [permanentCity, setPermanentCity] = useState<string>("");
 
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`); // Debugging log
@@ -94,6 +101,13 @@ export default function PersonalDetailsForm() {
     console.log("Updated L2 Users:", l2Users);
   }, [l2Users]);
 
+  useEffect(() => {
+    fetch("/districts.json")
+      .then((res) => res.json())
+      .then((data) => setStatesData(data))
+      .catch((err) => console.error("Failed to load districts.json", err));
+  }, []);
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -110,6 +124,37 @@ export default function PersonalDetailsForm() {
 
   const handleOtpChange = (e: ChangeEvent<HTMLInputElement>) => {
     setOtp(e.target.value);
+  };
+
+  const handlePresentStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPresentState(e.target.value);
+    setSelectedPresentDistrict("");
+    setPresentCity("");
+    setFormData((prev) => ({ ...prev, presentAddress: "" }));
+  };
+  const handlePresentDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPresentDistrict(e.target.value);
+    setPresentCity("");
+    setFormData((prev) => ({ ...prev, presentAddress: "" }));
+  };
+  const handlePresentCityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPresentCity(e.target.value);
+    setFormData((prev) => ({ ...prev, presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${e.target.value}` }));
+  };
+  const handlePermanentStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPermanentState(e.target.value);
+    setSelectedPermanentDistrict("");
+    setPermanentCity("");
+    setFormData((prev) => ({ ...prev, permanentAddress: "" }));
+  };
+  const handlePermanentDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPermanentDistrict(e.target.value);
+    setPermanentCity("");
+    setFormData((prev) => ({ ...prev, permanentAddress: "" }));
+  };
+  const handlePermanentCityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPermanentCity(e.target.value);
+    setFormData((prev) => ({ ...prev, permanentAddress: `${selectedPermanentState}, ${selectedPermanentDistrict}, ${e.target.value}` }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -205,7 +250,7 @@ export default function PersonalDetailsForm() {
     } finally {
       setIsVerifyingOtp(false);
     }
-  };console.log(language)
+  };
 
   return (
     <>
@@ -406,38 +451,89 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
+            {/* Present Address Stepper */}
             <div>
-              <label
-                htmlFor="presentAddress"
-                className="block text-sm font-semibold"
-              >
-                {t("signupl3.presentAddress")}
-              </label>
-              <input
-                type="text"
-                name="presentAddress"
-                id="presentAddress"
-                value={formData.presentAddress}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              />
+              <label className="block text-sm font-semibold">Present Address</label>
+              <div className="flex flex-col gap-2">
+                <select
+                  name="presentState"
+                  value={selectedPresentState}
+                  onChange={handlePresentStateChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(statesData).map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+                <select
+                  name="presentDistrict"
+                  value={selectedPresentDistrict}
+                  onChange={handlePresentDistrictChange}
+                  required={!!selectedPresentState}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  disabled={!selectedPresentState}
+                >
+                  <option value="">{selectedPresentState ? "Select District" : "Select State First"}</option>
+                  {selectedPresentState && statesData[selectedPresentState] &&
+                    statesData[selectedPresentState].map((district) => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                </select>
+                <input
+                  type="text"
+                  name="presentCity"
+                  value={presentCity}
+                  onChange={handlePresentCityChange}
+                  required={!!selectedPresentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter City Name"
+                  disabled={!selectedPresentDistrict}
+                />
+              </div>
             </div>
-
+            {/* Permanent Address Stepper */}
             <div>
-              <label
-                htmlFor="permanentAddress"
-                className="block text-sm font-semibold"
-              >
-                {t("signupl3.permanentAddress")}
-              </label>
-              <input
-                type="text"
-                name="permanentAddress"
-                id="permanentAddress"
-                value={formData.permanentAddress}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              />
+              <label className="block text-sm font-semibold">Permanent Address</label>
+              <div className="flex flex-col gap-2">
+                <select
+                  name="permanentState"
+                  value={selectedPermanentState}
+                  onChange={handlePermanentStateChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(statesData).map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+                <select
+                  name="permanentDistrict"
+                  value={selectedPermanentDistrict}
+                  onChange={handlePermanentDistrictChange}
+                  required={!!selectedPermanentState}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  disabled={!selectedPermanentState}
+                >
+                  <option value="">{selectedPermanentState ? "Select District" : "Select State First"}</option>
+                  {selectedPermanentState && statesData[selectedPermanentState] &&
+                    statesData[selectedPermanentState].map((district) => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                </select>
+                <input
+                  type="text"
+                  name="permanentCity"
+                  value={permanentCity}
+                  onChange={handlePermanentCityChange}
+                  required={!!selectedPermanentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter City Name"
+                  disabled={!selectedPermanentDistrict}
+                />
+              </div>
             </div>
 
             <div>

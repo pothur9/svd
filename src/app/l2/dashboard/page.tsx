@@ -58,6 +58,7 @@ export default function Dashboard(): JSX.Element {
         if (!memberResponse.ok) throw new Error("Failed to fetch member data");
 
         const memberData: MemberData[] = await memberResponse.json();
+        console.log('Fetched memberData:', memberData); // Debug log
         setMemberData(memberData);
 
         const userResponse = await fetch(`/api/l2/dashboard/${userId}?timestamp=${Date.now()}`, {
@@ -93,7 +94,12 @@ export default function Dashboard(): JSX.Element {
     fetchMemberData();
   }, [router]);
 
-  if (memberData.length === 0 || !userData) return <p>Loading...</p>;
+  if (memberData.length === 0 || !userData) {
+    if (memberData.length === 0) {
+      console.warn('memberData is empty after fetch!');
+    }
+    return <p>Loading...</p>;
+  }
   // Define background colors for peetas in a repeating pattern
   const bgColors = [
     "bg-green-400",
@@ -198,7 +204,7 @@ export default function Dashboard(): JSX.Element {
                     key={index}
                     className="border border-gray-800 p-1 sm:p-2 text-center"
                   >
-                    {member.l2UserCount}
+                    {member.l2UserCount ?? 0}
                   </td>
                 ))}
               </tr>
@@ -213,7 +219,7 @@ export default function Dashboard(): JSX.Element {
                     key={index}
                     className="border border-gray-800 p-1 sm:p-2 text-center"
                   >
-                    {member.l3UserCount}
+                    {member.l3UserCount ?? 0}
                   </td>
                 ))}
               </tr>
@@ -228,7 +234,7 @@ export default function Dashboard(): JSX.Element {
                     key={index}
                     className="border border-gray-800 p-1 sm:p-2 text-center"
                   >
-                    {member.l4UserCount}
+                    {member.l4UserCount ?? 0}
                   </td>
                 ))}
               </tr>
@@ -243,9 +249,9 @@ export default function Dashboard(): JSX.Element {
                     key={index}
                     className="border border-gray-800 p-1 sm:p-2 text-center"
                   >
-                    {member.l2UserCount +
-                      member.l3UserCount +
-                      member.l4UserCount}
+                    {(member.l2UserCount ?? 0) +
+                      (member.l3UserCount ?? 0) +
+                      (member.l4UserCount ?? 0)}
                   </td>
                 ))}
               </tr>

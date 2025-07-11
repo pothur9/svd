@@ -58,6 +58,11 @@ export default function SignupForm() {
   const { t } = useTranslation();
   const router = useRouter();
 
+  const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`); // Debugging log
     i18n.changeLanguage(lang);
@@ -207,6 +212,31 @@ export default function SignupForm() {
       }
     };
   }, [isResendOtpDisabled, resendTimer]);
+
+  useEffect(() => {
+    fetch("/districts.json")
+      .then((res) => res.json())
+      .then((data) => setStatesData(data))
+      .catch((err) => console.error("Failed to load districts.json", err));
+  }, []);
+
+  const handleStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedState(e.target.value);
+    setSelectedDistrict("");
+    setCity("");
+    setFormData((prev) => ({ ...prev, address: "" }));
+  };
+
+  const handleDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDistrict(e.target.value);
+    setCity("");
+    setFormData((prev) => ({ ...prev, address: "" }));
+  };
+
+  const handleCityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCity(e.target.value);
+    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${e.target.value}` }));
+  };
 
   console.log(language);
   console.log(isOtpVerified);
@@ -414,17 +444,51 @@ export default function SignupForm() {
                 />
               </label>
             </div>
+            {/* Address Stepper */}
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.address")}:
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  required
-                  className="border rounded-md p-2 w-full bg-white text-black"
-                />
+                Address:
+                <div className="flex flex-col gap-2">
+                  {/* Step 1: State */}
+                  <select
+                    name="state"
+                    value={selectedState}
+                    onChange={handleStateChange}
+                    required
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                  >
+                    <option value="">Select State</option>
+                    {Object.keys(statesData).map((state) => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                  {/* Step 2: District */}
+                  <select
+                    name="district"
+                    value={selectedDistrict}
+                    onChange={handleDistrictChange}
+                    required={!!selectedState}
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                    disabled={!selectedState}
+                  >
+                    <option value="">{selectedState ? "Select District" : "Select State First"}</option>
+                    {selectedState && statesData[selectedState] &&
+                      statesData[selectedState].map((district) => (
+                        <option key={district} value={district}>{district}</option>
+                      ))}
+                  </select>
+                  {/* Step 3: City */}
+                  <input
+                    type="text"
+                    name="city"
+                    value={city}
+                    onChange={handleCityChange}
+                    required={!!selectedDistrict}
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                    placeholder="Enter City Name"
+                    disabled={!selectedDistrict}
+                  />
+                </div>
               </label>
             </div>
             <div className="mb-4">

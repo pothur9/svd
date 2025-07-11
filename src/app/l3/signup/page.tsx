@@ -68,6 +68,15 @@ export default function PersonalDetailsForm() {
   const [language, setLanguage] = useState<string>("en");
   const { t } = useTranslation();
   const router = useRouter();
+  const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
+  const [selectedPresentState, setSelectedPresentState] = useState<string>("");
+  const [selectedPresentDistrict, setSelectedPresentDistrict] = useState<string>("");
+  const [presentCity, setPresentCity] = useState<string>("");
+  // Add state for permanent address fields
+  const [permanentState, setPermanentState] = useState<string>("");
+  const [permanentDistrict, setPermanentDistrict] = useState<string>("");
+  const [permanentCity, setPermanentCity] = useState<string>("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`); // Debugging log
@@ -94,6 +103,13 @@ export default function PersonalDetailsForm() {
     console.log("Updated L2 Users:", l2Users);
   }, [l2Users]);
 
+  useEffect(() => {
+    fetch("/districts.json")
+      .then((res) => res.json())
+      .then((data) => setStatesData(data))
+      .catch((err) => console.error("Failed to load districts.json", err));
+  }, []);
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -112,13 +128,56 @@ export default function PersonalDetailsForm() {
     setOtp(e.target.value);
   };
 
+  const handlePresentStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPresentState(e.target.value);
+    setSelectedPresentDistrict("");
+    setPresentCity("");
+    setFormData((prev) => ({ ...prev, presentAddress: "" }));
+  };
+  const handlePresentDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPresentDistrict(e.target.value);
+    setPresentCity("");
+    setFormData((prev) => ({ ...prev, presentAddress: "" }));
+  };
+  const handlePresentCityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPresentCity(e.target.value);
+    setFormData((prev) => ({ ...prev, presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${e.target.value}` }));
+  };
+
+  // Phone number input: allow only numbers and max 10 digits
+  const handlePhoneInput = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+    setFormData((prevData) => ({ ...prevData, contactNo: value }));
+  };
+
+  const validateFields = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!formData.selectedL2User) newErrors.selectedL2User = "Please select a peeta.";
+    if (!formData.name.trim()) newErrors.name = "Please enter your name.";
+    if (!formData.dob) newErrors.dob = "Please enter your date of birth.";
+    if (!formData.gender) newErrors.gender = "Please select your gender.";
+    if (!formData.contactNo) newErrors.contactNo = "Please enter your phone number.";
+    else if (!/^\d{10}$/.test(formData.contactNo)) newErrors.contactNo = "Phone number must be exactly 10 digits.";
+    if (formData.mailId && !/^\S+@\S+\.\S+$/.test(formData.mailId)) newErrors.mailId = "Please enter a valid email address.";
+    if (!formData.karthruGuru.trim()) newErrors.karthruGuru = "Please enter Karthru Guru.";
+    if (!formData.peeta.trim()) newErrors.peeta = "Please enter Peeta.";
+    if (!selectedPresentState) newErrors.presentState = "Please select your present state.";
+    if (!selectedPresentDistrict) newErrors.presentDistrict = "Please select your present district.";
+    if (!presentCity.trim()) newErrors.presentCity = "Please enter your present city.";
+    if (!formData.qualification) newErrors.qualification = "Please select your qualification.";
+    if (!formData.occupation.trim()) newErrors.occupation = "Please enter your occupation.";
+    if (!formData.languageKnown.trim()) newErrors.languageKnown = "Please enter languages known.";
+    if (!formData.password) newErrors.password = "Please enter a password.";
+    else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters long.";
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match.";
+    if (!formData.photoUrl || !(formData.photoUrl instanceof File)) newErrors.photoUrl = "Please upload a valid photo.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.contactNo) {
-      alert("Please enter a valid contact number.");
-      return;
-    }
-
+    if (!validateFields()) return;
     setIsLoading(true);
     try {
       const otpResponse = await fetch(
@@ -180,11 +239,16 @@ export default function PersonalDetailsForm() {
         if (!photoResponse.ok) throw new Error("Failed to upload photo.");
         const photoData = await photoResponse.json();
 
+        // Use updatedFormData with correct presentAddress
+        const presentAddress = `${selectedPresentState}, ${selectedPresentDistrict}, ${presentCity}`;
+        const permanentAddress = `${permanentState}, ${permanentDistrict}, ${permanentCity}`;
         const response = await fetch("/api/l3/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
+            presentAddress,
+            permanentAddress,
             photoUrl: photoData.secure_url,
           }),
         });
@@ -243,6 +307,32 @@ export default function PersonalDetailsForm() {
             {t("signupl1.title")}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Move Select L2 User to the top */}
+            <div>
+              <label
+                htmlFor="selectedL2User"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl3.selectedL2User")}
+              </label>
+              <select
+                name="selectedL2User"
+                id="selectedL2User"
+                value={formData.selectedL2User}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select peeta</option>
+                {l2Users.map((user: { name: string }, index: number) => (
+                  <option key={index} value={user.name}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+              {errors.selectedL2User && <p className="text-red-500 text-xs mt-1">{errors.selectedL2User}</p>}
+            </div>
+            {/* Name field follows L2 User */}
             <div>
               <label htmlFor="name" className="block text-sm font-semibold">
                 {t("signupl1.name")}
@@ -256,6 +346,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -299,19 +390,18 @@ export default function PersonalDetailsForm() {
                 {t("signupl1.contactNo")}
               </label>
               <input
-                type="tel"
+                type="text"
                 name="contactNo"
                 id="contactNo"
                 value={formData.contactNo}
-                onChange={handleInputChange}
-                onBlur={() => {
-                  if (!/^\d{10}$/.test(formData.contactNo)) {
-                    alert("Please enter a valid 10-digit phone number.");
-                  }
-                }}
+                onChange={handlePhoneInput}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
+                maxLength={10}
+                inputMode="numeric"
+                pattern="[0-9]{10}"
               />
+              {errors.contactNo && <p className="text-red-500 text-xs mt-1">{errors.contactNo}</p>}
             </div>
 
             <div>
@@ -326,6 +416,7 @@ export default function PersonalDetailsForm() {
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
               />
+              {errors.mailId && <p className="text-red-500 text-xs mt-1">{errors.mailId}</p>}
             </div>
 
             <div>
@@ -344,6 +435,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />
+              {errors.karthruGuru && <p className="text-red-500 text-xs mt-1">{errors.karthruGuru}</p>}
             </div>
 
             <div>
@@ -359,6 +451,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />
+              {errors.peeta && <p className="text-red-500 text-xs mt-1">{errors.peeta}</p>}
             </div>
 
             <div>
@@ -406,38 +499,92 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
+            {/* Present Address Stepper */}
             <div>
-              <label
-                htmlFor="presentAddress"
-                className="block text-sm font-semibold"
-              >
-                {t("signupl3.presentAddress")}
-              </label>
-              <input
-                type="text"
-                name="presentAddress"
-                id="presentAddress"
-                value={formData.presentAddress}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              />
+              <label className="block text-sm font-semibold">Present Address</label>
+              <div className="flex flex-col gap-2">
+                <select
+                  name="presentState"
+                  value={selectedPresentState}
+                  onChange={handlePresentStateChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(statesData).map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+                {errors.presentState && <p className="text-red-500 text-xs mt-1">{errors.presentState}</p>}
+                <select
+                  name="presentDistrict"
+                  value={selectedPresentDistrict}
+                  onChange={handlePresentDistrictChange}
+                  required={!!selectedPresentState}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  disabled={!selectedPresentState}
+                >
+                  <option value="">{selectedPresentState ? "Select District" : "Select State First"}</option>
+                  {selectedPresentState && statesData[selectedPresentState] &&
+                    statesData[selectedPresentState].map((district) => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                </select>
+                {errors.presentDistrict && <p className="text-red-500 text-xs mt-1">{errors.presentDistrict}</p>}
+                <input
+                  type="text"
+                  name="presentCity"
+                  value={presentCity}
+                  onChange={handlePresentCityChange}
+                  required={!!selectedPresentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter City Name"
+                  disabled={!selectedPresentDistrict}
+                />
+                {errors.presentCity && <p className="text-red-500 text-xs mt-1">{errors.presentCity}</p>}
+              </div>
             </div>
-
+            {/* Permanent Address Stepper */}
             <div>
-              <label
-                htmlFor="permanentAddress"
-                className="block text-sm font-semibold"
-              >
-                {t("signupl3.permanentAddress")}
-              </label>
-              <input
-                type="text"
-                name="permanentAddress"
-                id="permanentAddress"
-                value={formData.permanentAddress}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-              />
+              <label className="block text-sm font-semibold">Permanent Address</label>
+              <div className="flex flex-col gap-2">
+                <select
+                  name="permanentState"
+                  value={permanentState}
+                  onChange={e => setPermanentState(e.target.value)}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(statesData).map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+                <select
+                  name="permanentDistrict"
+                  value={permanentDistrict}
+                  onChange={e => setPermanentDistrict(e.target.value)}
+                  required={!!permanentState}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  disabled={!permanentState}
+                >
+                  <option value="">{permanentState ? "Select District" : "Select State First"}</option>
+                  {permanentState && statesData[permanentState] &&
+                    statesData[permanentState].map((district) => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                </select>
+                <input
+                  type="text"
+                  name="permanentCity"
+                  value={permanentCity}
+                  onChange={e => setPermanentCity(e.target.value)}
+                  required={!!permanentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter City Name"
+                  disabled={!permanentDistrict}
+                />
+              </div>
             </div>
 
             <div>
@@ -459,6 +606,7 @@ export default function PersonalDetailsForm() {
                 <option value="Business"> puc</option>
                 <option value="Job">10</option>
               </select>
+              {errors.qualification && <p className="text-red-500 text-xs mt-1">{errors.qualification}</p>}
             </div>
 
             <div>
@@ -476,6 +624,7 @@ export default function PersonalDetailsForm() {
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
               />
+              {errors.occupation && <p className="text-red-500 text-xs mt-1">{errors.occupation}</p>}
             </div>
 
             <div>
@@ -493,31 +642,9 @@ export default function PersonalDetailsForm() {
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
               />
+              {errors.languageKnown && <p className="text-red-500 text-xs mt-1">{errors.languageKnown}</p>}
             </div>
 
-            <div>
-              <label
-                htmlFor="selectedL2User"
-                className="block text-sm font-semibold"
-              >
-                {t("signupl3.selectedL2User")}
-              </label>
-              <select
-                name="selectedL2User"
-                id="selectedL2User"
-                value={formData.selectedL2User}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
-              >
-                <option value="">Select L2 User</option>
-                {l2Users.map((user: { name: string }, index: number) => (
-                  <option key={index} value={user.name}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div>
               <label htmlFor="photo" className="block text-sm font-semibold">
                 {t("signupl3.photoUrl")}
@@ -530,6 +657,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />
+              {errors.photoUrl && <p className="text-red-500 text-xs mt-1">{errors.photoUrl}</p>}
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-semibold">
@@ -544,6 +672,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
 
             {/* Confirm Password Field */}
@@ -563,6 +692,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />
+              {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
             </div>
 
             <button
@@ -576,6 +706,17 @@ export default function PersonalDetailsForm() {
                 "Sign Up"
               )}
             </button>
+           {/* Already have an account? Move to Login */}
+           <div className="text-center mt-4">
+             <span>Already have an account? </span>
+             <button
+               type="button"
+               className="text-blue-600 underline hover:text-blue-800"
+               onClick={() => router.push("/l3/login")}
+             >
+               Move to Login
+             </button>
+           </div>
           </form>
         </div>
         {showOtpPopup && (

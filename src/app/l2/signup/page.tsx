@@ -57,6 +57,11 @@ export default function SignupForm() {
   const [language, setLanguage] = useState<string>("en");
   const { t } = useTranslation();
   const router = useRouter();
+  const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     async function fetchL1Users() {
@@ -68,6 +73,11 @@ export default function SignupForm() {
       }
     }
     fetchL1Users();
+    // Fetch states/districts data
+    fetch("/districts.json")
+      .then((res) => res.json())
+      .then((data) => setStatesData(data))
+      .catch((err) => console.error("Failed to load districts.json", err));
   }, []);
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`); // Debugging log
@@ -75,15 +85,112 @@ export default function SignupForm() {
     setLanguage(lang);
   };
 
+  // Validate a single field
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case "name":
+        if (!value.trim()) return t("signupl2.name") + " is required";
+        break;
+      case "dob":
+        if (!value) return t("signupl2.dob") + " is required";
+        {
+          const dobDate = new Date(value);
+          const now = new Date();
+          if (dobDate > now) return "Date of birth cannot be in the future";
+          const age = now.getFullYear() - dobDate.getFullYear();
+          if (age < 10) return "You must be at least 10 years old";
+        }
+        break;
+      case "contactNo":
+        if (!value) return t("signupl2.contactNo") + " is required";
+        if (!/^\d{10}$/.test(value)) return "Contact number must be exactly 10 digits";
+        if (/^(\d)\1{9}$/.test(value)) return "Invalid phone number";
+        if (/^0/.test(value)) return "Phone number cannot start with 0";
+        break;
+      case "peetarohanaDate":
+        if (!value) return t("signupl2.peetarohanaDate") + " is required";
+        {
+          const peetaDate = new Date(value);
+          const now = new Date();
+          if (peetaDate > now) return "Peetarohana date cannot be in the future";
+          if (formData.dob) {
+            const dobDate = new Date(formData.dob);
+            if (peetaDate < dobDate) return "Peetarohana date cannot be before date of birth";
+          }
+        }
+        break;
+      case "gender":
+        if (!value) return t("signupl2.gender") + " is required";
+        break;
+      case "karthruGuru":
+        if (!value.trim()) return t("signupl2.karthruGuru") + " is required";
+        break;
+      case "dhekshaGuru":
+        if (!value.trim()) return t("signupl2.dhekshaGuru") + " is required";
+        break;
+      case "peeta":
+        if (!value) return t("signupl1.peeta") + " is required";
+        break;
+      case "bhage":
+        if (!value.trim()) return t("signupl2.bhage") + " is required";
+        break;
+      case "gothra":
+        if (!value.trim()) return t("signupl2.gothra") + " is required";
+        break;
+      case "password":
+        if (!value) return t("signupl2.password") + " is required";
+        if (value.length < 6) return "Password must be at least 6 characters";
+        break;
+      case "confirmPassword":
+        if (!value) return t("signupl2.confirmPassword") + " is required";
+        if (value !== formData.password) return "Passwords do not match";
+        break;
+      default:
+        break;
+    }
+    return "";
+  };
+
+  // Update handleChange to restrict phone number and date year input
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+
+    if (name === "contactNo") {
+      let filtered = value.replace(/\D/g, "");
+      if (filtered.length > 10) filtered = filtered.slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: filtered }));
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, filtered) }));
+      return;
+    }
+
+    if ((name === "dob" || name === "peetarohanaDate") && type === "date" && value) {
+      // value is in format YYYY-MM-DD
+      const year = value.split("-")[0];
+      if (year.length > 4) return; // Ignore input if year is more than 4 digits
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   };
 
+  // Add handleBlur for per-field validation
+  const handleBlur = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+  };
+
+  // Update handleImageChange to validate image file
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setImageFile(e.target.files ? e.target.files[0] : null);
+    const file = e.target.files ? e.target.files[0] : null;
+    setImageFile(file);
+    let error = "";
+    if (!file) error = "Profile picture is required";
+    else if (!file.type.startsWith("image/")) error = "File must be an image";
+    setErrors((prev) => ({ ...prev, imageUrl: error }));
   };
 
   const uploadImageToCloudinary = async (): Promise<string | null> => {
@@ -109,11 +216,73 @@ export default function SignupForm() {
     }
   };
 
+  // Enhanced Validation function
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    // Name
+    if (!formData.name.trim()) newErrors.name = t("signupl2.name") + " is required";
+    // DOB
+    if (!formData.dob) newErrors.dob = t("signupl2.dob") + " is required";
+    else {
+      const dobDate = new Date(formData.dob);
+      const now = new Date();
+      if (dobDate > now) newErrors.dob = "Date of birth cannot be in the future";
+      else {
+        const age = now.getFullYear() - dobDate.getFullYear();
+        if (age < 10) newErrors.dob = "You must be at least 10 years old";
+      }
+    }
+    // Contact Number
+    if (!formData.contactNo) newErrors.contactNo = t("signupl2.contactNo") + " is required";
+    else if (!/^\d{10}$/.test(formData.contactNo)) newErrors.contactNo = "Contact number must be exactly 10 digits";
+    else if (/^(\d)\1{9}$/.test(formData.contactNo)) newErrors.contactNo = "Invalid phone number";
+    else if (/^0/.test(formData.contactNo)) newErrors.contactNo = "Phone number cannot start with 0";
+    // Peetarohana Date
+    if (!formData.peetarohanaDate) newErrors.peetarohanaDate = t("signupl2.peetarohanaDate") + " is required";
+    else {
+      const peetaDate = new Date(formData.peetarohanaDate);
+      const now = new Date();
+      if (peetaDate > now) newErrors.peetarohanaDate = "Peetarohana date cannot be in the future";
+      if (formData.dob) {
+        const dobDate = new Date(formData.dob);
+        if (peetaDate < dobDate) newErrors.peetarohanaDate = "Peetarohana date cannot be before date of birth";
+      }
+    }
+    // Gender
+    if (!formData.gender) newErrors.gender = t("signupl2.gender") + " is required";
+    // Karthru Guru
+    if (!formData.karthruGuru.trim()) newErrors.karthruGuru = t("signupl2.karthruGuru") + " is required";
+    // Dheksha Guru
+    if (!formData.dhekshaGuru.trim()) newErrors.dhekshaGuru = t("signupl2.dhekshaGuru") + " is required";
+    // Peeta
+    if (!formData.peeta) newErrors.peeta = t("signupl1.peeta") + " is required";
+    // Bhage
+    if (!formData.bhage.trim()) newErrors.bhage = t("signupl2.bhage") + " is required";
+    // Gothra
+    if (!formData.gothra.trim()) newErrors.gothra = t("signupl2.gothra") + " is required";
+    // State
+    if (!selectedState) newErrors.state = "State is required";
+    // District
+    if (!selectedDistrict) newErrors.district = "District is required";
+    // City
+    if (!city.trim()) newErrors.city = "City is required";
+    // Password
+    if (!formData.password) newErrors.password = t("signupl2.password") + " is required";
+    else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+    // Confirm Password
+    if (!formData.confirmPassword) newErrors.confirmPassword = t("signupl2.confirmPassword") + " is required";
+    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    // Image file
+    if (!imageFile) newErrors.imageUrl = "Profile picture is required";
+    else if (imageFile && !imageFile.type.startsWith("image/")) newErrors.imageUrl = "File must be an image";
+    return newErrors;
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
@@ -177,6 +346,27 @@ export default function SignupForm() {
   
 }; console.log(language)
 
+  const handleStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedState(e.target.value);
+    setSelectedDistrict("");
+    setCity("");
+    setFormData((prev) => ({ ...prev, address: "" }));
+    setErrors((prev) => ({ ...prev, state: "", district: "", city: "" })); // Clear errors on state change
+  };
+
+  const handleDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDistrict(e.target.value);
+    setCity("");
+    setFormData((prev) => ({ ...prev, address: "" }));
+    setErrors((prev) => ({ ...prev, district: "" })); // Clear error on district change
+  };
+
+  const handleCityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCity(e.target.value);
+    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${e.target.value}` }));
+    setErrors((prev) => ({ ...prev, city: "" })); // Clear error on city change
+  };
+
   return (
     <>
       <div className="flex flex-col items-center p-2 bg-gray-100 rounded-xl shadow-md">
@@ -220,11 +410,12 @@ export default function SignupForm() {
                   name="peeta"
                   value={formData.peeta}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                   className="border rounded-md p-2 w-full bg-white text-black"
                 >
                   {" "}
-                  <option value="">Select L2 User</option>
+                  <option value="">Select peeta</option>
                   {l1Users.map((user) => (
                     <option key={user} value={user}>
                       {user}
@@ -232,6 +423,7 @@ export default function SignupForm() {
                   ))}
                 </select>
               </label>
+              {errors.peeta && <p className="text-red-500 text-sm mt-1">{errors.peeta}</p>}
             </div>
           <form onSubmit={handleSubmit}>
             {/* Form Fields */}
@@ -250,9 +442,11 @@ export default function SignupForm() {
               },
               {
                 label: t("signupl2.contactNo"),
-                type: "number",
+                type: "tel", // changed from 'number' to 'tel'
                 name: "contactNo",
                 required: true,
+                maxLength: 10, // add maxLength
+                pattern: "[0-9]{10}",
               },
               {
                 label: t("signupl2.peetarohanaDate"),
@@ -300,7 +494,8 @@ export default function SignupForm() {
                 type: "text",
                 name: "mariPresent",
               },
-              { label: t("signupl2.address"), type: "text", name: "address" },
+              // Remove the address field from here
+              // { label: t("signupl2.address"), type: "text", name: "address" },
               {
                 label: t("signupl2.password"),
                 type: "password",
@@ -322,6 +517,7 @@ export default function SignupForm() {
                       name={field.name}
                       value={formData[field.name]}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required={field.required}
                       className="border rounded-md p-2 w-full bg-white text-black"
                     >
@@ -341,13 +537,73 @@ export default function SignupForm() {
                       name={field.name}
                       value={formData[field.name]}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required={field.required}
+                      maxLength={field.name === "contactNo" ? 10 : undefined}
+                      pattern={field.name === "contactNo" ? "[0-9]{10}" : undefined}
                       className="border rounded-md p-2 w-full bg-white text-black"
                     />
                   )}
                 </label>
+                {errors[field.name] && (
+                  <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
+                )}
               </div>
             ))}
+
+            {/* Address Stepper */}
+            <div className="mb-4">
+              <label className="block mb-1 font-semibold text-black">
+                Address:
+                <div className="flex flex-col gap-2">
+                  {/* Step 1: State */}
+                  <select
+                    name="state"
+                    value={selectedState}
+                    onChange={handleStateChange}
+                    onBlur={() => setErrors((prev) => ({ ...prev, state: !selectedState ? "State is required" : "" }))}
+                    required
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                  >
+                    <option value="">Select State</option>
+                    {Object.keys(statesData).map((state) => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                  {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+                  {/* Step 2: District */}
+                  <select
+                    name="district"
+                    value={selectedDistrict}
+                    onChange={handleDistrictChange}
+                    onBlur={() => setErrors((prev) => ({ ...prev, district: !selectedDistrict ? "District is required" : "" }))}
+                    required={!!selectedState}
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                    disabled={!selectedState}
+                  >
+                    <option value="">{selectedState ? "Select District" : "Select State First"}</option>
+                    {selectedState && statesData[selectedState] &&
+                      statesData[selectedState].map((district) => (
+                        <option key={district} value={district}>{district}</option>
+                      ))}
+                  </select>
+                  {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
+                  {/* Step 3: City */}
+                  <input
+                    type="text"
+                    name="city"
+                    value={city}
+                    onChange={handleCityChange}
+                    onBlur={() => setErrors((prev) => ({ ...prev, city: !city.trim() ? "City is required" : "" }))}
+                    required={!!selectedDistrict}
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                    placeholder="Enter City Name"
+                    disabled={!selectedDistrict}
+                  />
+                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                </div>
+              </label>
+            </div>
 
            
 
@@ -358,9 +614,11 @@ export default function SignupForm() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
+                  onBlur={handleImageChange}
                   className="border rounded-md p-2 w-full bg-white text-black"
                 />
               </label>
+              {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{errors.imageUrl}</p>}
             </div>
 
            
