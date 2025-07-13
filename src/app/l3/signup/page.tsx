@@ -65,7 +65,7 @@ export default function PersonalDetailsForm() {
     confirmPassword: "",
     photoUrl: "",
   });
-  const [language, setLanguage] = useState<string>("en");
+  // const [language, setLanguage] = useState<string>("en"); // Removed unused variable
   const { t } = useTranslation();
   const router = useRouter();
   const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
@@ -76,12 +76,16 @@ export default function PersonalDetailsForm() {
   const [permanentState, setPermanentState] = useState<string>("");
   const [permanentDistrict, setPermanentDistrict] = useState<string>("");
   const [permanentCity, setPermanentCity] = useState<string>("");
+  const [presentTaluk, setPresentTaluk] = useState<string>("");
+  const [presentLandmark, setPresentLandmark] = useState<string>("");
+  // Add state for permanent address fields
+  const [permanentTaluk, setPermanentTaluk] = useState<string>("");
+  const [permanentLandmark, setPermanentLandmark] = useState<string>("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`); // Debugging log
     i18n.changeLanguage(lang);
-    setLanguage(lang);
   };
   const fetchL2Users = useCallback(async () => {
     try {
@@ -141,7 +145,20 @@ export default function PersonalDetailsForm() {
   };
   const handlePresentCityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPresentCity(e.target.value);
-    setFormData((prev) => ({ ...prev, presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${e.target.value}` }));
+    setFormData((prev) => ({ ...prev, presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${presentTaluk}, ${e.target.value}, ${presentLandmark}` }));
+  };
+  const handlePresentTalukChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPresentTaluk(e.target.value);
+  };
+  const handlePresentLandmarkChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPresentLandmark(e.target.value);
+  };
+
+  const handlePermanentTalukChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPermanentTaluk(e.target.value);
+  };
+  const handlePermanentLandmarkChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPermanentLandmark(e.target.value);
   };
 
   // Phone number input: allow only numbers and max 10 digits
@@ -164,6 +181,8 @@ export default function PersonalDetailsForm() {
     if (!selectedPresentState) newErrors.presentState = "Please select your present state.";
     if (!selectedPresentDistrict) newErrors.presentDistrict = "Please select your present district.";
     if (!presentCity.trim()) newErrors.presentCity = "Please enter your present city.";
+    if (!presentTaluk.trim()) newErrors.presentTaluk = "Please enter your present taluk.";
+    if (!presentLandmark.trim()) newErrors.presentLandmark = "Please enter your present landmark.";
     if (!formData.qualification) newErrors.qualification = "Please select your qualification.";
     if (!formData.occupation.trim()) newErrors.occupation = "Please enter your occupation.";
     if (!formData.languageKnown.trim()) newErrors.languageKnown = "Please enter languages known.";
@@ -240,8 +259,8 @@ export default function PersonalDetailsForm() {
         const photoData = await photoResponse.json();
 
         // Use updatedFormData with correct presentAddress
-        const presentAddress = `${selectedPresentState}, ${selectedPresentDistrict}, ${presentCity}`;
-        const permanentAddress = `${permanentState}, ${permanentDistrict}, ${permanentCity}`;
+        const presentAddress = `${selectedPresentState}, ${selectedPresentDistrict}, ${presentTaluk}, ${presentCity}, ${presentLandmark}`;
+        const permanentAddress = `${permanentState}, ${permanentDistrict}, ${permanentTaluk}, ${permanentCity}, ${permanentLandmark}`;
         const response = await fetch("/api/l3/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -269,7 +288,7 @@ export default function PersonalDetailsForm() {
     } finally {
       setIsVerifyingOtp(false);
     }
-  };console.log(language)
+  };
 
   return (
     <>
@@ -533,6 +552,17 @@ export default function PersonalDetailsForm() {
                 {errors.presentDistrict && <p className="text-red-500 text-xs mt-1">{errors.presentDistrict}</p>}
                 <input
                   type="text"
+                  name="presentTaluk"
+                  value={presentTaluk}
+                  onChange={handlePresentTalukChange}
+                  required={!!selectedPresentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Taluk Name"
+                  disabled={!selectedPresentDistrict}
+                />
+                {errors.presentTaluk && <p className="text-red-500 text-xs mt-1">{errors.presentTaluk}</p>}
+                <input
+                  type="text"
                   name="presentCity"
                   value={presentCity}
                   onChange={handlePresentCityChange}
@@ -542,6 +572,17 @@ export default function PersonalDetailsForm() {
                   disabled={!selectedPresentDistrict}
                 />
                 {errors.presentCity && <p className="text-red-500 text-xs mt-1">{errors.presentCity}</p>}
+                <input
+                  type="text"
+                  name="presentLandmark"
+                  value={presentLandmark}
+                  onChange={handlePresentLandmarkChange}
+                  required={!!selectedPresentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Landmark"
+                  disabled={!selectedPresentDistrict}
+                />
+                {errors.presentLandmark && <p className="text-red-500 text-xs mt-1">{errors.presentLandmark}</p>}
               </div>
             </div>
             {/* Permanent Address Stepper */}
@@ -576,12 +617,32 @@ export default function PersonalDetailsForm() {
                 </select>
                 <input
                   type="text"
+                  name="permanentTaluk"
+                  value={permanentTaluk}
+                  onChange={handlePermanentTalukChange}
+                  required={!!permanentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Taluk Name"
+                  disabled={!permanentDistrict}
+                />
+                <input
+                  type="text"
                   name="permanentCity"
                   value={permanentCity}
                   onChange={e => setPermanentCity(e.target.value)}
                   required={!!permanentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter City Name"
+                  disabled={!permanentDistrict}
+                />
+                <input
+                  type="text"
+                  name="permanentLandmark"
+                  value={permanentLandmark}
+                  onChange={handlePermanentLandmarkChange}
+                  required={!!permanentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Landmark"
                   disabled={!permanentDistrict}
                 />
               </div>

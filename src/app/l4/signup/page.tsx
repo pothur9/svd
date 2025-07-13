@@ -75,6 +75,10 @@ export default function PersonalDetailsForm() {
   const [selectedPermanentState, setSelectedPermanentState] = useState<string>("");
   const [selectedPermanentDistrict, setSelectedPermanentDistrict] = useState<string>("");
   const [permanentCity, setPermanentCity] = useState<string>("");
+  const [presentTaluk, setPresentTaluk] = useState<string>("");
+  const [presentLandmark, setPresentLandmark] = useState<string>("");
+  const [permanentTaluk, setPermanentTaluk] = useState<string>("");
+  const [permanentLandmark, setPermanentLandmark] = useState<string>("");
 
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`); // Debugging log
@@ -141,6 +145,20 @@ export default function PersonalDetailsForm() {
     setPresentCity(e.target.value);
     setFormData((prev) => ({ ...prev, presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${e.target.value}` }));
   };
+  const handlePresentTalukChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPresentTaluk(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${presentCity}, ${e.target.value}, ${presentLandmark}`,
+    }));
+  };
+  const handlePresentLandmarkChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPresentLandmark(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      presentAddress: `${selectedPresentState}, ${selectedPresentDistrict}, ${presentCity}, ${presentTaluk}, ${e.target.value}`,
+    }));
+  };
   const handlePermanentStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setSelectedPermanentState(e.target.value);
     setSelectedPermanentDistrict("");
@@ -155,6 +173,20 @@ export default function PersonalDetailsForm() {
   const handlePermanentCityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPermanentCity(e.target.value);
     setFormData((prev) => ({ ...prev, permanentAddress: `${selectedPermanentState}, ${selectedPermanentDistrict}, ${e.target.value}` }));
+  };
+  const handlePermanentTalukChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPermanentTaluk(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      permanentAddress: `${selectedPermanentState}, ${selectedPermanentDistrict}, ${permanentCity}, ${e.target.value}, ${permanentLandmark}`,
+    }));
+  };
+  const handlePermanentLandmarkChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPermanentLandmark(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      permanentAddress: `${selectedPermanentState}, ${selectedPermanentDistrict}, ${permanentCity}, ${permanentTaluk}, ${e.target.value}`,
+    }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -225,7 +257,7 @@ export default function PersonalDetailsForm() {
         if (!photoResponse.ok) throw new Error("Failed to upload photo.");
         const photoData = await photoResponse.json();
 
-        const response = await fetch("/api/l3/signup", {
+        const response = await fetch("/api/l4/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -288,6 +320,29 @@ export default function PersonalDetailsForm() {
             {t("signupl3.title")}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+              <label
+                htmlFor="selectedL2User"
+                className="block text-sm font-semibold"
+              >
+                {t("signupl3.selectedL2User")}
+              </label>
+              <select
+                name="selectedL2User"
+                id="selectedL2User"
+                value={formData.selectedL2User}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select Guru jangam</option>
+                {l2Users.map((user: { name: string }, index: number) => (
+                  <option key={index} value={user.name}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label htmlFor="name" className="block text-sm font-semibold">
                 {t("signupl3.name")}
@@ -491,6 +546,26 @@ export default function PersonalDetailsForm() {
                   placeholder="Enter City Name"
                   disabled={!selectedPresentDistrict}
                 />
+                <input
+                  type="text"
+                  name="presentTaluk"
+                  value={presentTaluk}
+                  onChange={handlePresentTalukChange}
+                  required={!!selectedPresentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Taluk Name"
+                  disabled={!selectedPresentDistrict}
+                />
+                <input
+                  type="text"
+                  name="presentLandmark"
+                  value={presentLandmark}
+                  onChange={handlePresentLandmarkChange}
+                  required={!!selectedPresentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Landmark"
+                  disabled={!selectedPresentDistrict}
+                />
               </div>
             </div>
             {/* Permanent Address Stepper */}
@@ -531,6 +606,26 @@ export default function PersonalDetailsForm() {
                   required={!!selectedPermanentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter City Name"
+                  disabled={!selectedPermanentDistrict}
+                />
+                <input
+                  type="text"
+                  name="permanentTaluk"
+                  value={permanentTaluk}
+                  onChange={handlePermanentTalukChange}
+                  required={!!selectedPermanentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Taluk Name"
+                  disabled={!selectedPermanentDistrict}
+                />
+                <input
+                  type="text"
+                  name="permanentLandmark"
+                  value={permanentLandmark}
+                  onChange={handlePermanentLandmarkChange}
+                  required={!!selectedPermanentDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Landmark"
                   disabled={!selectedPermanentDistrict}
                 />
               </div>
@@ -591,7 +686,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            {/* <div>
               <label
                 htmlFor="selectedL2User"
                 className="block text-sm font-semibold"
@@ -613,7 +708,7 @@ export default function PersonalDetailsForm() {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
             <div>
               <label htmlFor="photo" className="block text-sm font-semibold">
                 {t("signupl3.photoUrl")}
@@ -716,7 +811,7 @@ export default function PersonalDetailsForm() {
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                 onClick={() => {
                   setShowSuccessModal(false);
-                  router.push("/l3/login");
+                  router.push("/l4/login");
                 }}
               >
                 Proceed to Login

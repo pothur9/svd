@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 const levels = [
+  { name: "Sri jagdhguru", login: "/l1/login", bgColor: "bg-yellow-100" },
   { name: "Sri Pattacharyaru", login: "/l2/login", signup: "/l2/signup", bgColor: "bg-blue-100" },
   { name: "Sri guru jangam", login: "/l3/login", signup: "/l3/signup", bgColor: "bg-green-100" },
   { name: "Sri veerashiva", login: "/l4/login", signup: "/l4/signup", bgColor: "bg-pink-100" },
@@ -53,12 +54,14 @@ export default function Home() {
           >
             Login
           </Link>
-          <Link
-            href={selectedLevel.signup}
-            className="w-36 text-center py-2 rounded-full border-2 border-[#fbbf24] text-[#fbbf24] font-semibold shadow-md hover:bg-[#fbbf24] hover:text-white focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-colors text-base"
-          >
-            Sign Up
-          </Link>
+          {selectedLevel.signup && (
+            <Link
+              href={selectedLevel.signup}
+              className="w-36 text-center py-2 rounded-full border-2 border-[#fbbf24] text-[#fbbf24] font-semibold shadow-md hover:bg-[#fbbf24] hover:text-white focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-colors text-base"
+            >
+              Sign Up
+            </Link>
+          )}
         </div>
       </div>
       <footer className="mt-16 text-gray-400 text-xs text-center">

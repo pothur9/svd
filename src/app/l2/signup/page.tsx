@@ -61,6 +61,8 @@ export default function SignupForm() {
   const [selectedState, setSelectedState] = useState<string>("");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("");
   const [city, setCity] = useState<string>("");
+  const [taluk, setTaluk] = useState<string>(""); // new field
+  const [landmark, setLandmark] = useState<string>(""); // new field
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -266,6 +268,10 @@ export default function SignupForm() {
     if (!selectedDistrict) newErrors.district = "District is required";
     // City
     if (!city.trim()) newErrors.city = "City is required";
+    // Taluk
+    if (!taluk.trim()) newErrors.taluk = "Taluk is required";
+    // Landmark
+    if (!landmark.trim()) newErrors.landmark = "Landmark is required";
     // Password
     if (!formData.password) newErrors.password = t("signupl2.password") + " is required";
     else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
@@ -320,6 +326,10 @@ export default function SignupForm() {
       const { confirmPassword, ...submitData } = {
         ...formData,
         imageUrl,
+        landmark,
+        taluk,
+        city,
+        address: `${selectedState}, ${selectedDistrict}, ${city}, ${taluk}, ${landmark}`,
       };
       console.log(confirmPassword);
       const result = await fetch("/api/l2/signup", {
@@ -351,7 +361,7 @@ export default function SignupForm() {
     setSelectedDistrict("");
     setCity("");
     setFormData((prev) => ({ ...prev, address: "" }));
-    setErrors((prev) => ({ ...prev, state: "", district: "", city: "" })); // Clear errors on state change
+    setErrors((prev) => ({ ...prev, state: "", district: "", city: "", taluk: "", landmark: "" })); // Clear errors on state change
   };
 
   const handleDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -363,8 +373,18 @@ export default function SignupForm() {
 
   const handleCityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setCity(e.target.value);
-    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${e.target.value}` }));
+    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${e.target.value}, ${taluk}, ${landmark}` }));
     setErrors((prev) => ({ ...prev, city: "" })); // Clear error on city change
+  };
+  const handleTalukChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setTaluk(e.target.value);
+    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${city}, ${e.target.value}, ${landmark}` }));
+    setErrors((prev) => ({ ...prev, taluk: "" }));
+  };
+  const handleLandmarkChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLandmark(e.target.value);
+    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${city}, ${taluk}, ${e.target.value}` }));
+    setErrors((prev) => ({ ...prev, landmark: "" }));
   };
 
   return (
@@ -601,6 +621,32 @@ export default function SignupForm() {
                     disabled={!selectedDistrict}
                   />
                   {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                  {/* Step 4: Taluk */}
+                  <input
+                    type="text"
+                    name="taluk"
+                    value={taluk}
+                    onChange={handleTalukChange}
+                    onBlur={() => setErrors((prev) => ({ ...prev, taluk: !taluk.trim() ? "Taluk is required" : "" }))}
+                    required={!!selectedDistrict}
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                    placeholder="Enter Taluk Name"
+                    disabled={!selectedDistrict}
+                  />
+                  {errors.taluk && <p className="text-red-500 text-sm mt-1">{errors.taluk}</p>}
+                  {/* Step 5: Landmark */}
+                  <input
+                    type="text"
+                    name="landmark"
+                    value={landmark}
+                    onChange={handleLandmarkChange}
+                    onBlur={() => setErrors((prev) => ({ ...prev, landmark: !landmark.trim() ? "Landmark is required" : "" }))}
+                    required={!!selectedDistrict}
+                    className="border rounded-md p-2 w-full bg-white text-black"
+                    placeholder="Enter Landmark and House number"
+                    disabled={!selectedDistrict}
+                  />
+                  {errors.landmark && <p className="text-red-500 text-sm mt-1">{errors.landmark}</p>}
                 </div>
               </label>
             </div>
