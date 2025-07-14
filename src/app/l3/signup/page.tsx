@@ -342,7 +342,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               >
-                <option value="">Select peeta</option>
+                <option value="">Select Sri 108 Prabhu Shivachryaru</option>
                 {l2Users.map((user: { name: string }, index: number) => (
                   <option key={index} value={user.name}>
                     {user.name}
