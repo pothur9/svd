@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
@@ -16,7 +16,7 @@ interface UserData {
   imageUrl: string;
 }
 
-export default function CardPreview() {
+function CardPreviewContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -207,5 +207,13 @@ export default function CardPreview() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CardPreview() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CardPreviewContent />
+    </Suspense>
   );
 } 

@@ -16,6 +16,7 @@ export default function Home() {
   const logoBorderColor = "#fbbf24"; // Amber-400 as placeholder
   const router = useRouter();
   const [selectedLevel, setSelectedLevel] = useState(levels[0]);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Check if user is already logged in and redirect to appropriate dashboard
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function Home() {
         const checkUserLevel = async () => {
           try {
             // Try L1 first
-            const l1Response = await fetch(`/api/l1/dashboard/${userId}`);
+            const l1Response = await fetch(`/api/l1/userdata/${userId}`);
             if (l1Response.ok) {
               router.push("/l1/dashboard");
               return;
@@ -59,13 +60,29 @@ export default function Home() {
             console.error("Error checking user level:", error);
             // If there's an error, clear session and stay on home page
             sessionStorage.clear();
+          } finally {
+            setIsCheckingAuth(false);
           }
         };
 
         checkUserLevel();
+      } else {
+        setIsCheckingAuth(false);
       }
     }
   }, [router]);
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fbbf24] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
