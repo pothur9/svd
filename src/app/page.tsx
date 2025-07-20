@@ -87,7 +87,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
       <Image
-        className="mb-10 "
+        className="mb-4"
         src="/logomain1.png"
         alt="Logo"
         width={200}
@@ -132,8 +132,11 @@ export default function Home() {
           )}
         </div>
       </div>
-      <footer className="mt-4 mb-0 w-full text-gray-200 text-xs text-center py-2 px-4 rounded-none shadow-lg">
-        {/* <div>&copy; {new Date().getFullYear()} SVD. All rights reserved.</div> */}
+      <footer
+        className="mt-4 mb-0 w-full text-gray-200 text-xs text-center py-2 px-4 rounded-none shadow-lg border-4 border-solid"
+        style={{ borderColor: logoBorderColor }}
+      >
+      
         <div className="mt-2 text-[12px] leading-relaxed text-gray-300 max-w-3xl mx-auto">
           {/* <div className="font-semibold text-gray-100 mb-1">ಮಾಗಮದಶಮನ & ಅಪಪಣ ಯಿಂತ</div>
           <div className="mb-2">1008 ಶಿರೀರ್ದ್ಕ್ಾಶಿ ಜಗದುುರು ಶಿರೀಡಾ, ಚಿಂದರ ಶ ೀಖರ ಶಿವಾಚಾಯ ಮಭಗವತಾಪದರು.</div>
@@ -147,6 +150,7 @@ export default function Home() {
             <Image src="/footer1.jpg" alt="Footer 1" width={580} height={580} className="rounded shadow w-full max-w-xs md:max-w-md lg:max-w-lg" />
             <Image src="/footer2.jpg" alt="Footer 2" width={380} height={380} className="rounded shadow w-full max-w-xs md:max-w-sm lg:max-w-md" />
           </div>
+          <div className="text-black mt-3">&copy; {new Date().getFullYear()} SVD. All rights reserved.</div>
         </div>
       </footer>
     </div>
