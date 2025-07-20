@@ -35,6 +35,7 @@ export default function Dashboard(): JSX.Element {
   const [memberData, setMemberData] = useState<MemberData[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [isDownloading, setIsDownloading] = useState(false);
   const router = useRouter();
   const frontCardRef = useRef<HTMLDivElement>(null);
   const backCardRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,9 @@ export default function Dashboard(): JSX.Element {
   };
 
   const downloadUserCard = async () => {
+    if (isDownloading) return; // Prevent multiple simultaneous downloads
+    
+    setIsDownloading(true);
     try {
       const cardUrl = getCardPreviewUrl();
       if (!cardUrl) throw new Error('Card preview URL not found');
@@ -162,6 +166,8 @@ export default function Dashboard(): JSX.Element {
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -557,20 +563,37 @@ export default function Dashboard(): JSX.Element {
            <div className="flex justify-center mt-6">
              <button
                onClick={downloadUserCard}
+               disabled={isDownloading}
                style={{
-                 backgroundColor: '#ea580c',
+                 backgroundColor: isDownloading ? '#9ca3af' : '#ea580c',
                  color: '#ffffff',
                  padding: '0.5rem 1.5rem',
                  borderRadius: '0.5rem',
-                 cursor: 'pointer',
+                 cursor: isDownloading ? 'not-allowed' : 'pointer',
                  border: 'none',
                  fontWeight: 'bold',
                  transition: 'background-color 0.3s ease',
+                 opacity: isDownloading ? 0.7 : 1,
                }}
-               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c2410c'}
-               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
+               onMouseOver={(e) => {
+                 if (!isDownloading) {
+                   e.currentTarget.style.backgroundColor = '#c2410c';
+                 }
+               }}
+               onMouseOut={(e) => {
+                 if (!isDownloading) {
+                   e.currentTarget.style.backgroundColor = '#ea580c';
+                 }
+               }}
              >
-               Download ID Card as PDF
+               {isDownloading ? (
+                 <div className="flex items-center gap-2">
+                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                   Generating PDF...
+                 </div>
+               ) : (
+                 'Download ID Card as PDF'
+               )}
              </button>
            </div>
          </div>
