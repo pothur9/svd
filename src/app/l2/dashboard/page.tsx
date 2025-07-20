@@ -423,7 +423,7 @@ export default function Dashboard(): JSX.Element {
                     className="p-3 flex items-center"
                     style={{ backgroundColor: '#ea580c', color: '#fff' }}
                   >
-                    <div className="relative w-[40px] h-[40px]">
+                    <div className="relative w-[50px] h-[50px]">
                       <Image
                         src="/logomain1.png"
                         alt="Logo"
