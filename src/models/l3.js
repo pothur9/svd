@@ -21,7 +21,11 @@ const l3UserSchema = new mongoose.Schema({
   password:{ type: String, required: true },
   photoUrl:{ type: String, required: true },
   selectedL2User:{ type: String, required: true },
- 
+  kula: { type: String },
+  married: { type: String },
+  higherDegree: { type: String },
+  maneDhevaruName: { type: String },
+  maneDhevaruAddress: { type: String },
 });
 
 export default mongoose.models.l3User || mongoose.model('l3User', l3UserSchema);

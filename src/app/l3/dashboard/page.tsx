@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
+import { QRCodeSVG } from "qrcode.react";
 
 interface MemberData {
   l1User: {
@@ -16,6 +17,7 @@ interface MemberData {
 }
 
 interface UserData {
+  _id?: string;
   name: string;
   userId: string;
   contactNo: string;
@@ -24,6 +26,20 @@ interface UserData {
   peeta: string | null;
   selectedL2User: string | null;
   photoUrl: string;
+  karthruGuru?: string | null;
+  bhage?: string | null;
+  gothra?: string | null;
+  kula?: string | null;
+  nakshatra?: string | null;
+  presentAddress?: string | null;
+  gender?: string | null;
+  mailId?: string | null;
+  nationality?: string | null;
+  qualification?: string | null;
+  occupation?: string | null;
+  languageKnown?: string | null;
+  married?: string | null;
+  higherDegree?: string | null;
 }
 
 export default function Dashboard() {
@@ -193,65 +209,142 @@ export default function Dashboard() {
           </h1>
         </div>
         <br/>
-        {/* User Info Section (profile card, as in L2) */}
-        <div
-          className="items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[500px] bg-orange-600 rounded-xl overflow-hidden mt-6"
-          style={{ height: "100px" }}
-        >
-          <h1 className="text-lg sm:text-2xl font-bold text-white float-right">
-            &nbsp; Sanathanaveershivadharma
-          </h1>
-          <div className="flex-shrink-0 float-left">
-            <img
-              src="/logomain1.png"
-              alt="Logo"
-              className="w-[80px] sm:w-[110px]"
-              style={{ marginTop: "-35px" }}
-            />
+        {/* Custom Card Layout for L3 */}
+        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-8">
+            {/* Front Card */}
+            <div
+              className="w-[85mm] h-[55mm] mx-auto"
+              style={{ backgroundColor: '#fff', color: '#000' }}
+            >
+              <div
+                className="rounded-xl w-full h-full shadow-lg overflow-hidden relative"
+                style={{ backgroundColor: '#fff', color: '#000' }}
+              >
+                {/* Watermark Logo */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                    backgroundColor: 'transparent',
+                  }}
+                >
+                  <img
+                    src="/logomain1.png"
+                    alt="Logo Watermark"
+                    style={{
+                      opacity: 0.15,
+                      maxWidth: '70%',
+                      maxHeight: '70%',
+                      backgroundColor: 'transparent',
+                    }}
+                  />
+                </div>
+                {/* Orange Header Section */}
+                <div
+                  className="p-3 flex items-center"
+                  style={{ backgroundColor: '#ea580c', color: '#fff' }}
+                >
+                  <img
+                    src="/logomain1.png"
+                    alt="Logo"
+                    className="object-contain w-[50px] h-[50px]"
+                  />
+                  <h1
+                    className="text-sm font-bold ml-2"
+                    style={{ color: '#fff', backgroundColor: '#ea580c' }}
+                  >
+                    Sanathana Veera Shiva <br/>Lingayatha Dharma
+                  </h1>
+                </div>
+                {/* Content Section */}
+                <div
+                  className="p-3 flex justify-between"
+                  style={{ backgroundColor: '#fff', color: '#000' }}
+                >
+                  {/* Left side - Text */}
+                  <div className="text-black" style={{ color: '#000', backgroundColor: '#fff' }}>
+                    <p className="text-sm font-semibold mb-1">Name: {userData.name}</p>
+                    <p className="text-sm font-semibold mb-1">S/o: {userData.karthruGuru || 'N/A'}</p>
+                    <p className="text-sm font-semibold mb-1">Peeta: {userData.peeta || 'N/A'}</p>
+                    <p className="text-sm font-semibold mb-1">DOB: {userData.dob && !isNaN(Date.parse(userData.dob)) ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) : "N/A"}</p>
+                    <p className="text-sm font-semibold">Phone: {userData.contactNo}</p>
+                  </div>
+                  {/* Right side - Image */}
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-[80px] h-[80px] -mt-6">
+                      <img
+                        src={userData.photoUrl && userData.photoUrl.startsWith("http") ? userData.photoUrl : "/default-avatar.jpg"}
+                        alt={`${userData.name}'s profile`}
+                        className="rounded-md object-cover border-2 w-full h-full"
+                        style={{ borderColor: '#ea580c', backgroundColor: '#fff' }}
+                        onError={(e) => { e.currentTarget.src = "/default-avatar.jpg"; }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Back Card */}
+            <div
+              className="w-[85mm] h-[55mm] mx-auto"
+              style={{ backgroundColor: '#fff', color: '#000' }}
+            >
+              <div
+                className="rounded-xl w-full h-full shadow-lg overflow-hidden relative"
+                style={{ backgroundColor: '#fff', color: '#000' }}
+              >
+                {/* Red Ribbon Guru Section */}
+                <div
+                  className="p-3 flex flex-col   z-10 relative"
+                  style={{ backgroundColor: '#ea580c', color: '#fff' }}
+                >
+                  <span className="text-xs font-semibold w-full break-words">Guru: {userData.selectedL2User || 'N/A'}</span>
+                  <span className="text-xs font-semibold">Guru Address: {userData.presentAddress || 'N/A'}</span>
+                </div>
+                {/* Content Section (below ribbon) */}
+                <div
+                  className="px-5 pb-5 pt-2 w-full h-full z-10 relative flex flex-row items-center justify-between"
+                  style={{ backgroundColor: '#fff', color: '#000' }}
+                >
+                  {/* Left side: details */}
+                  <div className="flex-1" style={{ backgroundColor: '#fff', color: '#000' }}>
+                    <div className="grid grid-cols-1 gap-0.5" style={{ backgroundColor: '#fff', color: '#000', marginTop:"-50px"}} >
+                   
+                      <p className="text-xs font-semibold"><span className="font-bold">Kula:</span> <span className="font-normal">{userData.kula || 'N/A'}</span></p>
+                      <p className="text-xs font-semibold"><span className="font-bold">Gotra:</span> <span className="font-normal">{userData.gothra || 'N/A'}</span></p>
+                      <p className="text-xs font-semibold"><span className="font-bold">Bhage:</span> <span className="font-normal">{userData.bhage || 'N/A'}</span></p>
+                      {/* <p className="text-xs font-semibold"><span className="font-bold">Nakshatra:</span> <span className="font-normal">{userData.nakshatra || 'N/A'}</span></p> */}
+                      <p className="text-xs font-semibold"><span className="font-bold">Permanent Address:</span> <span className="font-normal">{userData.permanentAddress || 'N/A'}</span></p>
+                    </div>
+                  </div>
+                  {/* Right side: QR code */}
+                  <div className="flex items-center justify-end ml-4" style={{ backgroundColor: '#fff', marginTop:"-60px"}}>
+                    <QRCodeSVG
+                      value={JSON.stringify({
+                        name: userData.name,
+                        id: userData.userId,
+                        phone: userData.contactNo,
+                        dob: userData.dob,
+                        guru: userData.selectedL2User,
+                      })}
+                      size={130}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        {/* User Personal Details Card */}
-        <div
-          className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[500px] rounded-xl bg-yellow-100"
-          style={{ marginTop: "-30px", fontSize: "5px" }}
-        >
-          <div
-            className="flex-shrink-0 float-right"
-            style={{ marginTop: "10px" }}
-          >
-            <img
-              src={userData.photoUrl ? userData.photoUrl : "/logomain1.png"}
-              alt="User"
-              className="w-[80px] sm:w-[110px] h-[80px] sm:h-[110px] rounded-full object-cover mb-16 float-right"
-              onError={(e) => { e.currentTarget.src = "/logomain1.png"; }}
-            />
-          </div>
-          <p className="text-black text-base font-semibold mt-4" style={{ fontSize: "15px" }}>
-            Name: {userData.name}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Membership No: {userData.userId}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Date: {userData.dob && !isNaN(Date.parse(userData.dob)) 
-              ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) 
-              : "N/A"}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Phone: {userData.contactNo}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Peeta: {userData.peeta || "N/A"}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Guru: {userData.selectedL2User || "N/A"}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Phone number: {userData.contactNo || "N/A"}
-          </p>
-          <p className="text-black text-base font-semibold mt-1" style={{ fontSize: "15px" }}>
-            Address: {userData.permanentAddress || "N/A"}
-          </p>
         </div>
         <br />
         <br />

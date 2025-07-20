@@ -21,12 +21,19 @@ export async function POST(req:NextRequest) {
       presentAddress,
       permanentAddress,
       qualification,
+      higherDegree,
       occupation,
       languageKnown,
       password,
       selectedL2User,
       photoUrl, 
-     
+      kula,
+      married,
+      maneDhevaruName,
+      maneDhevaruAddress,
+      subKula,
+      guardianType,
+      guardianName,
     } = await req.json();
 
     // Hash the password
@@ -58,12 +65,19 @@ export async function POST(req:NextRequest) {
       presentAddress,
       permanentAddress,
       qualification,
+      higherDegree,
       occupation,
       languageKnown,
       selectedL2User,
       password: hashedPassword,
       photoUrl, 
-     
+      kula,
+      married,
+      maneDhevaruName,
+      maneDhevaruAddress,
+      subKula,
+      guardianType,
+      guardianName,
     });
 
     await newUser.save();

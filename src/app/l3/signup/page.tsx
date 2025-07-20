@@ -25,12 +25,21 @@ interface FormData {
   presentAddress: string;
   permanentAddress: string;
   qualification: string;
+  higherDegree?: string; // NEW
   occupation: string;
   languageKnown: string;
   selectedL2User: string;
   password: string;
   confirmPassword: string;
   photoUrl: File | string;
+  kula?: string; // NEW
+  married?: string; // NEW
+  kulaCustom?: string; // NEW
+  subKula?: string; // NEW
+  guardianType?: string; // NEW
+  guardianName?: string; // NEW
+  maneDhevaruName?: string; // NEW
+  maneDhevaruAddress?: string; // NEW
 }
 
 export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
@@ -58,13 +67,23 @@ export default function PersonalDetailsForm() {
     presentAddress: "",
     permanentAddress: "",
     qualification: "",
+    higherDegree: "", // NEW
     occupation: "",
     languageKnown: "",
     selectedL2User: "",
     password: "",
     confirmPassword: "",
     photoUrl: "",
+    kula: "Veera Shaiva Jangama", // NEW
+    married: "", // NEW
+    kulaCustom: "", // NEW
+    subKula: "",
+    guardianType: "",
+    guardianName: "",
+    maneDhevaruName: "",
+    maneDhevaruAddress: "",
   });
+  const [showHigherDegreeInput, setShowHigherDegreeInput] = useState(false); // NEW
   // const [language, setLanguage] = useState<string>("en"); // Removed unused variable
   const { t } = useTranslation();
   const router = useRouter();
@@ -119,6 +138,12 @@ export default function PersonalDetailsForm() {
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (name === "qualification") {
+      setShowHigherDegreeInput(value === "Higher Degree");
+      if (value !== "Higher Degree") {
+        setFormData((prevData) => ({ ...prevData, higherDegree: "" }));
+      }
+    }
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -289,6 +314,34 @@ export default function PersonalDetailsForm() {
       setIsVerifyingOtp(false);
     }
   };
+
+  const kulaOptions = [
+    "Veera Shaiva Jangama",
+    "Mataadhisharu",
+    "Matapatthi",
+    "Ganachasri",
+    "Saraganachaari",
+    "Bidi - ganangalu",
+    "Gante ayyanoru",
+    "Shuladha ayyanoru",
+    "Pathri ayyanoru",
+    "Kambi ayyanoru",
+    "Ayyar",
+    "Other"
+  ];
+
+  const subKulaOptions = [
+    "Mataadhisharu",
+    "Matapatthi",
+    "Ganachasri",
+    "Saraganachaari",
+    "Bidi - ganangalu",
+    "Gante ayyanoru",
+    "Shuladha ayyanoru",
+    "Pathri ayyanoru",
+    "Kambi ayyanoru",
+    "Ayyar"
+  ];
 
   return (
     <>
@@ -648,6 +701,108 @@ export default function PersonalDetailsForm() {
               </div>
             </div>
 
+            {/* Kula Field (fixed) */}
+            <div>
+              <label className="block text-sm font-semibold">Kula</label>
+              <input
+                type="text"
+                name="kula"
+                className="mb-2 p-2 border rounded w-full "
+                value="Veera Shaiva Jangama"
+                readOnly
+                disabled
+              />
+            </div>
+            {/* Sub Kula Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold">Sub Kula</label>
+              <select
+                name="subKula"
+                className="mb-4 p-2 border rounded w-full bg-white text-black"
+                value={formData.subKula || ""}
+                onChange={handleInputChange}
+              >
+                <option value="">Select Sub Kula</option>
+                {subKulaOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+            {/* Married or Not */}
+            <div>
+              <label className="block text-sm font-semibold">Married or Not</label>
+              <div className="mb-4 bg-white text-black p-2 rounded">
+                <label className="mr-4">
+                  <input
+                    type="radio"
+                    name="married"
+                    value="Yes"
+                    checked={formData.married === "Yes"}
+                    onChange={handleInputChange}
+                  /> Yes
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="married"
+                    value="No"
+                    checked={formData.married === "No"}
+                    onChange={handleInputChange}
+                  /> No
+                </label>
+              </div>
+            </div>
+
+            {/* Guardian Type and Name */}
+            <div className="flex items-center gap-2 mb-4">
+              <label className="block text-sm font-semibold">S/O, W/O, C/O</label>
+              <select
+                name="guardianType"
+                className="p-2 border rounded bg-white text-black"
+                value={formData.guardianType || ""}
+                onChange={handleInputChange}
+                style={{ minWidth: 80 }}
+              >
+                <option value="">Select</option>
+                <option value="S/O">S/O</option>
+                <option value="W/O">W/O</option>
+                <option value="C/O">C/O</option>
+              </select>
+              <input
+                type="text"
+                name="guardianName"
+                className="p-2 border rounded w-full"
+                placeholder="Enter Name"
+                value={formData.guardianName || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Mane Dhevaru Name */}
+            <div>
+              <label className="block text-sm font-semibold">Mane Dhevaru Name</label>
+              <input
+                type="text"
+                name="maneDhevaruName"
+                className="mb-2 p-2 border rounded w-full"
+                placeholder="Enter Mane Dhevaru Name"
+                value={formData.maneDhevaruName || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+            {/* Mane Dhevaru Address */}
+            <div>
+              <label className="block text-sm font-semibold">Mane Dhevaru Address</label>
+              <input
+                type="text"
+                name="maneDhevaruAddress"
+                className="mb-4 p-2 border rounded w-full"
+                placeholder="Enter Mane Dhevaru Address"
+                value={formData.maneDhevaruAddress || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="qualification"
@@ -663,10 +818,21 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
               >
                 <option value="">Select Qualification</option>
-                <option value="Job">Degree</option>
-                <option value="Business"> puc</option>
-                <option value="Job">10</option>
+                <option value="10">10</option>
+                <option value="PUC">PUC</option>
+                <option value="Degree">Degree</option>
+                <option value="Higher Degree">Higher Degree</option>
               </select>
+              {formData.qualification === "Higher Degree" && (
+                <input
+                  type="text"
+                  name="higherDegree"
+                  className="mt-2 p-2 border rounded w-full"
+                  placeholder="Enter your Higher Degree"
+                  value={formData.higherDegree || ""}
+                  onChange={handleInputChange}
+                />
+              )}
               {errors.qualification && <p className="text-red-500 text-xs mt-1">{errors.qualification}</p>}
             </div>
 
