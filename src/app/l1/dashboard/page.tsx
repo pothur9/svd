@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { QRCodeSVG } from "qrcode.react";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 
@@ -29,6 +31,7 @@ interface UserData {
   peeta: string | null;
   dhekshaGuru: string | null;
   imageUrl: string;
+  address?: string;
 }
 
 export default function Dashboard() {
@@ -36,6 +39,7 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const router = useRouter();
 
@@ -110,6 +114,32 @@ export default function Dashboard() {
     fetchData();
   }, [router]);
 
+  useEffect(() => {
+    // Responsive check for mobile
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [router]);
+
+  useEffect(() => {
+    if (userData?.imageUrl) {
+      const validateImage = async () => {
+        try {
+          const response = await fetch(userData.imageUrl);
+          if (!response.ok) {
+            console.error("Cloudinary image validation failed:", userData.imageUrl);
+          }
+        } catch (error) {
+          console.error("Error validating image:", error);
+        }
+      };
+      validateImage();
+    }
+  }, [userData]);
+
   if (!userData) return <p>Loading...</p>;
 
   // Define background colors for peetas in a repeating pattern
@@ -130,11 +160,23 @@ export default function Dashboard() {
     "Sri Kashi Peeta श्री काशी पीठ ಶ್ರೀ ಕಾಶಿ ಪೀಠ": "/img5.jpg",
     "Sri viraktha parmpare श्री विरक्त  परंपरा ಶ್ರೀ ವಿರಕ್ತ  ಪರಂಪರೆ": "/img6.jpg",
   };
-  
-console.log("peeta images log:", peetaImages);
 
+  console.log("peeta images log:", peetaImages);
 
   console.log(userId);
+  // Helper for mobile: get user counts for a member
+  const getUserCounts = (member: MemberData) => [
+    member.l2UserCount ?? 0,
+    member.l3UserCount ?? 0,
+    member.l4UserCount ?? 0,
+    (member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)
+  ];
+  const userTypeFullLabels = [
+    'Sri 108 Prabhu shivachrya',
+    'Sri guru Jangam',
+    'Sri Veerashiva',
+    'Total',
+  ];
   return (
     <>
       <Navbar />
@@ -142,226 +184,372 @@ console.log("peeta images log:", peetaImages);
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
           Dashboard
         </h1>
-       
-
-        {/* Table Structure with API Data */}
-        <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
-          <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
-          <thead>
-  <tr>
-    <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
-      Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
-    </th>
-
-    {memberData.map((member, index) => {
-      // Modify the image matching logic
-      const peetaKey = member.l1User.peeta.trim().toLowerCase();
-      console.log('Original Peeta:', member.l1User.peeta);
-      console.log('Processed Peeta Key:', peetaKey);
-      console.log('Available Peeta Image Keys:', Object.keys(peetaImages));
-      
-      const matchedPeetaKey = Object.keys(peetaImages).find(
-        key => key.trim().toLowerCase() === peetaKey
-      );
-      
-      console.log('Matched Peeta Key:', matchedPeetaKey);
-      const imageUrl = matchedPeetaKey ? peetaImages[matchedPeetaKey] : "/img2.jpg";
-      console.log('Image URL:', imageUrl);
-
-      return (
-        <th
-          key={index}
-          className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${
-            bgColors[index % bgColors.length]
-          }`}
-        >
-          <div className="flex flex-col items-center">
-            <img
-              src={imageUrl}
-              alt={member.l1User.peeta}
-              className="rounded-full mb-1 object-cover"
-              style={{ width: "65px", height: "100px" }}
-              onError={(e) => {
-                console.error('Image load error for:', member.l1User.peeta);
-                e.currentTarget.src = "/img2.jpg"; // Fallback image
-              }}
+        <div className="flex items-center justify-center gap-4 mt-6">
+          <div className="relative w-[250px] h-[250px]">
+            <Image
+              src="/count.png"
+              alt="Logo"
+              fill
+              className="object-contain"
             />
           </div>
-          <span className="block mt-1 text-sm font-semibold">{member.l1User.peeta}</span>
-        </th>
-      );
-    })}
-  </tr>
-</thead>
+          
+        </div>
+        {/* Responsive Table */}
+        <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
+          {/* Desktop Table */}
+          {!isMobile && (
+            <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
+              <thead>
+                <tr>
+                  <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
+                    Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
+                  </th>
 
-            <tbody>
-              {/* L1 Row - Names */}
-              {/* <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L1 (Name)</td>
-                {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">
-                    {member.l1User.name || "N/A"}
+                  {memberData.map((member, index) => {
+                    // Modify the image matching logic
+                    const peetaKey = member.l1User.peeta.trim().toLowerCase();
+                    console.log('Original Peeta:', member.l1User.peeta);
+                    console.log('Processed Peeta Key:', peetaKey);
+                    console.log('Available Peeta Image Keys:', Object.keys(peetaImages));
+                    
+                    const matchedPeetaKey = Object.keys(peetaImages).find(
+                      key => key.trim().toLowerCase() === peetaKey
+                    );
+                    
+                    console.log('Matched Peeta Key:', matchedPeetaKey);
+                    const imageUrl = matchedPeetaKey ? peetaImages[matchedPeetaKey] : "/img2.jpg";
+                    console.log('Image URL:', imageUrl);
+
+                    return (
+                      <th
+                        key={index}
+                        className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${
+                          bgColors[index % bgColors.length]
+                        }`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <div className="relative w-[65px] h-[100px]">
+                            <Image
+                              src={imageUrl}
+                              alt={member.l1User.peeta}
+                              fill
+                              className="rounded-full mb-1 object-cover"
+                              onError={(e) => {
+                                // @ts-expect-error - next/image doesn't properly type onError event
+                                e.target.src = "/img2.jpg";
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <span className="block mt-1 text-sm font-semibold">{member.l1User.peeta}</span>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+
+              <tbody>
+                {/* L2 Row - User Counts */}
+                <tr className="border border-gray-800 hover:bg-yellow-100">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
+                    Sri 108 Prabhu shivachrya
+                    <br />
+                    श्री 108 प्रभु शिवाचार्य
+                    <br />
+                    ಶ್ರೀ 108 ಪ್ರಭು ಶಿವಾಚಾರ್ಯರು
                   </td>
-                ))}
-              </tr> */}
+                  {memberData.map((member, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-800 p-1 sm:p-2 text-center"
+                    >
+                      {member.l2UserCount ?? 0}
+                    </td>
+                  ))}
+                </tr>
 
-              {/* L2 Row - User Counts */}
-              <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
-                Sri 108 Prabhu shivachrya
-श्री 108 प्रभु शिवाचार्य ಶ್ರೀ 108 ಪ್ರಭು ಶಿವಾಚಾರ್ಯರು
-
-                </td>
-                {memberData.map((member, index) => (
-                  <td
-                    key={index}
-                    className="border border-gray-800 p-1 sm:p-2 text-center"
-                  >
-                    {member.l2UserCount}
+                {/* L3 Row - User Counts */}
+                <tr className="border border-gray-800 hover:bg-yellow-100">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
+                    Sri guru Jangam
+                    <br />
+                    श्री गुरु जंगम
+                    <br />
+                    ಶ್ರೀ ಗುರು ಜಂಗಮ
                   </td>
-                ))}
-              </tr>
+                  {memberData.map((member, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-800 p-1 sm:p-2 text-center"
+                    >
+                      {member.l3UserCount ?? 0}
+                    </td>
+                  ))}
+                </tr>
 
-              {/* L3 Row - User Counts */}
-              <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
-                Sri guru Jangam श्री गुरु जंगम ಶ್ರೀ ಗುರು ಜಂಗಮ
-                </td>
-                {memberData.map((member, index) => (
-                  <td
-                    key={index}
-                    className="border border-gray-800 p-1 sm:p-2 text-center"
-                  >
-                    {member.l3UserCount}
+                {/* L4 Row - User Counts */}
+                <tr className="border border-gray-800 hover:bg-yellow-100">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
+                    Sri Veerashiva
+                    <br />
+                    श्री वीरशिव
+                    <br />
+                    ಶ್ರೀ ವೀರಶೈವ
                   </td>
-                ))}
-              </tr>
+                  {memberData.map((member, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-800 p-1 sm:p-2 text-center"
+                    >
+                      {member.l4UserCount ?? 0}
+                    </td>
+                  ))}
+                </tr>
 
-              {/* L4 Row - User Counts */}
-              <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
-                Sri Veerashiva श्री वीरशिव ಶ್ರೀ ವೀರಶೈವ
-                </td>
-                {memberData.map((member, index) => (
-                  <td
-                    key={index}
-                    className="border border-gray-800 p-1 sm:p-2 text-center"
-                  >
-                    {member.l4UserCount}
+                {/* Total Row */}
+                <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center">
+                    Total
                   </td>
-                ))}
-              </tr>
-
-              {/* Total Row */}
-              <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center">
-                  Total
-                </td>
-                {memberData.map((member, index) => (
-                  <td
-                    key={index}
-                    className="border border-gray-800 p-1 sm:p-2 text-center"
-                  >
-                    {member.l2UserCount +
-                      member.l3UserCount +
-                      member.l4UserCount}
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+                  {memberData.map((member, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-800 p-1 sm:p-2 text-center"
+                    >
+                      {(member.l2UserCount ?? 0) +
+                        (member.l3UserCount ?? 0) +
+                        (member.l4UserCount ?? 0)}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          )}
+          {/* Mobile Table (Transposed) */}
+          {isMobile && (
+            <table className="w-full table-fixed border-collapse border border-gray-800 bg-white shadow-lg text-xs">
+              <thead>
+                <tr>
+                  <th className="border border-gray-800 p-1 bg-orange-600 text-white text-center w-1/4 min-w-[60px]">Peeta</th>
+                  {userTypeFullLabels.map((label) => (
+                    <th key={label} className="border border-gray-800 p-1 bg-yellow-100 text-center w-1/5 min-w-[70px]">{label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {memberData.map((member, index) => {
+                  const peetaKey = member.l1User.peeta.trim().toLowerCase();
+                  const matchedPeetaKey = Object.keys(peetaImages).find(
+                    key => key.trim().toLowerCase() === peetaKey
+                  );
+                  const imageUrl = matchedPeetaKey ? peetaImages[matchedPeetaKey] : "/img2.jpg";
+                  const counts = getUserCounts(member);
+                  return (
+                    <tr key={index}>
+                      <td className={`border border-gray-800 p-1 text-center font-semibold ${bgColors[index % bgColors.length]} w-1/4 align-middle`} style={{fontSize:'0.7rem', minHeight: '48px', paddingTop: '6px'}}>
+                        <div className="flex flex-col items-start h-full">
+                          <div className="relative w-[32px] h-[32px] mb-1">
+                            <Image src={imageUrl} alt={member.l1User.peeta} fill className="rounded-full object-cover object-top" />
+                          </div>
+                          <span className="block text-[10px] break-words whitespace-normal leading-snug min-h-[24px] text-left" style={{wordBreak: 'break-word'}}>{member.l1User.peeta}</span>
+                        </div>
+                      </td>
+                      {counts.map((count, i) => (
+                        <td key={i} className="border border-gray-800 p-1 text-center w-1/5" style={{fontSize:'0.8rem'}}>{count}</td>
+                      ))}
+                    </tr>
+                  );
+                })}
+                {/* Column Totals Row */}
+                <tr className="bg-orange-100 font-bold">
+                  <td className="border border-gray-800 p-1 text-center">Total</td>
+                  {(() => {
+                    // Calculate totals for each user type column
+                    const totals = [0, 0, 0, 0];
+                    memberData.forEach(member => {
+                      const counts = getUserCounts(member);
+                      counts.forEach((count, i) => { totals[i] += count; });
+                    });
+                    return totals.map((total, i) => (
+                      <td key={i} className="border border-gray-800 p-1 text-center w-1/5">{total}</td>
+                    ));
+                  })()}
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
         <div className="flex items-center justify-center gap-4 mt-6">
-  <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
-  <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
-  <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>  
-  <span className="ml-4 text-3xl mt-3">Total: {total}</span>
-</h1>
-
-
-</div>
-<div>
-          {/* User Info Section */}
-          <div
-            className="items-center p-4 shadow-lg relative mx-auto max-w-[90%] sm:max-w-[500px] bg-orange-600 rounded-xl overflow-hidden mt-6"
-            style={{ height: "100px" }}
-          >
-            <h1 className="text-lg sm:text-2xl font-bold text-white float-right">
-              &nbsp; Sanathanaveershivadharma
-            </h1>
-            <div className="flex-shrink-0 float-left">
-              <img
-                src="/logomain1.png"
-                alt="Logo"
-                className="w-[80px] sm:w-[110px]"
-                style={{ marginTop: "-35px" }}
-              />
-            </div>
+          <div className="relative w-[150px] h-[150px]">
+            <Image
+              src="/logomain1.png"
+              alt="Logo"
+              fill
+              className="object-contain"
+            />
           </div>
+          <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center">
+            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>
+              →
+            </strong>
+            <span className="ml-4 text-3xl mt-3">Total: {total}</span>
+          </h1>
+        </div>
+        <div>
+          {/* User Info Section - Cards Container */}
+          <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-6">
+            <div className="flex flex-col sm:flex-row justify-center gap-8">
+              {/* Front Card */}
+              <div
+                className="w-[85mm] h-[55mm] mx-auto"
+                style={{ backgroundColor: '#fff', color: '#000' }}
+              >
+                <div
+                  className="rounded-xl w-full h-full shadow-lg overflow-hidden"
+                  style={{ backgroundColor: '#fff', color: '#000' }}
+                >
+                  {/* Orange Header Section */}
+                  <div
+                    className="p-3 flex items-center"
+                    style={{ backgroundColor: '#ea580c', color: '#fff' }}
+                  >
+                    <div className="relative w-[40px] h-[40px]">
+                      <Image
+                        src="/logomain1.png"
+                        alt="Logo"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <h1
+                      className="text-sm font-bold ml-2"
+                      style={{ color: '#fff', backgroundColor: '#ea580c' }}
+                    >
+                      Sanathana Veera Shiva <br/>Lingayatha Dharma
+                    </h1>
+                  </div>
+                  
+                  {/* Content Section */}
+                  <div
+                    className="p-3 flex justify-between"
+                    style={{ backgroundColor: '#fff', color: '#000' }}
+                  >
+                    {/* Left side - Text */}
+                    <div className="text-black" style={{ color: '#000', backgroundColor: '#fff' }}>
+                      <p className="text-sm font-semibold mb-1" style={{ color: '#000', backgroundColor: '#fff' }}>Name: {userData.name}</p>
+                      <p className="text-sm font-semibold mb-1" style={{ color: '#000', backgroundColor: '#fff' }}>ID: {userData.userId}</p>
+                      <p className="text-sm font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>Peeta: {userData.peeta || "N/A"}</p>
+                     
+                    </div>
+                    
+                    {/* Right side - Image and QR Code */}
+                    <div className="flex flex-col items-center" style={{ backgroundColor: '#fff' }}>
+                      <div className="relative w-[80px] h-[80px] -mt-6" style={{ backgroundColor: '#fff' }}>
+                        <Image
+                          src={userData.imageUrl && userData.imageUrl.startsWith("http") ? userData.imageUrl : "/default-avatar.jpg"}
+                          alt={`${userData.name}'s profile`}
+                          fill
+                          className="rounded-md object-cover border-2"
+                          style={{ borderColor: '#ea580c', backgroundColor: '#fff' }}
+                          onError={(e) => {
+                            // @ts-expect-error - next/image doesn't properly type onError event
+                            e.target.src = "/default-avatar.jpg";
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          {/* User Personal Details */}
-          <div
-            className="bg-white p-6 shadow-lg mx-auto mt-4 max-w-[90%] sm:max-w-[500px] rounded-xl bg-yellow-100"
-            style={{ marginTop: "-30px", fontSize: "5px" }}
-          >
-            <div
-              className="flex-shrink-0 float-right"
-              style={{ marginTop: "10px" }}
-            >
-              <img
-                src={userData.imageUrl}
-                alt="User"
-                className="w-[80px] sm:w-[110px] h-[80px] sm:h-[110px] rounded-full object-cover mb-16 float-right"
-              />
+              {/* Back Card */}
+              <div
+                className="w-[85mm] h-[55mm] mx-auto"
+                style={{ backgroundColor: '#fff', color: '#000' }}
+              >
+                <div
+                  className="rounded-xl w-full h-full shadow-lg overflow-hidden relative"
+                  style={{ backgroundColor: '#fff', color: '#000' }}
+                >
+                  {/* Orange Header Section (same as front) */}
+                  <div
+                    className="p-3 flex items-center z-10 relative"
+                    style={{ backgroundColor: '#ea580c', color: '#fff' }}
+                  ></div>
+                  {/* Watermark Logo */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      pointerEvents: 'none',
+                      zIndex: 50,
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    <Image
+                      src="/logomain1.png"
+                      alt="Logo Watermark"
+                      fill
+                      className="object-contain"
+                      style={{ 
+                        opacity: 0.20, 
+                        backgroundColor: 'transparent',
+                        maxWidth: '70%',
+                        maxHeight: '70%'
+                      }}
+                    />
+                  </div>
+                  {/* Content Section (above watermark) */}
+                  <div
+                    className="px-5 pb-5 pt-0 w-full h-full z-10 relative flex flex-row items-center justify-between"
+                    style={{ backgroundColor: '#fff', color: '#000' }}
+                  >
+                    <div className="flex-1" style={{ backgroundColor: '#fff', color: '#000' }}>
+                      <div className="grid grid-cols-1 gap-2" style={{ backgroundColor: '#fff', color: '#000' }}>
+                        <p className="text-xs font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>DOB: {
+                          userData.dob && !isNaN(Date.parse(userData.dob))
+                            ? new Date(userData.dob).toLocaleDateString("en-GB", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              })
+                            : "N/A"
+                        }</p>
+                        <p className="text-sm font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>Phone: {userData.contactNo}</p>
+                        <p className="text-xs font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>Guru: {userData.dhekshaGuru || "N/A"}</p>
+                        <p className="text-xs font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>Address: {userData.address || "N/A"}</p>
+                      </div>
+                    </div>
+                    {/* QR Code for back side, right side */}
+                    <div className="flex items-center justify-end ml-4" style={{ backgroundColor: '#fff' }}>
+                      <QRCodeSVG
+                        value={JSON.stringify({
+                          name: userData.name,
+                          id: userData.userId,
+                          peeta: userData.peeta,
+                          dob: userData.dob,
+                          phone: userData.contactNo,
+                          guru: userData.dhekshaGuru
+                        })}
+                        size={130}
+                        level="H"
+                        includeMargin={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p
-              className="text-black text-base font-semibold mt-4"
-              style={{ fontSize: "15px" }}
-            >
-              Name: {userData.name}
-            </p>
-            <p
-              className="text-black text-base font-semibold mt-1"
-              style={{ fontSize: "15px" }}
-            >
-              Id No: {userData.userId}
-            </p>
-            <p
-              className="text-black text-base font-semibold mt-1"
-              style={{ fontSize: "15px" }}
-            >
-              DOB:{" "}
-              {userData.dob && !isNaN(Date.parse(userData.dob))
-                ? new Date(userData.dob).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
-                : "N/A"}
-            </p>
-            <p
-              className="text-black text-base font-semibold mt-1"
-              style={{ fontSize: "15px" }}
-            >
-              Phone: {userData.contactNo}
-            </p>
-            <p
-              className="text-black text-base font-semibold mt-1"
-              style={{ fontSize: "15px" }}
-            >
-              Peeta: {userData.peeta || "N/A"}
-            </p>
-            <p
-              className="text-black text-base font-semibold mt-1"
-              style={{ fontSize: "15px" }}
-            >
-              Guru: {userData.dhekshaGuru || "N/A"}
-            </p>
           </div>
         </div>
-
       </div>
-
       <Footer />
     </>
   );

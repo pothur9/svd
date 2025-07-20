@@ -199,7 +199,7 @@ export default function PersonalDetailsForm() {
     setIsLoading(true);
     try {
       const otpResponse = await fetch(
-        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN/SVD`
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       const otpData = await otpResponse.json();
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 function Navbar() {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -23,6 +25,13 @@ function Navbar() {
 
     return () => clearInterval(interval); // Cleanup interval on unmount
   }, []);
+
+  const handleLogout = () => {
+    // Clear all session storage
+    sessionStorage.clear();
+    // Redirect to home page
+    router.push('/');
+  };
 
   return (
     <div>
@@ -50,6 +59,7 @@ function Navbar() {
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
             >
               <li><Link href="/l1/dashboard" className="text-lg">Home</Link></li>
+               <li><Link href="/l1/profile" className="text-lg">Profile</Link></li>
               <li><Link href="/l1/addevent" className="text-lg">Add Event</Link></li>
               <li><Link href="/l1/viewevents" className="text-lg">Event Calendar</Link></li>
               <li><Link href="/l1/history" className="text-lg">History</Link></li>
@@ -61,6 +71,7 @@ function Navbar() {
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li><Link href="/l1/dashboard" className="text-lg">Home</Link></li>
+             <li><Link href="/l1/profile" className="text-lg">Profile</Link></li>
             <li><Link href="/l1/addevent" className="text-lg">Add Event</Link></li>
             <li><Link href="/l1/viewevents" className="text-lg">Event Calendar</Link></li>
             <li><Link href="/l1/history" className="text-lg">History</Link></li>
@@ -74,9 +85,9 @@ function Navbar() {
               Total Users: {totalUsers}
             </div>
           )}
-          <Link href="/l1/login" className="btn">
+          <button onClick={handleLogout} className="btn">
             Logout
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -1,11 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const levels = [
-  { name: "Sri jagdhguru", login: "/l1/login", bgColor: "bg-yellow-100" },
-  { name: "Sri 108 Prabhu Shivachryaru", login: "/l2/login", signup: "/l2/signup", bgColor: "bg-blue-100" },
+  { name: "Sri 1008 jagdhguru", login: "/l1/login", bgColor: "bg-yellow-100" },
+  { name: "Sri 1008 Prabhu Shivachryaru", login: "/l2/login", signup: "/l2/signup", bgColor: "bg-blue-100" },
   { name: "Sri guru jangam", login: "/l3/login", signup: "/l3/signup", bgColor: "bg-green-100" },
   { name: "Sri veerashiva", login: "/l4/login", signup: "/l4/signup", bgColor: "bg-pink-100" },
 ];
@@ -13,8 +14,58 @@ const levels = [
 export default function Home() {
   // Sample logo color (adjust as needed)
   const logoBorderColor = "#fbbf24"; // Amber-400 as placeholder
-
+  const router = useRouter();
   const [selectedLevel, setSelectedLevel] = useState(levels[0]);
+
+  // Check if user is already logged in and redirect to appropriate dashboard
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userId = sessionStorage.getItem("userId");
+      if (userId) {
+        // Check which level the user belongs to by trying to fetch their data
+        const checkUserLevel = async () => {
+          try {
+            // Try L1 first
+            const l1Response = await fetch(`/api/l1/dashboard/${userId}`);
+            if (l1Response.ok) {
+              router.push("/l1/dashboard");
+              return;
+            }
+
+            // Try L2
+            const l2Response = await fetch(`/api/l2/dashboard/${userId}`);
+            if (l2Response.ok) {
+              router.push("/l2/dashboard");
+              return;
+            }
+
+            // Try L3
+            const l3Response = await fetch(`/api/l3/dashboard/${userId}`);
+            if (l3Response.ok) {
+              router.push("/l3/dashboard");
+              return;
+            }
+
+            // Try L4
+            const l4Response = await fetch(`/api/l4/dashboard/${userId}`);
+            if (l4Response.ok) {
+              router.push("/l4/dashboard");
+              return;
+            }
+
+            // If none work, clear the session and stay on home page
+            sessionStorage.clear();
+          } catch (error) {
+            console.error("Error checking user level:", error);
+            // If there's an error, clear session and stay on home page
+            sessionStorage.clear();
+          }
+        };
+
+        checkUserLevel();
+      }
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
@@ -65,7 +116,8 @@ export default function Home() {
         </div>
       </div>
       <footer className="mt-16 text-gray-400 text-xs text-center">
-        &copy; {new Date().getFullYear()} SVD. All rights reserved.
+        <div>&copy; {new Date().getFullYear()} SVD. All rights reserved.</div>
+        <div className="mt-1">Developed by Prashanth VM and Prasanna Kumar P Korlagundi (P) Bellary (T and D)</div>
       </footer>
     </div>
   );

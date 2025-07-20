@@ -7,7 +7,9 @@ import i18n from "../../../../i18n"; // Ensure the correct path
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+// Add to FormData interface
 interface FormData {
+  parampare: string;  // Add this line
   name: string;
   dob: string;
   contactNo: string;
@@ -27,7 +29,9 @@ interface FormData {
 }
 
 export default function SignupForm() {
+  // Add to initial state
   const [formData, setFormData] = useState<FormData>({
+    parampare: "",  // Add this line
     name: "",
     dob: "",
     contactNo: "",
@@ -296,7 +300,7 @@ export default function SignupForm() {
 
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN/SVD`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       console.log("OTP sent:", response.data);
       setIsOtpSent(true);
@@ -422,6 +426,27 @@ export default function SignupForm() {
           <h2 className="text-2xl font-bold text-black text-center mb-6">
             {t("signupl2.title")}
           </h2>
+        
+<div className="mb-4">
+  <label className="block mb-1 font-semibold text-black">
+    Select Parampare:
+    <select
+      name="parampare"
+      value={formData.parampare}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      required
+      className="border rounded-md p-2 w-full bg-white text-black"
+    >
+      <option value="">Select Parampare</option>
+      <option value="guru_shishya">Guru Shishya Parampare</option>
+      <option value="putra_shishya">Putra Shishya Parampare</option>
+    </select>
+  </label>
+  {errors.parampare && (
+    <p className="text-red-500 text-sm mt-1">{errors.parampare}</p>
+  )}
+</div>
            {/* Dropdown for Peeta (l2 users) */}
            <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
@@ -462,7 +487,7 @@ export default function SignupForm() {
               },
               {
                 label: t("signupl2.contactNo"),
-                type: "tel", // changed from 'number' to 'tel'
+                type: "tel", 
                 name: "contactNo",
                 required: true,
                 maxLength: 10, // add maxLength

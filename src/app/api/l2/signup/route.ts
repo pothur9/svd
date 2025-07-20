@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const {
+            parampare,  // Add this line
             name,
             dob,
             contactNo,
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
         const userId = await generateUniqueUserId();
 
         const newUser = new l2User({
+            parampare,  // Add this line
             userId,
             name,
             dob,

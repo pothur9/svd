@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 
 const l2UserSchema = new mongoose.Schema({
+  parampare: { type: String, required: true }, // Add this line
   userId: { type: String, unique: true, required: true },
   name: { type: String, required: true },
   dob: { type: Date, required: true },

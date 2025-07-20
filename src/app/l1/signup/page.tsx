@@ -106,7 +106,7 @@ export default function SignupForm() {
   const sendOtp = async () => {
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN/SVD`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       console.log("OTP sent:", response.data);
       setOtpSessionId(response.data.Details); // Store the session ID

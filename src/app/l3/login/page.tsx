@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -8,6 +8,16 @@ const LoginPage = () => {
   const [password, setPassword] = useState<string>(""); // password as string
   const [isLoading, setIsLoading] = useState<boolean>(false); // isLoading as boolean
   const router = useRouter();
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserId = sessionStorage.getItem("userId");
+      if (storedUserId) {
+        router.push("/l3/dashboard");
+      }
+    }
+  }, [router]);
 
   // Define the type of the event for the form submission
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
