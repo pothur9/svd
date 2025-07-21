@@ -272,11 +272,12 @@ export default function Dashboard() {
                 >
                   {/* Left side - Text */}
                   <div className="text-black" style={{ color: '#000', backgroundColor: '#fff' }}>
-                    <p className="text-sm font-semibold mb-1">Name: {userData.name}</p>
-                    <p className="text-sm font-semibold mb-1">S/o: {userData.karthruGuru || 'N/A'}</p>
-                    <p className="text-sm font-semibold mb-1">Peeta: {userData.peeta || 'N/A'}</p>
-                    <p className="text-sm font-semibold mb-1">DOB: {userData.dob && !isNaN(Date.parse(userData.dob)) ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) : "N/A"}</p>
+                    <p className="text-sm font-semibold ">Name: {userData.name}</p>
+                    <p className="text-sm font-semibold ">S/o: M.Karibasayya swamy</p>
+                    <p className="text-sm font-semibold ">Peeta: {userData.peeta || 'N/A'}</p>
+                    <p className="text-sm font-semibold ">DOB: {userData.dob && !isNaN(Date.parse(userData.dob)) ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) : "N/A"}</p>
                     <p className="text-sm font-semibold">Phone: {userData.contactNo}</p>
+                    <p className="text-sm font-semibold">Gotra:{userData.gothra || 'N/A'}</p>
                   </div>
                   {/* Right side - Image */}
                   <div className="flex flex-col items-center">
@@ -288,6 +289,10 @@ export default function Dashboard() {
                         style={{ borderColor: '#ea580c', backgroundColor: '#fff' }}
                         onError={(e) => { e.currentTarget.src = "/default-avatar.jpg"; }}
                       />
+                    </div>
+                    {/* E-KYC pending vertical text */}
+                    <div style={{ color: 'red', fontWeight: 'bold', marginTop: '8px', letterSpacing: '2px', fontSize: '10px' }}>
+                      E-KYC pending
                     </div>
                   </div>
                 </div>
@@ -308,7 +313,7 @@ export default function Dashboard() {
                   style={{ backgroundColor: '#ea580c', color: '#fff' }}
                 >
                   <span className="text-xs font-semibold w-full break-words">Guru: {userData.selectedL2User || 'N/A'}</span>
-                  <span className="text-xs font-semibold">Guru Address: {userData.presentAddress || 'N/A'}</span>
+                  <span className="text-xs font-semibold">Guru Address:  ಹರಗಿನ ದೋಣಿ. ಬಳ್ಳಾರಿ ಜಿ</span>
                 </div>
                 {/* Content Section (below ribbon) */}
                 <div
@@ -317,11 +322,11 @@ export default function Dashboard() {
                 >
                   {/* Left side: details */}
                   <div className="flex-1" style={{ backgroundColor: '#fff', color: '#000' }}>
-                    <div className="grid grid-cols-1 gap-0.5" style={{ backgroundColor: '#fff', color: '#000', marginTop:"-50px"}} >
+                    <div className="grid grid-cols-1 gap-0.5" style={{ backgroundColor: '#fff', color: '#000', marginTop:"-55px"}} >
                    
                       <p className="text-xs font-semibold"><span className="font-bold">Kula:</span> <span className="font-normal">{userData.kula || 'N/A'}</span></p>
-                      <p className="text-xs font-semibold"><span className="font-bold">Gotra:</span> <span className="font-normal">{userData.gothra || 'N/A'}</span></p>
-                      <p className="text-xs font-semibold"><span className="font-bold">Bhage:</span> <span className="font-normal">{userData.bhage || 'N/A'}</span></p>
+                    
+                      <p className="text-xs font-semibold"><span className="font-bold">Bhage:</span> <span className="font-normal">Panchavarna</span></p>
                       {/* <p className="text-xs font-semibold"><span className="font-bold">Nakshatra:</span> <span className="font-normal">{userData.nakshatra || 'N/A'}</span></p> */}
                       <p className="text-xs font-semibold"><span className="font-bold">Permanent Address:</span> <span className="font-normal">{userData.permanentAddress || 'N/A'}</span></p>
                     </div>

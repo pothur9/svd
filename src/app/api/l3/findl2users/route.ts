@@ -9,9 +9,25 @@ export async function GET() {
 
     const users = await l2.find({}, 'name');  // Only fetching name field
 
-    return NextResponse.json(users, { status: 200 });
+    return NextResponse.json(users, {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
+      },
+    });
   } catch (error) {
     console.error('Error fetching L2 users:', error);
-    return NextResponse.json({ error: 'Error fetching L2 users' }, { status: 500 });
+    return NextResponse.json({ error: 'Error fetching L2 users' }, {
+      status: 500,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
+      },
+    });
   }
 }
