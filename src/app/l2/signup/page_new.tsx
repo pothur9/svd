@@ -4,7 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Footer from "../footer/footer";
 import { useTranslation } from "react-i18next";
-import i18n from "../../../../i18n"; // Ensure the correct path
+import i18n from "../../../../i18n";
 import { auth } from "../../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
@@ -37,9 +37,8 @@ export default function SignupForm() {
   const { t } = useTranslation();
   const router = useRouter();
 
-
   const changeLanguage = (lang: string) => {
-    console.log(`Changing language to: ${lang}`); // Debugging log
+    console.log(`Changing language to: ${lang}`);
     i18n.changeLanguage(lang);
     setLanguage(lang);
   };
@@ -57,10 +56,10 @@ export default function SignupForm() {
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       console.log("OTP sent:", response.data);
-      setOtpSessionId(response.data.Details); // Store the session ID
+      setOtpSessionId(response.data.Details);
       setIsOtpSent(true);
-      setIsResendOtpDisabled(true); // Disable resend button
-      setResendTimer(10); // Reset the timer to 30 seconds
+      setIsResendOtpDisabled(true);
+      setResendTimer(10);
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("Failed to send OTP. Please check your phone number.");
@@ -81,15 +80,13 @@ export default function SignupForm() {
         // Create Firebase user
         let firebaseUid = "";
         try {
-          // Create a temporary email from phone number
           const tempEmail = `${formData.contactNo}@svd.temp`;
-          const tempPassword = `SVD${formData.contactNo}@2024`; // Temporary password
+          const tempPassword = `SVD${formData.contactNo}@2024`;
           const userCredential = await createUserWithEmailAndPassword(auth, tempEmail, tempPassword);
           firebaseUid = userCredential.user.uid;
           console.log("Firebase user created with UID:", firebaseUid);
         } catch (firebaseError) {
           console.error("Firebase user creation error:", firebaseError);
-          // If user already exists, try to sign in
           if ((firebaseError as { code?: string }).code === 'auth/email-already-in-use') {
             alert("This phone number is already registered.");
             return;
@@ -97,7 +94,7 @@ export default function SignupForm() {
         }
 
         const submitData = { ...formData, firebaseUid };
-        const result = await fetch("/api/l1/signup", {
+        const result = await fetch("/api/l2/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
@@ -114,8 +111,6 @@ export default function SignupForm() {
           peeta: "",
           karthruGuru: "",
         });
-        setIsOtpSent(false);
-        setOtp("");
       } else {
         alert(`OTP verification failed: ${response.data.Details}`);
       }
@@ -140,15 +135,15 @@ export default function SignupForm() {
   };
 
   const handleLoginRedirect = () => {
-    router.push("/l1/login"); // Redirect to the login page
+    router.push("/l2/login");
   };
 
   useEffect(() => {
-    let timer: NodeJS.Timeout | undefined; // Explicitly typing the timer
+    let timer: NodeJS.Timeout | undefined;
     if (isResendOtpDisabled && resendTimer > 0) {
       timer = setTimeout(() => setResendTimer((prev) => prev - 1), 1000);
     } else if (resendTimer === 0) {
-      setIsResendOtpDisabled(false); // Enable resend button when timer reaches 0
+      setIsResendOtpDisabled(false);
     }
     return () => {
       if (timer) {
@@ -156,7 +151,6 @@ export default function SignupForm() {
       }
     };
   }, [isResendOtpDisabled, resendTimer]);
-
 
   console.log(language);
   console.log(isOtpVerified);
@@ -205,12 +199,12 @@ export default function SignupForm() {
           </div>
 
           <h2 className="text-2xl font-bold text-black text-center mb-6 mt-10">
-            {t("signupl1.title")}
+            {t("signupl2.title")}
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.name")}:
+                {t("signupl2.name")}:
                 <input
                   type="text"
                   name="name"
@@ -223,13 +217,13 @@ export default function SignupForm() {
             </div>
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.contactNo")}:
+                {t("signupl2.contactNo")}:
                 <input
                   type="tel"
                   name="contactNo"
                   value={formData.contactNo}
                   onChange={(e) => {
-                    const { value } = e.target; // destructure value directly
+                    const { value } = e.target;
                     if (/^\d{0,10}$/.test(value)) {
                       handleChange(e);
                     }
@@ -246,7 +240,7 @@ export default function SignupForm() {
             </div>
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.peeta")}:
+                {t("signupl2.peeta")}:
                 <input
                   type="text"
                   name="peeta"
@@ -259,7 +253,7 @@ export default function SignupForm() {
             </div>
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.karthruGuru")}:
+                {t("signupl2.karthruGuru")}:
                 <input
                   type="text"
                   name="karthruGuru"
@@ -341,7 +335,7 @@ export default function SignupForm() {
           )}
           <p>
             have an account?
-            <a href="/l1/login" className="text-blue-500 hover:text-blue-700">
+            <a href="/l2/login" className="text-blue-500 hover:text-blue-700">
               &nbsp; Move to login
             </a>
           </p>

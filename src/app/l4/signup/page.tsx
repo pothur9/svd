@@ -10,27 +10,15 @@ import {
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../../i18n"; // Ensure the correct path
+import Image from "next/image";
+import { auth } from "../../../lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 interface FormData {
   name: string;
-  dob: string;
-  gender: string;
   contactNo: string;
-  mailId: string;
-  karthruGuru: string;
   peeta: string;
-  bhage: string;
-  gothra: string;
-  nationality: string;
-  presentAddress: string;
-  permanentAddress: string;
-  qualification: string;
-  occupation: string;
-  languageKnown: string;
-  selectedL2User: string;
-  password: string;
-  confirmPassword: string;
-  photoUrl: File | string;
+  karthruGuru: string;
 }
 
 export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
@@ -46,26 +34,10 @@ export default function PersonalDetailsForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
-    dob: "",
-    gender: "",
     contactNo: "",
-    mailId: "",
-    karthruGuru: "",
     peeta: "",
-    bhage: "",
-    gothra: "",
-    nationality: "",
-    presentAddress: "",
-    permanentAddress: "",
-    qualification: "",
-    occupation: "",
-    languageKnown: "",
-    selectedL2User: "",
-    password: "",
-    confirmPassword: "",
-    photoUrl: "",
+    karthruGuru: "",
   });
-  const [language, setLanguage] = useState<string>("en");
   const { t } = useTranslation();
   const router = useRouter();
   const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
@@ -81,9 +53,7 @@ export default function PersonalDetailsForm() {
   const [permanentLandmark, setPermanentLandmark] = useState<string>("");
 
   const changeLanguage = (lang: string) => {
-    console.log(`Changing language to: ${lang}`); // Debugging log
     i18n.changeLanguage(lang);
-    setLanguage(lang);
   };
   const fetchL2Users = useCallback(async () => {
     try {
@@ -91,7 +61,6 @@ export default function PersonalDetailsForm() {
       if (!response.ok) throw new Error("Failed to fetch L2 users.");
       const users = await response.json();
       setL2Users(users);
-      console.log(l2Users);
     } catch (error) {
       console.error("Error fetching L2 users:", error);
     }
@@ -257,12 +226,29 @@ export default function PersonalDetailsForm() {
         if (!photoResponse.ok) throw new Error("Failed to upload photo.");
         const photoData = await photoResponse.json();
 
+        // Create Firebase user
+        let firebaseUid = "";
+        try {
+          const tempEmail = `${formData.contactNo}@svd.temp`;
+          const tempPassword = `SVD${formData.contactNo}@2024`;
+          const userCredential = await createUserWithEmailAndPassword(auth, tempEmail, tempPassword);
+          firebaseUid = userCredential.user.uid;
+          console.log("Firebase user created with UID:", firebaseUid);
+        } catch (firebaseError) {
+          console.error("Firebase user creation error:", firebaseError);
+          if ((firebaseError as { code?: string }).code === 'auth/email-already-in-use') {
+            alert("This phone number is already registered.");
+            return;
+          }
+        }
+
         const response = await fetch("/api/l4/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
             photoUrl: photoData.secure_url,
+            firebaseUid,
           }),
         });
 
@@ -314,7 +300,7 @@ export default function PersonalDetailsForm() {
       <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
         <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
           <div className="flex justify-center">
-            <img src="/logo.png" alt="Logo" width={100} height={100} />
+            <Image src="/logo.png" alt="Logo" width={100} height={100} />
           </div>
           <h2 className="text-2xl font-semibold text-center mb-6">
             {t("signupl3.title")}
@@ -718,39 +704,6 @@ export default function PersonalDetailsForm() {
                 name="photoUrl"
                 id="photoUrl"
                 onChange={handleFileChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold">
-                {t("signupl3.password")}
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
-              />
-            </div>
-
-            {/* Confirm Password Field */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-semibold"
-              >
-                {t("signupl3.confirmPassword")}
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                id="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               />

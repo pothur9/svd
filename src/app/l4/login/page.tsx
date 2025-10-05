@@ -6,8 +6,12 @@ import Image from "next/image";
 
 const LoginPage = () => {
   const [userId, setUserId] = useState<string>(""); // Type for userId
-  const [password, setPassword] = useState<string>(""); // Type for password
+  const [contactNo, setContactNo] = useState<string>(""); // Type for contact number
+  const [otp, setOtp] = useState<string>(""); // Type for OTP
+  const [otpSessionId, setOtpSessionId] = useState<string>(""); // OTP session ID
+  const [isOtpSent, setIsOtpSent] = useState<boolean>(false); // OTP sent status
   const [isLoading, setIsLoading] = useState<boolean>(false); // Type for loading state
+  const [isVerifying, setIsVerifying] = useState<boolean>(false); // Type for verifying OTP
   const router = useRouter();
 
   // Redirect to dashboard if already logged in
@@ -20,40 +24,79 @@ const LoginPage = () => {
     }
   }, [router]);
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission
-
-    setIsLoading(true); // Start loading
+  // Send OTP
+  const handleSendOtp = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!contactNo || !/^\d{10}$/.test(contactNo)) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/l4/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, password }), // Send userId and password to the server
-      });
-
-      const data = await response.json(); // Parse the JSON response
-
-      if (response.ok) {
-        // If the response is successful
-        sessionStorage.setItem("userId", userId); // Store userId in session storage
-        router.push("/l4/dashboard"); // Redirect to dashboard or another page
+      const response = await fetch(
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${contactNo}/AUTOGEN3/SVD`
+      );
+      const data = await response.json();
+      if (data.Status === "Success") {
+        setOtpSessionId(data.Details);
+        setIsOtpSent(true);
+        alert("OTP sent successfully!");
       } else {
-        alert(data.message); // Show error message if login fails
+        alert("Failed to send OTP. Please try again.");
       }
     } catch (error) {
-      console.error("Error during login:", error); // Log any errors
-      alert("An error occurred. Please try again."); // Notify the user
+      console.error("Error sending OTP:", error);
+      alert("An error occurred while sending OTP.");
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
+    }
+  };
+
+  // Verify OTP and login
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      alert("Please enter the OTP.");
+      return;
+    }
+    setIsVerifying(true);
+    try {
+      const verifyResponse = await fetch(
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${otpSessionId}/${otp}`
+      );
+      const verifyData = await verifyResponse.json();
+      
+      if (verifyData.Status === "Success") {
+        // OTP verified, now login
+        const loginResponse = await fetch("/api/l4/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, contactNo }),
+        });
+        
+        const loginData = await loginResponse.json();
+        
+        if (loginResponse.ok) {
+          sessionStorage.setItem("userId", userId);
+          alert("Login successful!");
+          router.push("/l4/dashboard");
+        } else {
+          alert(loginData.message || "Login failed.");
+        }
+      } else {
+        alert("Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      alert("An error occurred during verification.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form
-        onSubmit={handleLogin}
+        onSubmit={handleSendOtp}
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
       >
         <div className="flex justify-center">
@@ -68,39 +111,80 @@ const LoginPage = () => {
             onChange={(e) => setUserId(e.target.value)}
             placeholder="Enter your User ID"
             required
+            disabled={isOtpSent}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
           />
         </label>
         <label className="block mb-4">
-          <span className="text-gray-700">Password</span>
+          <span className="text-gray-700">Contact Number</span>
           <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
+            type="text"
+            value={contactNo}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+              setContactNo(value);
+            }}
+            placeholder="Enter your 10-digit phone number"
             required
+            disabled={isOtpSent}
+            maxLength={10}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
           />
         </label>
-        <p className="text-right mt-1 mb-5">
-            <a
-              href="/l4/forgotpass"
-              className="text-blue-500 hover:text-blue-700"
+        
+        {isOtpSent && (
+          <label className="block mb-4">
+            <span className="text-gray-700">Enter OTP</span>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              required
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
+            />
+          </label>
+        )}
+        
+        {!isOtpSent ? (
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full p-2 rounded-md text-white ${
+              isLoading
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            {isLoading ? "Sending OTP..." : "Send OTP"}
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={handleVerifyOtp}
+              disabled={isVerifying}
+              className={`w-full p-2 rounded-md text-white ${
+                isVerifying
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
             >
-             Forgot Password ?
-            </a>
-          </p>
-        <button
-          type="submit"
-          disabled={isLoading} // Disable button while loading
-          className={`w-full p-2 rounded-md text-white ${
-            isLoading
-              ? "bg-blue-300 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
-          }`}
-        >
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
+              {isVerifying ? "Verifying..." : "Verify OTP & Login"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsOtpSent(false);
+                setOtp("");
+                setOtpSessionId("");
+              }}
+              className="w-full p-2 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400"
+            >
+              Resend OTP
+            </button>
+          </div>
+        )}
       </form>
       {/* Loading Spinner */}
       {isLoading && (

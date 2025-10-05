@@ -1,7 +1,6 @@
 // app/api/l2/signup/route.ts
 import dbConnect from "@/lib/dbconnect";
 import l2User from '@/models/l2'; // Assuming l2 user model is available
-import bcrypt from 'bcrypt';
 import { NextRequest, NextResponse } from "next/server";
 
 async function generateUniqueUserId() {
@@ -29,46 +28,22 @@ export async function POST(req: NextRequest) {
 
     try {
         const {
-            parampare,  // Add this line
             name,
-            dob,
             contactNo,
-            peetarohanaDate,
-            gender,
-            karthruGuru, // Selected name from dropdown
-            dhekshaGuru,
             peeta,
-            bhage,
-            gothra,
-            mariPresent,
-            password,
-            imageUrl,
-            address,
-           
-            
+            karthruGuru,
+            firebaseUid,
         } = await req.json();
 
-        const hashedPassword = await bcrypt.hash(password, 10);
         const userId = await generateUniqueUserId();
 
         const newUser = new l2User({
-            parampare,  // Add this line
             userId,
             name,
-            dob,
             contactNo,
-            peetarohanaDate,
-            gender,
-            karthruGuru,
-            dhekshaGuru,
             peeta,
-            bhage,
-            gothra,
-            mariPresent,
-            password: hashedPassword,
-            imageUrl,
-            address,
-          
+            karthruGuru,
+            firebaseUid,
         });
 
         await newUser.save();

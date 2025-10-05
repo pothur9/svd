@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
+import AuthManager from "../../lib/auth";
 import Navbar from "../navbar/page";
 import Footer from "../footer/page";
 
@@ -11,13 +12,6 @@ interface L1User {
   _id: string;
   name: string;
   peeta: string;
-}
-
-interface MemberData {
-  l1User: L1User;
-  l2UserCount: number;
-  l3UserCount: number;
-  l4UserCount: number;
 }
 
 interface UserData {
@@ -42,7 +36,13 @@ export default function Dashboard(): JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId");
+    if (!AuthManager.isAuthenticated()) {
+      router.push("/l2/login");
+      return;
+    }
+
+    const currentUser = AuthManager.getAuthUser();
+    const userId = currentUser?.userId;
 
     if (!userId) {
       router.push("/l2/login");
@@ -185,6 +185,12 @@ export default function Dashboard(): JSX.Element {
     'Total',
   ];
 
+  // Add logout function
+  const handleLogout = () => {
+    AuthManager.logout();
+    router.push("/l2/login");
+  };
+
   return (
     <>
       <Navbar />
@@ -192,6 +198,16 @@ export default function Dashboard(): JSX.Element {
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
           Dashboard
         </h1>
+
+        {/* Logout Button */}
+        <div className="flex justify-end mb-4 mr-6">
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
         <div className="flex items-center justify-center gap-4 mt-6">
           <div className="relative w-[250px] h-[250px]">
             <Image

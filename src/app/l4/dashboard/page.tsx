@@ -178,7 +178,7 @@ export default function Dashboard() {
               <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
                 <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
                 {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount + member.l3UserCount}</td>
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount + member.l3UserCount + member.l4UserCount}</td>
                 ))}
               </tr>
             </tbody>
@@ -189,7 +189,7 @@ export default function Dashboard() {
           <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
             <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>  
-            <span className="ml-4 text-3xl mt-3">Total: {memberData.reduce((acc, member) => acc + member.l2UserCount + member.l3UserCount, 0)}</span>
+            <span className="ml-4 text-3xl mt-3">Total: {memberData.reduce((acc, member) => acc + member.l2UserCount + member.l3UserCount + member.l4UserCount, 0)}</span>
           </h1>
         </div>
         <br/>

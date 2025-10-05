@@ -14,7 +14,8 @@ const l1UserSchema = new mongoose.Schema({
   bhage: { type: String, required: true },
   gothra: { type: String, required: true },
   mariPresent: { type: String,  },
-  password:{ type: String, required: true },
+  password:{ type: String, required: false },
+  firebaseUid: { type: String, required: false },
   imageUrl:{ type: String, required: true },
   address:{ type: String, required: true },
 });

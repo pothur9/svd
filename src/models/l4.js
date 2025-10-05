@@ -18,7 +18,8 @@ const l4UserSchema = new mongoose.Schema({
   qualification: { type: String, required: true },
   occupation: { type: String, required: true },
   languageKnown: { type: String, required: true },
-  password:{ type: String, required: true },
+  password:{ type: String, required: false },
+  firebaseUid: { type: String, required: false },
   photoUrl:{ type: String, required: true },
   selectedL2User:{ type: String, required: true },
   

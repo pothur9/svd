@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 import { QRCodeSVG } from "qrcode.react";
+import AuthManager from "../../../lib/auth";
 
 interface MemberData {
   l1User: {
@@ -49,10 +50,15 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId");
+    // Check authentication using AuthManager
+    if (!AuthManager.isAuthenticated()) {
+      router.replace("/l3/login");
+      return;
+    }
 
+    const userId = AuthManager.getCurrentUserId();
     if (!userId) {
-      router.push("/l3/login");
+      router.replace("/l3/login");
       return;
     }
 
@@ -86,7 +92,10 @@ export default function Dashboard() {
         const userData = await response.json();
         setUserData(userData);
 
-        // Store peeta name and username in session storage
+        // Store additional data in session storage for legacy compatibility
+        if (userId) {
+          sessionStorage.setItem("userId", userId);
+        }
         sessionStorage.setItem("peeta", userData.peeta || "");
         sessionStorage.setItem("username", userData.name);
         sessionStorage.setItem("guru", userData.selectedL2User || "");
@@ -96,7 +105,8 @@ export default function Dashboard() {
     }
 
     fetchMemberData();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (memberData.length === 0 || !userData) return <p>Loading...</p>;
 
@@ -194,7 +204,7 @@ export default function Dashboard() {
               <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
                 <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
                 {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount + member.l3UserCount}</td>
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount + member.l3UserCount + member.l4UserCount}</td>
                 ))}
               </tr>
             </tbody>
@@ -205,7 +215,7 @@ export default function Dashboard() {
           <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
             <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>  
-            <span className="ml-4 text-3xl mt-3">Total: {memberData.reduce((acc, member) => acc + member.l2UserCount + member.l3UserCount, 0)}</span>
+            <span className="ml-4 text-3xl mt-3">Total: {memberData.reduce((acc, member) => acc + member.l2UserCount + member.l3UserCount + member.l4UserCount, 0)}</span>
           </h1>
         </div>
         <br/>

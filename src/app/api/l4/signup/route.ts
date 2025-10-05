@@ -1,7 +1,6 @@
 import dbConnect from "@/lib/dbconnect";
 import l4User from "@/models/l4";
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 
 export async function POST(req:NextRequest) {
   try {
@@ -23,14 +22,11 @@ export async function POST(req:NextRequest) {
       qualification,
       occupation,
       languageKnown,
-      password,
+      firebaseUid,
       selectedL2User,
       photoUrl, 
      
     } = await req.json();
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     let userId;
     let isUnique = false;
@@ -61,7 +57,7 @@ export async function POST(req:NextRequest) {
       occupation,
       languageKnown,
       selectedL2User,
-      password: hashedPassword,
+      firebaseUid,
       photoUrl, 
      
     });

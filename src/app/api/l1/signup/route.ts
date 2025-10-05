@@ -1,6 +1,5 @@
 import dbConnect from "@/lib/dbconnect";
 import l1User from '@/models/l1';
-import bcrypt from 'bcrypt';
 import { NextRequest, NextResponse } from "next/server";
 
 // Helper function to generate unique user ID
@@ -40,12 +39,11 @@ export async function POST(req: NextRequest) {
             bhage,
             gothra,
             mariPresent,
-            password,
+            firebaseUid,
             imageUrl, 
             address,// receiving image URL
         } = await req.json();
 
-        const hashedPassword = await bcrypt.hash(password, 10);
         const userId = await generateUniqueUserId();
 
         const newUser = new l1User({
@@ -61,7 +59,7 @@ export async function POST(req: NextRequest) {
             bhage,
             gothra,
             mariPresent,
-            password: hashedPassword,
+            firebaseUid,
             imageUrl, 
             address// storing image URL in the database
         });

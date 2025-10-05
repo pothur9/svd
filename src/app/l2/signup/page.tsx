@@ -1,314 +1,71 @@
 "use client";
-
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { useTranslation } from "react-i18next";
-import i18n from "../../../../i18n"; // Ensure the correct path
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-// Add to FormData interface
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../i18n";
+import { auth } from "../../../lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { generateCustomUID } from "../../../lib/firebase";
+
 interface FormData {
-  parampare: string;  // Add this line
   name: string;
-  dob: string;
   contactNo: string;
-  peetarohanaDate: string;
-  gender: string;
-  karthruGuru: string;
-  dhekshaGuru: string;
   peeta: string;
-  bhage: string;
-  gothra: string;
-  mariPresent: string;
-  password: string;
-  confirmPassword: string;
-  imageUrl: string;
-  address: string;
-  [key: string]: string;
+  karthruGuru: string;
 }
 
 export default function SignupForm() {
-  // Add to initial state
   const [formData, setFormData] = useState<FormData>({
-    parampare: "",  // Add this line
     name: "",
-    dob: "",
     contactNo: "",
-    peetarohanaDate: "",
-    gender: "",
-    karthruGuru: "",
-    dhekshaGuru: "",
     peeta: "",
-    bhage: "",
-    gothra: "",
-    mariPresent: "",
-    password: "",
-    confirmPassword: "",
-    imageUrl: "",
-    address: "",
+    karthruGuru: "",
   });
-
-  const [l1Users, setL1Users] = useState<string[]>([]);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [otp, setOtp] = useState<string>("");
+  const [otpSessionId, setOtpSessionId] = useState<string>("");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
   const [isOtpVerified, setIsOtpVerified] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
   const [isUserIdVisible, setIsUserIdVisible] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
+  const [isResendOtpDisabled, setIsResendOtpDisabled] = useState<boolean>(true);
+  const [resendTimer, setResendTimer] = useState<number>(150);
+  const [peetaOptions, setPeetaOptions] = useState<string[]>([]);
+
   const [language, setLanguage] = useState<string>("en");
   const { t } = useTranslation();
   const router = useRouter();
-  const [statesData, setStatesData] = useState<{ [state: string]: string[] }>({});
-  const [selectedState, setSelectedState] = useState<string>("");
-  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [taluk, setTaluk] = useState<string>(""); // new field
-  const [landmark, setLandmark] = useState<string>(""); // new field
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  useEffect(() => {
-    async function fetchL1Users() {
-      try {
-        const response = await axios.get("/api/l2/getguruname");
-        setL1Users(response.data || []);
-      } catch (error) {
-        console.error("Error fetching l1 users:", error);
-      }
-    }
-    fetchL1Users();
-    // Fetch states/districts data
-    fetch("/districts.json")
-      .then((res) => res.json())
-      .then((data) => setStatesData(data))
-      .catch((err) => console.error("Failed to load districts.json", err));
-  }, []);
   const changeLanguage = (lang: string) => {
-    console.log(`Changing language to: ${lang}`); // Debugging log
+    console.log(`Changing language to: ${lang}`);
     i18n.changeLanguage(lang);
     setLanguage(lang);
   };
 
-  // Validate a single field
-  const validateField = (name: string, value: string): string => {
-    switch (name) {
-      case "name":
-        if (!value.trim()) return t("signupl2.name") + " is required";
-        break;
-      case "dob":
-        if (!value) return t("signupl2.dob") + " is required";
-        {
-          const dobDate = new Date(value);
-          const now = new Date();
-          if (dobDate > now) return "Date of birth cannot be in the future";
-          const age = now.getFullYear() - dobDate.getFullYear();
-          if (age < 10) return "You must be at least 10 years old";
-        }
-        break;
-      case "contactNo":
-        if (!value) return t("signupl2.contactNo") + " is required";
-        if (!/^\d{10}$/.test(value)) return "Contact number must be exactly 10 digits";
-        if (/^(\d)\1{9}$/.test(value)) return "Invalid phone number";
-        if (/^0/.test(value)) return "Phone number cannot start with 0";
-        break;
-      case "peetarohanaDate":
-        if (!value) return t("signupl2.peetarohanaDate") + " is required";
-        {
-          const peetaDate = new Date(value);
-          const now = new Date();
-          if (peetaDate > now) return "Peetarohana date cannot be in the future";
-          if (formData.dob) {
-            const dobDate = new Date(formData.dob);
-            if (peetaDate < dobDate) return "Peetarohana date cannot be before date of birth";
-          }
-        }
-        break;
-      case "gender":
-        if (!value) return t("signupl2.gender") + " is required";
-        break;
-      case "karthruGuru":
-        if (!value.trim()) return t("signupl2.karthruGuru") + " is required";
-        break;
-      case "dhekshaGuru":
-        if (!value.trim()) return t("signupl2.dhekshaGuru") + " is required";
-        break;
-      case "peeta":
-        if (!value) return t("signupl1.peeta") + " is required";
-        break;
-      case "bhage":
-        if (!value.trim()) return t("signupl2.bhage") + " is required";
-        break;
-      case "gothra":
-        if (!value.trim()) return t("signupl2.gothra") + " is required";
-        break;
-      case "password":
-        if (!value) return t("signupl2.password") + " is required";
-        if (value.length < 6) return "Password must be at least 6 characters";
-        break;
-      case "confirmPassword":
-        if (!value) return t("signupl2.confirmPassword") + " is required";
-        if (value !== formData.password) return "Passwords do not match";
-        break;
-      default:
-        break;
-    }
-    return "";
-  };
-
-  // Update handleChange to restrict phone number and date year input
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, type } = e.target;
-
-    if (name === "contactNo") {
-      let filtered = value.replace(/\D/g, "");
-      if (filtered.length > 10) filtered = filtered.slice(0, 10);
-      setFormData((prev) => ({ ...prev, [name]: filtered }));
-      setErrors((prev) => ({ ...prev, [name]: validateField(name, filtered) }));
-      return;
-    }
-
-    if ((name === "dob" || name === "peetarohanaDate") && type === "date" && value) {
-      // value is in format YYYY-MM-DD
-      const year = value.split("-")[0];
-      if (year.length > 4) return; // Ignore input if year is more than 4 digits
-    }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
-  };
-
-  // Add handleBlur for per-field validation
-  const handleBlur = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
     const { name, value } = e.target;
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Update handleImageChange to validate image file
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    setImageFile(file);
-    let error = "";
-    if (!file) error = "Profile picture is required";
-    else if (!file.type.startsWith("image/")) error = "File must be an image";
-    setErrors((prev) => ({ ...prev, imageUrl: error }));
-  };
-
-  const uploadImageToCloudinary = async (): Promise<string | null> => {
-    if (!imageFile) return null;
-    try {
-      const imageFormData = new FormData();
-      imageFormData.append("file", imageFile);
-      imageFormData.append("upload_preset", "profilephoto");
-
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dxruv6swh/image/upload",
-        {
-          method: "POST",
-          body: imageFormData,
-        }
-      );
-
-      const data = await res.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error("Image upload failed:", error);
-      return null;
-    }
-  };
-
-  // Enhanced Validation function
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-    // Name
-    if (!formData.name.trim()) newErrors.name = t("signupl2.name") + " is required";
-    // DOB
-    if (!formData.dob) newErrors.dob = t("signupl2.dob") + " is required";
-    else {
-      const dobDate = new Date(formData.dob);
-      const now = new Date();
-      if (dobDate > now) newErrors.dob = "Date of birth cannot be in the future";
-      else {
-        const age = now.getFullYear() - dobDate.getFullYear();
-        if (age < 10) newErrors.dob = "You must be at least 10 years old";
-      }
-    }
-    // Contact Number
-    if (!formData.contactNo) newErrors.contactNo = t("signupl2.contactNo") + " is required";
-    else if (!/^\d{10}$/.test(formData.contactNo)) newErrors.contactNo = "Contact number must be exactly 10 digits";
-    else if (/^(\d)\1{9}$/.test(formData.contactNo)) newErrors.contactNo = "Invalid phone number";
-    else if (/^0/.test(formData.contactNo)) newErrors.contactNo = "Phone number cannot start with 0";
-    // Peetarohana Date
-    if (!formData.peetarohanaDate) newErrors.peetarohanaDate = t("signupl2.peetarohanaDate") + " is required";
-    else {
-      const peetaDate = new Date(formData.peetarohanaDate);
-      const now = new Date();
-      if (peetaDate > now) newErrors.peetarohanaDate = "Peetarohana date cannot be in the future";
-      if (formData.dob) {
-        const dobDate = new Date(formData.dob);
-        if (peetaDate < dobDate) newErrors.peetarohanaDate = "Peetarohana date cannot be before date of birth";
-      }
-    }
-    // Gender
-    if (!formData.gender) newErrors.gender = t("signupl2.gender") + " is required";
-    // Karthru Guru
-    if (!formData.karthruGuru.trim()) newErrors.karthruGuru = t("signupl2.karthruGuru") + " is required";
-    // Dheksha Guru
-    if (!formData.dhekshaGuru.trim()) newErrors.dhekshaGuru = t("signupl2.dhekshaGuru") + " is required";
-    // Peeta
-    if (!formData.peeta) newErrors.peeta = t("signupl1.peeta") + " is required";
-    // Bhage
-    if (!formData.bhage.trim()) newErrors.bhage = t("signupl2.bhage") + " is required";
-    // Gothra
-    if (!formData.gothra.trim()) newErrors.gothra = t("signupl2.gothra") + " is required";
-    // State
-    if (!selectedState) newErrors.state = "State is required";
-    // District
-    if (!selectedDistrict) newErrors.district = "District is required";
-    // City
-    if (!city.trim()) newErrors.city = "City is required";
-    // Taluk
-    if (!taluk.trim()) newErrors.taluk = "Taluk is required";
-    // Landmark
-    if (!landmark.trim()) newErrors.landmark = "Landmark is required";
-    // Password
-    if (!formData.password) newErrors.password = t("signupl2.password") + " is required";
-    else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
-    // Confirm Password
-    if (!formData.confirmPassword) newErrors.confirmPassword = t("signupl2.confirmPassword") + " is required";
-    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
-    // Image file
-    if (!imageFile) newErrors.imageUrl = "Profile picture is required";
-    else if (imageFile && !imageFile.type.startsWith("image/")) newErrors.imageUrl = "File must be an image";
-    return newErrors;
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const validationErrors = validateForm();
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
-
-    setIsLoading(true);
-
+  const sendOtp = async () => {
     try {
       const response = await axios.get(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       console.log("OTP sent:", response.data);
+      setOtpSessionId(response.data.Details);
       setIsOtpSent(true);
+      setIsResendOtpDisabled(true);
+      setResendTimer(10);
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("Failed to send OTP");
-    } finally {
-      setIsLoading(false);
+      alert("Failed to send OTP. Please check your phone number.");
+      setIsSubmitting(false);
     }
   };
 
@@ -316,84 +73,117 @@ export default function SignupForm() {
     setIsVerifyingOtp(true);
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY3/${formData.contactNo}/${otp}`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
       );
-      console.log("OTP verified:", response.data);
-      setIsOtpVerified(true);
+      console.log("OTP verified response:", response.data);
+      if (response.data.Status === "Success") {
+        setIsOtpVerified(true);
 
-      const imageUrl = await uploadImageToCloudinary();
-      if (!imageUrl) {
-        alert("Image upload failed");
-        return;
+        // Create Firebase user or generate custom UID
+        let firebaseUid = "";
+        try {
+          const tempEmail = `${formData.contactNo}@svd.temp`;
+          const tempPassword = `SVD${formData.contactNo}@2024`;
+          const userCredential = await createUserWithEmailAndPassword(auth, tempEmail, tempPassword);
+          firebaseUid = userCredential.user.uid;
+          console.log("Firebase user created with UID:", firebaseUid);
+        } catch (firebaseError) {
+          console.error("Firebase user creation error:", firebaseError);
+          const errorCode = (firebaseError as { code?: string }).code;
+
+          if (errorCode === 'auth/email-already-in-use') {
+            alert("This phone number is already registered.");
+            return;
+          }
+
+          // Generate a custom UID as fallback (no Firebase auth needed)
+          firebaseUid = generateCustomUID();
+          console.log("Generated custom UID:", firebaseUid);
+        }
+
+        const submitData = { ...formData, firebaseUid };
+        const result = await fetch("/api/l2/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submitData),
+        });
+        const responseData = await result.json();
+        
+        if (result.ok) {
+          alert(responseData.message);
+          setUserId(responseData.userId);
+          setIsUserIdVisible(true);
+          setIsOtpSent(false);
+          setOtp("");
+          setFormData({
+            name: "",
+            contactNo: "",
+            peeta: "",
+            karthruGuru: "",
+          });
+        } else {
+          alert(responseData.error || "Signup failed. Please try again.");
+        }
+      } else {
+        alert(`OTP verification failed: ${response.data.Details}`);
       }
-
-      const { confirmPassword, ...submitData } = {
-        ...formData,
-        imageUrl,
-        landmark,
-        taluk,
-        city,
-        address: `${selectedState}, ${selectedDistrict}, ${city}, ${taluk}, ${landmark}`,
-      };
-      console.log(confirmPassword);
-      const result = await fetch("/api/l2/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submitData),
-      });
-
-      const responseData = await result.json();
-      alert(responseData.message);
-
-      setUserId(responseData.userId);
-      setIsUserIdVisible(true);
-      setIsOtpSent(false);
-      setOtp("");
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("OTP verification failed");
+      alert("An error occurred during OTP verification.");
     } finally {
       setIsVerifyingOtp(false);
     }
-  };  const handleLoginRedirect = () => {
-    router.push("/l2/login"); // Redirect to the login page
-  
-}; console.log(language)
-
-  const handleStateChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedState(e.target.value);
-    setSelectedDistrict("");
-    setCity("");
-    setFormData((prev) => ({ ...prev, address: "" }));
-    setErrors((prev) => ({ ...prev, state: "", district: "", city: "", taluk: "", landmark: "" })); // Clear errors on state change
   };
 
-  const handleDistrictChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedDistrict(e.target.value);
-    setCity("");
-    setFormData((prev) => ({ ...prev, address: "" }));
-    setErrors((prev) => ({ ...prev, district: "" })); // Clear error on district change
+  const handleResendOtp = async () => {
+    if (!isResendOtpDisabled) {
+      await sendOtp();
+    }
   };
 
-  const handleCityChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCity(e.target.value);
-    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${e.target.value}, ${taluk}, ${landmark}` }));
-    setErrors((prev) => ({ ...prev, city: "" })); // Clear error on city change
-  };
-  const handleTalukChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setTaluk(e.target.value);
-    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${city}, ${e.target.value}, ${landmark}` }));
-    setErrors((prev) => ({ ...prev, taluk: "" }));
-  };
-  const handleLandmarkChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setLandmark(e.target.value);
-    setFormData((prev) => ({ ...prev, address: `${selectedState}, ${selectedDistrict}, ${city}, ${taluk}, ${e.target.value}` }));
-    setErrors((prev) => ({ ...prev, landmark: "" }));
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await sendOtp();
   };
 
+  const handleLoginRedirect = () => {
+    router.push("/l2/login");
+  };
+
+  useEffect(() => {
+    // Fetch peeta options
+    const fetchPeetaOptions = async () => {
+      try {
+        const response = await axios.get("/api/l2/getguruname");
+        const uniquePeeta = [...new Set(response.data)] as string[];
+        setPeetaOptions(uniquePeeta);
+      } catch (error) {
+        console.error("Error fetching peeta options:", error);
+      }
+    };
+    fetchPeetaOptions();
+  }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (isResendOtpDisabled && resendTimer > 0) {
+      timer = setTimeout(() => setResendTimer((prev) => prev - 1), 1000);
+    } else if (resendTimer === 0) {
+      setIsResendOtpDisabled(false);
+    }
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [isResendOtpDisabled, resendTimer]);
+
+  console.log(language);
+  console.log(isOtpVerified);
   return (
     <>
-      <div className="flex flex-col items-center p-2 bg-gray-100 rounded-xl shadow-md">
+      <div className="flex flex-col items-center p-6 bg-gray-100 rounded-xl shadow-md">
         <h1 className="text-2xl font-semibold text-gray-800 mb-4">
           Select Your Language
         </h1>
@@ -418,322 +208,153 @@ export default function SignupForm() {
           </button>
         </div>
       </div>
+
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-          <div className="flex justify-center">
-            <Image src="/logomain1.png" alt="Logo" width={100} height={100} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src="/logomain1.png"
+              alt="Logo"
+              style={{ width: "110px", height: "auto" }}
+            />
           </div>
-          <h2 className="text-2xl font-bold text-black text-center mb-6">
+
+          <h2 className="text-2xl font-bold text-black text-center mb-6 mt-10">
             {t("signupl2.title")}
           </h2>
-        
-<div className="mb-4">
-  <label className="block mb-1 font-semibold text-black">
-    Select Parampare:
-    <select
-      name="parampare"
-      value={formData.parampare}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      required
-      className="border rounded-md p-2 w-full bg-white text-black"
-    >
-      <option value="">Select Parampare</option>
-      <option value="guru_shishya">Guru Shishya Parampare</option>
-      <option value="putra_shishya">Putra Shishya Parampare</option>
-    </select>
-  </label>
-  {errors.parampare && (
-    <p className="text-red-500 text-sm mt-1">{errors.parampare}</p>
-  )}
-</div>
-           {/* Dropdown for Peeta (l2 users) */}
-           <div className="mb-4">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.peeta")}
+                {t("signupl2.name")}:
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="border rounded-md p-2 w-full bg-white text-black"
+                />
+              </label>
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 font-semibold text-black">
+                {t("signupl2.contactNo")}:
+                <input
+                  type="tel"
+                  name="contactNo"
+                  value={formData.contactNo}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    if (/^\d{0,10}$/.test(value)) {
+                      handleChange(e);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (formData.contactNo.length !== 10) {
+                      alert("Phone number must be exactly 10 digits.");
+                    }
+                  }}
+                  required
+                  className="border rounded-md p-2 w-full bg-white text-black"
+                />
+              </label>
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 font-semibold text-black">
+                {t("signupl2.peeta")}:
                 <select
                   name="peeta"
                   value={formData.peeta}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   required
                   className="border rounded-md p-2 w-full bg-white text-black"
                 >
-                  {" "}
-                  <option value="">Select peeta</option>
-                  {l1Users.map((user) => (
-                    <option key={user} value={user}>
-                      {user}
+                  <option value="">Select Peeta</option>
+                  {peetaOptions.map((peeta, index) => (
+                    <option key={index} value={peeta}>
+                      {peeta}
                     </option>
                   ))}
                 </select>
               </label>
-              {errors.peeta && <p className="text-red-500 text-sm mt-1">{errors.peeta}</p>}
             </div>
-          <form onSubmit={handleSubmit}>
-            {/* Form Fields */}
-            {[
-              {
-                label: t("signupl2.name"),
-                type: "text",
-                name: "name",
-                required: true,
-              },
-              {
-                label: t("signupl2.dob"),
-                type: "date",
-                name: "dob",
-                required: true,
-              },
-              {
-                label: t("signupl2.contactNo"),
-                type: "tel", 
-                name: "contactNo",
-                required: true,
-                maxLength: 10, // add maxLength
-                pattern: "[0-9]{10}",
-              },
-              {
-                label: t("signupl2.peetarohanaDate"),
-                type: "date",
-                name: "peetarohanaDate",
-                required: true,
-              },
-              {
-                label: t("signupl2.gender"),
-                type: "select",
-                name: "gender",
-                options: [
-                  { value: "", label: "Select" },
-                  { value: "male", label: "Male" },
-                  { value: "female", label: "Female" },
-                ],
-                required: true,
-              },
-              {
-                label: t("signupl2.karthruGuru"),
-                type: "text",
-                name: "karthruGuru",
-                required: true,
-              },
-              {
-                label: t("signupl2.dhekshaGuru"),
-                type: "text",
-                name: "dhekshaGuru",
-                required: true,
-              },
-              {
-                label: t("signupl2.bhage"),
-                type: "text",
-                name: "bhage",
-                required: true,
-              },
-              {
-                label: t("signupl2.gothra"),
-                type: "text",
-                name: "gothra",
-                required: true,
-              },
-              {
-                label: t("signupl2.mariPresent"),
-                type: "text",
-                name: "mariPresent",
-              },
-              // Remove the address field from here
-              // { label: t("signupl2.address"), type: "text", name: "address" },
-              {
-                label: t("signupl2.password"),
-                type: "password",
-                name: "password",
-                required: true,
-              },
-              {
-                label: t("signupl2.confirmPassword"),
-                type: "password",
-                name: "confirmPassword",
-                required: true,
-              },
-            ].map((field, index) => (
-              <div key={index} className="mb-4">
-                <label className="block mb-1 font-semibold text-black">
-                  {field.label}:
-                  {field.type === "select" ? (
-                    <select
-                      name={field.name}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      required={field.required}
-                      className="border rounded-md p-2 w-full bg-white text-black"
-                    >
-                      {field.options ? (
-                        field.options.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="">No options available</option>
-                      )}
-                    </select>
-                  ) : (
-                    <input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      required={field.required}
-                      maxLength={field.name === "contactNo" ? 10 : undefined}
-                      pattern={field.name === "contactNo" ? "[0-9]{10}" : undefined}
-                      className="border rounded-md p-2 w-full bg-white text-black"
-                    />
-                  )}
-                </label>
-                {errors[field.name] && (
-                  <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
-                )}
-              </div>
-            ))}
-
-            {/* Address Stepper */}
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                Address:
-                <div className="flex flex-col gap-2">
-                  {/* Step 1: State */}
-                  <select
-                    name="state"
-                    value={selectedState}
-                    onChange={handleStateChange}
-                    onBlur={() => setErrors((prev) => ({ ...prev, state: !selectedState ? "State is required" : "" }))}
-                    required
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                  >
-                    <option value="">Select State</option>
-                    {Object.keys(statesData).map((state) => (
-                      <option key={state} value={state}>{state}</option>
-                    ))}
-                  </select>
-                  {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
-                  {/* Step 2: District */}
-                  <select
-                    name="district"
-                    value={selectedDistrict}
-                    onChange={handleDistrictChange}
-                    onBlur={() => setErrors((prev) => ({ ...prev, district: !selectedDistrict ? "District is required" : "" }))}
-                    required={!!selectedState}
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                    disabled={!selectedState}
-                  >
-                    <option value="">{selectedState ? "Select District" : "Select State First"}</option>
-                    {selectedState && statesData[selectedState] &&
-                      statesData[selectedState].map((district) => (
-                        <option key={district} value={district}>{district}</option>
-                      ))}
-                  </select>
-                  {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
-                  {/* Step 3: City */}
-                  <input
-                    type="text"
-                    name="city"
-                    value={city}
-                    onChange={handleCityChange}
-                    onBlur={() => setErrors((prev) => ({ ...prev, city: !city.trim() ? "City is required" : "" }))}
-                    required={!!selectedDistrict}
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                    placeholder="Enter City Name"
-                    disabled={!selectedDistrict}
-                  />
-                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
-                  {/* Step 4: Taluk */}
-                  <input
-                    type="text"
-                    name="taluk"
-                    value={taluk}
-                    onChange={handleTalukChange}
-                    onBlur={() => setErrors((prev) => ({ ...prev, taluk: !taluk.trim() ? "Taluk is required" : "" }))}
-                    required={!!selectedDistrict}
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                    placeholder="Enter Taluk Name"
-                    disabled={!selectedDistrict}
-                  />
-                  {errors.taluk && <p className="text-red-500 text-sm mt-1">{errors.taluk}</p>}
-                  {/* Step 5: Landmark */}
-                  <input
-                    type="text"
-                    name="landmark"
-                    value={landmark}
-                    onChange={handleLandmarkChange}
-                    onBlur={() => setErrors((prev) => ({ ...prev, landmark: !landmark.trim() ? "Landmark is required" : "" }))}
-                    required={!!selectedDistrict}
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                    placeholder="Enter Landmark and House number"
-                    disabled={!selectedDistrict}
-                  />
-                  {errors.landmark && <p className="text-red-500 text-sm mt-1">{errors.landmark}</p>}
-                </div>
-              </label>
-            </div>
-
-           
-
-            <div className="mb-4">
-              <label className="block mb-1 font-semibold text-black">
-                {t("signupl1.uploadProfilePicture")}
+                {t("signupl2.karthruGuru")}:
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  onBlur={handleImageChange}
+                  type="text"
+                  name="karthruGuru"
+                  value={formData.karthruGuru}
+                  onChange={handleChange}
+                  required
                   className="border rounded-md p-2 w-full bg-white text-black"
                 />
               </label>
-              {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{errors.imageUrl}</p>}
             </div>
 
-           
-            {/* Submit Button */}
-            <div className="flex justify-between mt-4">
-              <button
-                type="submit"
-                disabled={isLoading || isOtpVerified}
-                className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-              >
-                {isLoading ? "Sending OTP..." : "Send OTP"}
-              </button>
-              {isOtpSent && !isOtpVerified && (
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter OTP"
-                    className="border rounded-md p-2 w-full bg-white text-black"
-                  />
+            {isOtpSent ? (
+              <>
+                <div className="mb-4">
+                  <label className="block mb-1 font-semibold text-black">
+                    OTP:
+                    <input
+                      type="text"
+                      name="otp"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                      className="border rounded-md p-2 w-full bg-white text-black"
+                    />
+                  </label>
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-blue-500 text-white py-2 px-4 rounded-md"
+                  >
+                    {isSubmitting ? "Sending OTP..." : "Send OTP"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={isResendOtpDisabled}
+                    className="text-blue-500 py-2 px-4 rounded-md"
+                  >
+                    Resend OTP ({resendTimer}s)
+                  </button>
+                </div>
+
+                <div className="flex justify-center mb-4">
                   <button
                     type="button"
                     onClick={verifyOtp}
-                    className="ml-2 px-6 py-2 rounded bg-green-600 text-white hover:bg-green-700"
                     disabled={isVerifyingOtp}
+                    className="bg-green-500 text-white py-2 px-4 rounded-md"
                   >
-                    {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
+                    {isVerifyingOtp ? "Verifying OTP..." : "Verify OTP"}
                   </button>
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="flex justify-center mb-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-500 text-white py-2 px-4 rounded-md"
+                >
+                  {isSubmitting ? "Sending OTP..." : "Send OTP"}
+                </button>
+              </div>
+            )}
           </form>
-
-          {/* Loading Spinner */}
-          {isVerifyingOtp && !isOtpVerified && (
-            <div className="flex justify-center mt-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-600 border-solid"></div>
-              <span className="ml-4 text-lg font-semibold text-blue-600">
-                Verifying OTP...
-              </span>
-            </div>
-          )}
-          {/* User ID Display */}
           {isUserIdVisible && (
             <div className="text-center mt-4">
               <p className="text-black">Your user ID is: {userId}</p>
@@ -753,6 +374,7 @@ export default function SignupForm() {
           </p>
         </div>
       </div>
+    
     </>
   );
 }

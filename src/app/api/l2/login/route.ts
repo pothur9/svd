@@ -1,29 +1,35 @@
-// pages/api/l1/login.js
-import dbConnect from "@/lib/dbconnect"; // Adjust the path as necessary
-import l2User from '@/models/l2'; // Ensure you have the correct model imported
-import bcrypt from "bcrypt";
+// pages/api/l2/login.js
+import dbConnect from "@/lib/dbconnect";
+import l2User from '@/models/l2';
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  await dbConnect(); // Ensure that the database connection is established
+  await dbConnect();
 
   try {
-    const { userId, password } = await req.json(); // Parse the request body as JSON
+    const { userId } = await req.json();
 
-    const user = await l2User.findOne({ userId }); // Fetch user from database
+    if (!userId) {
+      return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+    }
+
+    // Check if user exists
+    const user = await l2User.findOne({ userId });
 
     if (!user) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Account not found' }, { status: 404 });
     }
 
-    // Compare the password with the hashed password in the database
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
-    }
+    // Login successful - return user info
+    return NextResponse.json({
+      message: 'Login successful',
+      user: {
+        userId: user.userId,
+        name: user.name,
+        contactNo: user.contactNo
+      }
+    }, { status: 200 });
 
-    // Login successful
-    return NextResponse.json({ message: 'Login successful' }, { status: 200 }); // Changed to 200 for successful login
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json({ message: 'Server error' }, { status: 500 });
