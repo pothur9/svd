@@ -18,13 +18,24 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+
+// Only initialize messaging in the browser
+let messaging: ReturnType<typeof getMessaging> | null = null;
+if (typeof window !== 'undefined') {
+  messaging = getMessaging(app);
+}
 
 // Export auth but it won't be used for authentication
 export const auth = getAuth(app);
 
 export const requestFcmToken = async () => {
     try {
+      // Ensure we're in a browser environment
+      if (typeof window === 'undefined' || !messaging) {
+        console.warn('FCM not available in this environment');
+        return null;
+      }
+
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         return null;

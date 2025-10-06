@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
-import AuthManager from "../../lib/auth";
+import AuthManager from "../../../lib/auth";
 import Navbar from "../navbar/page";
 import Footer from "../footer/page";
 
@@ -12,6 +12,13 @@ interface L1User {
   _id: string;
   name: string;
   peeta: string;
+}
+
+interface MemberData {
+  l1User: L1User;
+  l2UserCount: number;
+  l3UserCount: number;
+  l4UserCount: number;
 }
 
 interface UserData {

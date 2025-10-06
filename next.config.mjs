@@ -11,7 +11,18 @@ const nextConfig = {
     typescript: {
       ignoreBuildErrors: true,
     },
+    webpack: (config, { isServer }) => {
+      // Ignore @sparticuz/chromium and puppeteer on client-side builds
+      if (!isServer) {
+        config.resolve.alias = {
+          ...config.resolve.alias,
+          '@sparticuz/chromium': false,
+          'puppeteer-core': false,
+          'puppeteer': false,
+        };
+      }
+      return config;
+    },
   };
   
   export default nextConfig;
-  

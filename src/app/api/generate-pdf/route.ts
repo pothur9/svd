@@ -15,10 +15,10 @@ export async function POST(req: NextRequest) {
 
   try {
     if (isVercel) {
-      // Vercel/serverless: use chrome-aws-lambda
-      const chromium = require('chrome-aws-lambda');
+      // Vercel/serverless: use @sparticuz/chromium
+      const chromium = require('@sparticuz/chromium');
       puppeteer = require('puppeteer-core');
-      executablePath = await chromium.executablePath;
+      executablePath = await chromium.executablePath();
       args = chromium.args;
       headless = chromium.headless;
       defaultViewport = chromium.defaultViewport;
