@@ -283,7 +283,7 @@ export default function Dashboard() {
                   {/* Left side - Text */}
                   <div className="text-black" style={{ color: '#000', backgroundColor: '#fff' }}>
                     <p className="text-sm font-semibold ">Name: {userData.name}</p>
-                    <p className="text-sm font-semibold ">S/o: M.Karibasayya swamy</p>
+                    <p className="text-sm font-semibold "></p>
                     <p className="text-sm font-semibold ">Peeta: {userData.peeta || 'N/A'}</p>
                     <p className="text-sm font-semibold ">DOB: {userData.dob && !isNaN(Date.parse(userData.dob)) ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) : "N/A"}</p>
                     <p className="text-sm font-semibold">Phone: {userData.contactNo}</p>
