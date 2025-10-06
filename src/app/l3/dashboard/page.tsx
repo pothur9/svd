@@ -323,7 +323,7 @@ export default function Dashboard() {
                   style={{ backgroundColor: '#ea580c', color: '#fff' }}
                 >
                   <span className="text-xs font-semibold w-full break-words">Guru: {userData.selectedL2User || 'N/A'}</span>
-                  <span className="text-xs font-semibold">Guru Address:  ಹರಗಿನ ದೋಣಿ. ಬಳ್ಳಾರಿ ಜಿ</span>
+                  {/* <span className="text-xs font-semibold">Guru Address: {userData.address || 'N/A'}</span> */}
                 </div>
                 {/* Content Section (below ribbon) */}
                 <div
@@ -336,7 +336,7 @@ export default function Dashboard() {
                    
                       <p className="text-xs font-semibold"><span className="font-bold">Kula:</span> <span className="font-normal">{userData.kula || 'N/A'}</span></p>
                     
-                      <p className="text-xs font-semibold"><span className="font-bold">Bhage:</span> <span className="font-normal">Panchavarna</span></p>
+                      {/* <p className="text-xs font-semibold"><span className="font-bold">Bhage:</span> <span className="font-normal">Panchavarna</span></p> */}
                       {/* <p className="text-xs font-semibold"><span className="font-bold">Nakshatra:</span> <span className="font-normal">{userData.nakshatra || 'N/A'}</span></p> */}
                       <p className="text-xs font-semibold"><span className="font-bold">Permanent Address:</span> <span className="font-normal">{userData.permanentAddress || 'N/A'}</span></p>
                     </div>
