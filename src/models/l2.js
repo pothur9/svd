@@ -6,7 +6,7 @@ const l2UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   contactNo: { type: String, required: true },
   peeta: { type: String, required: true },
-  karthruGuru: { type: String, required: true },
+  mataName: { type: String, required: true },
   password: { type: String, required: false },
   firebaseUid: { type: String, required: false },
 });

@@ -4,9 +4,9 @@
       "name": "Name",
       "dob": "Date of Birth",
       "contactNo": "Contact No",
-      "peetarohanaDate": "Date of Peetarohana",
+      "peetarohanDate": "Date of Peetarohan",
       "gender": "Gender",
-      "karthruGuru": "Name of Karthru Guru",
+      "karthruGuru": "Name of Mata",
       "dhekshaGuru": "Name of Dheksha Guru",
       "peeta": "Peeta",
       "bhage": "Bhage",
@@ -24,9 +24,10 @@
       "name": "Name",
       "dob": "Date of Birth",
       "contactNo": "Contact No",
-      "peetarohanaDate": "Date of Peetarohana",
+      "peetarohanDate": "Date of Peetarohan",
       "gender": "Gender",
       "karthruGuru": "Name of Karthru Guru",
+      "mataName": "Mata Name",
       "dhekshaGuru": "Name of Dheksha Guru",
       "peeta": "Peeta",
       "bhage": "Bhage",
@@ -46,7 +47,7 @@
     "gender": "Gender",
     "contactNo": "Contact Number",
     "mailId": "Email ID",
-    "karthruGuru": "Karthru Guru Name",
+    "karthruGuru": "Guru Name",
     "peeta": "Peeta",
     "bhage": "Bhage",
     "gothra": "Gothra",
@@ -62,4 +63,3 @@
     "photoUrl": "Profile Picture"
   }
   }
-  

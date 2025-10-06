@@ -6,7 +6,7 @@
       "contactNo": "संपर्क नंबर",
       "peetarohanaDate": "पीठारोहण तिथि",
       "gender": "लिंग",
-      "karthruGuru": "कर्तृ गुरु का नाम",
+      "karthruGuru": "माता का नाम",
       "dhekshaGuru": "दीक्षा गुरु का नाम",
       "peeta": "पीठ",
       "bhage": "भागे",
@@ -47,7 +47,7 @@
     "gender": "लिंग",
     "contactNo": "संपर्क नंबर",
     "mailId": "ईमेल आईडी",
-    "karthruGuru": "कर्तृ गुरु का नाम",
+    "karthruGuru": "गुरु का नाम",
     "peeta": "पीठ",
     "bhage": "भागे",
     "gothra": "गोत्र",
@@ -63,4 +63,3 @@
     "photoUrl": "प्रोफ़ाइल तस्वीर"
   }
   }
-  

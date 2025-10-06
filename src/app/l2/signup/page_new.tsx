@@ -12,7 +12,7 @@ interface FormData {
   name: string;
   contactNo: string;
   peeta: string;
-  karthruGuru: string;
+  mataName: string;
 }
 
 export default function SignupForm() {
@@ -20,7 +20,7 @@ export default function SignupForm() {
     name: "",
     contactNo: "",
     peeta: "",
-    karthruGuru: "",
+    mataName: "",
   });
   const [otp, setOtp] = useState<string>("");
   const [otpSessionId, setOtpSessionId] = useState<string>("");
@@ -109,7 +109,7 @@ export default function SignupForm() {
           name: "",
           contactNo: "",
           peeta: "",
-          karthruGuru: "",
+          mataName: "",
         });
       } else {
         alert(`OTP verification failed: ${response.data.Details}`);
@@ -253,11 +253,11 @@ export default function SignupForm() {
             </div>
             <div className="mb-4">
               <label className="block mb-1 font-semibold text-black">
-                {t("signupl2.karthruGuru")}:
+                {t("signupl2.mataName")}:
                 <input
                   type="text"
-                  name="karthruGuru"
-                  value={formData.karthruGuru}
+                  name="mataName"
+                  value={formData.mataName}
                   onChange={handleChange}
                   required
                   className="border rounded-md p-2 w-full bg-white text-black"

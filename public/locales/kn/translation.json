@@ -6,7 +6,7 @@
       "contactNo": "ಸಂಪರ್ಕ ಸಂಖ್ಯೆ",
       "peetarohanaDate": "ಪೀಠಾರೋಹಣ ದಿನಾಂಕ",
       "gender": "ಲಿಂಗ",
-      "karthruGuru": "ಕರ್ತೃ ಗುರುಹಿರಿಯರ ಹೆಸರು",
+      "karthruGuru": "ಮಾತೆಯ ಹೆಸರು",
       "dhekshaGuru": "ದೀಕ್ಷಾ ಗುರುಹಿರಿಯರ ಹೆಸರು",
       "peeta": "ಪೀಠ",
       "bhage": "ಭಾಗೆ",
@@ -27,6 +27,7 @@
       "peetarohanaDate": "ಪೀಠಾರೋಹಣ ದಿನಾಂಕ",
       "gender": "ಲಿಂಗ",
       "karthruGuru": "ಕರ್ತೃ ಗುರುಹಿರಿಯರ ಹೆಸರು",
+      "mataName": "ಮಾತೆಯ ಹೆಸರು",
       "dhekshaGuru": "ದೀಕ್ಷಾ ಗುರುಹಿರಿಯರ ಹೆಸರು",
       "peeta": "ಪೀಠ",
       "bhage": "ಭಾಗೆ",
@@ -46,7 +47,7 @@
     "gender": "ಲಿಂಗ",
     "contactNo": "ಸಂಪರ್ಕ ಸಂಖ್ಯೆ",
     "mailId": "ಇಮೇಲ್ ID",
-    "karthruGuru": "ಕರ್ತೃ ಗುರುಹಿರಿಯರ ಹೆಸರು",
+    "karthruGuru": "ಗುರುವಿನ ಹೆಸರು",
     "peeta": "ಪೀಠ",
     "bhage": "ಭಾಗೆ",
     "gothra": "ಗೋತ್ರ",
@@ -62,4 +63,3 @@
     "photoUrl": "ಪ್ರೊಫೈಲ್ ಚಿತ್ರ"
   }
   }
-  

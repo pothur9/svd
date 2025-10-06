@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
             name,
             contactNo,
             peeta,
-            karthruGuru,
+            mataName,
             firebaseUid,
         } = await req.json();
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
             name,
             contactNo,
             peeta,
-            karthruGuru,
+            mataName,
             firebaseUid,
         });
 

@@ -26,12 +26,13 @@ export default function SignupForm() {
   const [otp, setOtp] = useState<string>("");
   const [otpSessionId, setOtpSessionId] = useState<string>("");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
-  const [isOtpVerified, setIsOtpVerified] = useState<boolean>(false);
+  // removed unused isOtpVerified state to satisfy linter
   const [userId, setUserId] = useState<string>("");
   const [isUserIdVisible, setIsUserIdVisible] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
   const [peetaOptions, setPeetaOptions] = useState<string[]>([]);
+  const [l2Users, setL2Users] = useState<string[]>([]);
 
   const { t } = useTranslation();
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function SignupForm() {
         const response = await fetch("/api/l1/dashboard");
         if (response.ok) {
           const data = await response.json();
-          const peetas = data.map((item: any) => item.l1User.peeta);
+          const peetas = (data as Array<{ l1User: { peeta: string } }>).map((item) => item.l1User.peeta);
           setPeetaOptions(peetas);
         }
       } catch (error) {
@@ -51,6 +52,21 @@ export default function SignupForm() {
       }
     };
     fetchPeetaOptions();
+
+    // Fetch L2 users for guru dropdown
+    const fetchL2Users = async () => {
+      try {
+        const res = await fetch("/api/l3/findl2users", { cache: "no-store" });
+        if (res.ok) {
+          const users = await res.json();
+          const names = (users as Array<{ name: string }>).map(u => u.name).filter(Boolean);
+          setL2Users(names);
+        }
+      } catch (err) {
+        console.error("Error fetching L2 users:", err);
+      }
+    };
+    fetchL2Users();
   }, []);
 
   const handleChange = (
@@ -83,7 +99,6 @@ export default function SignupForm() {
       );
       console.log("OTP verified response:", response.data);
       if (response.data.Status === "Success") {
-        setIsOtpVerified(true);
 
         // Create Firebase user or generate custom UID
         let firebaseUid = "";
@@ -247,16 +262,19 @@ export default function SignupForm() {
             <label htmlFor="karthruGuru" className="block text-sm font-semibold mb-1">
               {t("signupl3.karthruGuru")}
             </label>
-            <input
-              type="text"
+            <select
               name="karthruGuru"
               id="karthruGuru"
               value={formData.karthruGuru}
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              placeholder="Enter Karthru Guru"
               required
-            />
+            >
+              <option value="">Select Guru</option>
+              {l2Users.map((name, idx) => (
+                <option key={idx} value={name}>{name}</option>
+              ))}
+            </select>
           </div>
 
           {!isOtpSent ? (
