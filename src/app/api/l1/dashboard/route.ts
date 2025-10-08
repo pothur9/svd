@@ -16,12 +16,14 @@ interface L2User {
 interface L3User {
     name: string;
     selectedL2User: string;
+    peeta?: string;
     // Add other fields based on your model
 }
 
 interface L4User {
     name: string;
     selectedL2User: string;
+    peeta?: string;
     // Add other fields based on your model
 }
 
@@ -47,22 +49,37 @@ export async function GET() {
             return acc;
         }, {} as Record<string, L2User[]>);
 
-        // Group L3 users by their selectedL2User (L2 user's name)
-        const groupedL3Users = l3Users.reduce((acc, user: L3User) => {
-            const { selectedL2User } = user;
-            if (selectedL2User) {
-                if (!acc[selectedL2User]) acc[selectedL2User] = [];
-                acc[selectedL2User].push(user);
+        // Build canonical keys for L1 peeta values
+        const l1PeetaKeys = l1Users.map(l1 => ({
+            raw: l1.peeta,
+            key: (l1.peeta || '').trim().toLowerCase(),
+        }));
+
+        // Helper to map a user peeta string to the closest L1 peeta key via substring match
+        const mapToL1PeetaKey = (userPeeta?: string) => {
+            const up = (userPeeta || '').trim().toLowerCase();
+            if (!up) return '';
+            // Find an L1 key that includes the user's peeta term (e.g., 'kashi' matches 'sri kashi peeta ...')
+            const found = l1PeetaKeys.find(p => p.key.includes(up) || up.includes(p.key));
+            return found?.key || up; // fallback to the user string itself
+        };
+
+        // Group L3 users by mapped L1 peeta key
+        const groupedL3ByPeeta = l3Users.reduce((acc, user: L3User) => {
+            const key = mapToL1PeetaKey(user.peeta);
+            if (key) {
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(user);
             }
             return acc;
         }, {} as Record<string, L3User[]>);
 
-        // Group L4 users by their selectedL2User (L2 user's name)
-        const groupedL4Users = l4Users.reduce((acc, user: L4User) => {
-            const { selectedL2User } = user;
-            if (selectedL2User) {
-                if (!acc[selectedL2User]) acc[selectedL2User] = [];
-                acc[selectedL2User].push(user);
+        // Group L4 users by mapped L1 peeta key
+        const groupedL4ByPeeta = l4Users.reduce((acc, user: L4User) => {
+            const key = mapToL1PeetaKey(user.peeta);
+            if (key) {
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(user);
             }
             return acc;
         }, {} as Record<string, L4User[]>);
@@ -73,14 +90,10 @@ export async function GET() {
             const l2UsersForL1 = groupedL2Users[l1PeetaKey] || [];
             const l2UserCount = l2UsersForL1.length;
 
-            const l3UsersForL1 = l2UsersForL1.reduce((acc, l2) => {
-                return acc.concat(groupedL3Users[l2.name] || []);
-            }, [] as L3User[]);
+            const l3UsersForL1 = groupedL3ByPeeta[l1PeetaKey] || [];
             const l3UserCount = l3UsersForL1.length;
 
-            const l4UsersForL1 = l2UsersForL1.reduce((acc, l2) => {
-                return acc.concat(groupedL4Users[l2.name] || []);
-            }, [] as L4User[]);
+            const l4UsersForL1 = groupedL4ByPeeta[l1PeetaKey] || [];
             const l4UserCount = l4UsersForL1.length;
 
             const totalUserCount = l2UserCount + l3UserCount + l4UserCount; // Correct total calculation

@@ -42,8 +42,12 @@ export default function Dashboard(): JSX.Element {
   const backCardRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
   useEffect(() => {
+    // Early auth check using localStorage via AuthManager
     if (!AuthManager.isAuthenticated()) {
       router.push("/l2/login");
       return;
@@ -96,6 +100,18 @@ export default function Dashboard(): JSX.Element {
 
         const userData: UserData = await userResponse.json();
         setUserData(userData);
+        // Check for missing mandatory fields to complete profile
+        const requiredKeys: (keyof UserData)[] = [
+          'dob',
+          'address',
+          'dhekshaGuru',
+          'peeta', // ensure peeta present too
+          'imageUrl',
+        ];
+        const missing = requiredKeys.filter(k => !userData[k] || (typeof userData[k] === 'string' && (userData[k] as unknown as string).trim() === ''));
+        if (missing.length > 0) {
+          setProfileIncomplete(true);
+        }
           // Calculate total user count
           const totalUsers = memberData.reduce((acc, member) => {
             return (
@@ -123,8 +139,21 @@ export default function Dashboard(): JSX.Element {
     };
     handleResize();
     window.addEventListener('resize', handleResize);
+    setAuthChecked(true);
     return () => window.removeEventListener('resize', handleResize);
   }, [router]);
+
+  // If profile is incomplete, show a prompt after 30 seconds
+  useEffect(() => {
+    if (!profileIncomplete) return;
+    const t = setTimeout(() => setShowProfilePrompt(true), 30000);
+    return () => clearTimeout(t);
+  }, [profileIncomplete]);
+
+  // Block rendering until we verify auth state to prevent flicker
+  if (!authChecked) {
+    return <p>Loading...</p>;
+  }
 
   if (memberData.length === 0 || !userData) {
     if (memberData.length === 0) {
@@ -150,6 +179,11 @@ export default function Dashboard(): JSX.Element {
     "Sri viraktha parmpare श्री विरक्त  परंपरा ಶ್ರೀ ವಿರಕ್ತ  ಪರಂಪರೆ": "/img6.jpg",
   };
   console.log(total)
+  // Precompute overall totals across all peetas for desktop table totals column
+  const l2TotalAll = memberData.reduce((sum, m) => sum + (m.l2UserCount ?? 0), 0);
+  const l3TotalAll = memberData.reduce((sum, m) => sum + (m.l3UserCount ?? 0), 0);
+  const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
+  const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
   
   // Helper to get the card preview URL for the current user
   const getCardPreviewUrl = () => {
@@ -209,16 +243,37 @@ export default function Dashboard(): JSX.Element {
     router.push("/l2/login");
   };
 
+  const goToCompleteProfile = () => {
+    router.push("/l2/complete-profile");
+  };
+
   return (
     <>
       <Navbar />
       <div className="bg-slate-100 py-6">
+        {profileIncomplete && showProfilePrompt && (
+          <div className="mx-auto max-w-[90%] sm:max-w-[95%] mt-20 mb-2 p-3 rounded bg-yellow-100 text-yellow-900 flex items-center justify-between shadow">
+            <span>Your profile is incomplete. Please fill the remaining details.</span>
+            <div className="flex gap-2">
+              <button onClick={() => router.push('/l2/complete-profile')} className="bg-orange-500 text-white px-3 py-1 rounded">Complete Now</button>
+              <button onClick={() => setShowProfilePrompt(false)} className="bg-gray-200 text-gray-800 px-3 py-1 rounded">Dismiss</button>
+            </div>
+          </div>
+        )}
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
           Dashboard
         </h1>
 
-        {/* Logout Button */}
-        <div className="flex justify-end mb-4 mr-6">
+        {/* Actions */}
+        <div className="flex justify-end gap-3 mb-4 mr-6">
+          {profileIncomplete && (
+            <button
+              onClick={goToCompleteProfile}
+              className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors"
+            >
+              Complete Profile
+            </button>
+          )}
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
@@ -288,6 +343,8 @@ export default function Dashboard(): JSX.Element {
                       </th>
                     );
                   })}
+                  {/* Totals Column Header */}
+                  <th className="border border-gray-800 p-1 sm:p-2 bg-yellow-600 text-white text-center min-w-[80px]">Total</th>
                 </tr>
               </thead>
 
@@ -309,6 +366,8 @@ export default function Dashboard(): JSX.Element {
                       {member.l2UserCount ?? 0}
                     </td>
                   ))}
+                  {/* Row total for L2 */}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l2TotalAll}</td>
                 </tr>
 
                 {/* L3 Row - User Counts */}
@@ -328,6 +387,8 @@ export default function Dashboard(): JSX.Element {
                       {member.l3UserCount ?? 0}
                     </td>
                   ))}
+                  {/* Row total for L3 */}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l3TotalAll}</td>
                 </tr>
 
                 {/* L4 Row - User Counts */}
@@ -347,6 +408,8 @@ export default function Dashboard(): JSX.Element {
                       {member.l4UserCount ?? 0}
                     </td>
                   ))}
+                  {/* Row total for L4 */}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l4TotalAll}</td>
                 </tr>
 
                 {/* Total Row */}
@@ -364,6 +427,8 @@ export default function Dashboard(): JSX.Element {
                         (member.l4UserCount ?? 0)}
                     </td>
                   ))}
+                  {/* Grand total column */}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center">{grandTotalAll}</td>
                 </tr>
               </tbody>
             </table>
