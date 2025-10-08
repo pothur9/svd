@@ -20,6 +20,7 @@ const LoginPage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]); // Multiple accounts for selection
   const [showAccountSelection, setShowAccountSelection] = useState<boolean>(false); // Show account selection
   const [selectedAccount, setSelectedAccount] = useState<string>(""); // Selected account ID
+  const [errorMsg, setErrorMsg] = useState<string>("");
   const router = useRouter();
 
   // Redirect to dashboard if already logged in
@@ -91,7 +92,7 @@ const LoginPage: React.FC = () => {
             setShowAccountSelection(true);
           }
         } else {
-          alert("No accounts found with this phone number.");
+          setErrorMsg("Please signup first to login.");
         }
       } else {
         alert("Invalid OTP. Please try again.");
@@ -153,6 +154,12 @@ const LoginPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6 text-center text-black mt-4">
           Login
         </h2>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 rounded-md bg-yellow-100 text-yellow-800 text-sm">
+            {errorMsg} <a href="/l2/signup" className="underline font-medium">Go to Sign up</a>
+          </div>
+        )}
 
         {!showAccountSelection ? (
           <form onSubmit={handleSendOtp}>

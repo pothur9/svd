@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import AuthManager from "../../../lib/auth";
 
 function Navbar() {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
@@ -30,8 +31,8 @@ function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    // Clear all session storage
-    sessionStorage.clear();
+    // Clear auth (both localStorage and sessionStorage)
+    AuthManager.logout();
     // Redirect to home page
     router.push('/');
   };

@@ -41,6 +41,7 @@ export default function Dashboard(): JSX.Element {
   const frontCardRef = useRef<HTMLDivElement>(null);
   const backCardRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!AuthManager.isAuthenticated()) {
@@ -83,7 +84,15 @@ export default function Dashboard(): JSX.Element {
             Expires: "0",
           },
         });
-        if (!userResponse.ok) throw new Error("Failed to fetch user data");
+        if (!userResponse.ok) {
+          // If user not found, direct the user to signup
+          if (userResponse.status === 404) {
+            setError("Please signup first to login.");
+            router.push("/l2/signup");
+            return;
+          }
+          throw new Error("Failed to fetch user data");
+        }
 
         const userData: UserData = await userResponse.json();
         setUserData(userData);
@@ -99,8 +108,10 @@ export default function Dashboard(): JSX.Element {
         // Store peeta name and username in session storage
         sessionStorage.setItem("peeta", userData.peeta || "");
         sessionStorage.setItem("username", userData.name);
+        sessionStorage.setItem("userId", userData.userId);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setError("Something went wrong. Please try again.");
       }
     };
 
@@ -119,7 +130,7 @@ export default function Dashboard(): JSX.Element {
     if (memberData.length === 0) {
       console.warn('memberData is empty after fetch!');
     }
-    return <p>Loading...</p>;
+    return <p>{error ? error : 'Loading...'}</p>;
   }
   // Define background colors for peetas in a repeating pattern
   const bgColors = [
