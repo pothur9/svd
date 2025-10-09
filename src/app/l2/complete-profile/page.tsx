@@ -16,7 +16,6 @@ interface ProfileForm {
   gender: string;
   bhage: string;
   gothra: string;
-  mariPresent: string; // Yes/No
   paramapare?: string;
   imageUrl: string;
 }
@@ -41,7 +40,6 @@ export default function CompleteProfilePage() {
     gender: "",
     bhage: "",
     gothra: "",
-    mariPresent: "",
     paramapare: "",
     imageUrl: "",
   });
@@ -78,7 +76,6 @@ export default function CompleteProfilePage() {
           gender: u.gender ?? "",
           bhage: u.bhage ?? "",
           gothra: u.gothra ?? "",
-          mariPresent: u.mariPresent ?? "",
           paramapare: u.paramapare ?? u.parampare ?? "",
           imageUrl: u.imageUrl ?? "",
         });
@@ -131,7 +128,6 @@ export default function CompleteProfilePage() {
           gender: form.gender,
           bhage: form.bhage,
           gothra: form.gothra,
-          mariPresent: form.mariPresent,
           paramapare: form.paramapare,
           imageUrl: form.imageUrl,
         }),
@@ -251,14 +247,6 @@ export default function CompleteProfilePage() {
                 <input value={form.gothra} onChange={e=>handleChange('gothra', e.target.value)} className="w-full border p-2 rounded bg-white" />
               </div>
             </div>
-            <div>
-              <label className="block mb-1">Marital Status</label>
-              <select value={form.mariPresent} onChange={e=>handleChange('mariPresent', e.target.value)} className="w-full border p-2 rounded bg-white">
-                <option value="">Select</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
-            </div>
           </div>
         )}
 
@@ -290,7 +278,6 @@ export default function CompleteProfilePage() {
                 <div><strong>Dheksha Guru:</strong> {form.dhekshaGuru || '-'}</div>
                 <div><strong>Bhage:</strong> {form.bhage || '-'}</div>
                 <div><strong>Gothra:</strong> {form.gothra || '-'}</div>
-                <div><strong>Marital Status:</strong> {form.mariPresent || '-'}</div>
                 <div className="flex items-center gap-2"><strong>Image:</strong> {form.imageUrl ? (
                   <span className="inline-block h-10 w-10 relative">
                     <Image src={form.imageUrl} className="object-cover rounded border" alt="preview" fill />
