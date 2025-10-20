@@ -19,6 +19,20 @@ interface FormData {
   contactNo: string;
   peeta: string;
   karthruGuru: string;
+  // Optional fields for completion later (kept here so inputs can bind without TS errors)
+  selectedL2User?: string;
+  dob?: string;
+  gender?: string;
+  mailId?: string;
+  bhage?: string;
+  gothra?: string;
+  nationality?: string;
+  presentAddress?: string;
+  permanentAddress?: string;
+  qualification?: string;
+  occupation?: string;
+  languageKnown?: string;
+  photoUrl?: File | string | null;
 }
 
 export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
@@ -37,6 +51,19 @@ export default function PersonalDetailsForm() {
     contactNo: "",
     peeta: "",
     karthruGuru: "",
+    selectedL2User: "",
+    dob: "",
+    gender: "",
+    mailId: "",
+    bhage: "",
+    gothra: "",
+    nationality: "",
+    presentAddress: "",
+    permanentAddress: "",
+    qualification: "",
+    occupation: "",
+    languageKnown: "",
+    photoUrl: null,
   });
   const { t } = useTranslation();
   const router = useRouter();
@@ -192,11 +219,6 @@ export default function PersonalDetailsForm() {
       return;
     }
 
-    if (!formData.photoUrl || !(formData.photoUrl instanceof File)) {
-      alert("Please upload a valid photo.");
-      return;
-    }
-
     setIsVerifyingOtp(true);
     try {
       const verifyResponse = await fetch(
@@ -207,24 +229,27 @@ export default function PersonalDetailsForm() {
       if (verifyData.Status === "Success") {
         alert("OTP verified successfully. Completing signup...");
 
-        const photoFormData = new FormData();
-        photoFormData.append("file", formData.photoUrl);
-        photoFormData.append(
-          "upload_preset",
-          `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`
-        );
+        // Conditionally upload photo if provided
+        let uploadedPhotoUrl: string | undefined;
+        if (formData.photoUrl && formData.photoUrl instanceof File) {
+          const photoFormData = new FormData();
+          photoFormData.append("file", formData.photoUrl);
+          photoFormData.append(
+            "upload_preset",
+            `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`
+          );
 
-        const photoResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_CLOUDINARY_API_URL}/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-
-          {
-            method: "POST",
-            body: photoFormData,
-          }
-        );
-
-        if (!photoResponse.ok) throw new Error("Failed to upload photo.");
-        const photoData = await photoResponse.json();
+          const photoResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_CLOUDINARY_API_URL}/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+              method: "POST",
+              body: photoFormData,
+            }
+          );
+          if (!photoResponse.ok) throw new Error("Failed to upload photo.");
+          const photoData = await photoResponse.json();
+          uploadedPhotoUrl = photoData.secure_url as string;
+        }
 
         // Create Firebase user
         let firebaseUid = "";
@@ -246,9 +271,12 @@ export default function PersonalDetailsForm() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ...formData,
-            photoUrl: photoData.secure_url,
+            name: formData.name,
+            contactNo: formData.contactNo,
+            peeta: formData.peeta,
+            karthruGuru: formData.karthruGuru,
             firebaseUid,
+            ...(uploadedPhotoUrl ? { photoUrl: uploadedPhotoUrl } : {}),
           }),
         });
 
@@ -319,7 +347,6 @@ export default function PersonalDetailsForm() {
                 value={formData.selectedL2User}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
               >
                 <option value="">Select Sri 108 Prabhu Shivachryaru</option>
                 {l2Users.map((user: { name: string }, index: number) => (
@@ -344,7 +371,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label htmlFor="dob" className="block text-sm font-semibold">
                 {t("signupl3.dob")}
               </label>
@@ -355,11 +382,10 @@ export default function PersonalDetailsForm() {
                 value={formData.dob}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label htmlFor="gender" className="block text-sm font-semibold">
                 {t("signupl3.gender")}
               </label>
@@ -369,7 +395,6 @@ export default function PersonalDetailsForm() {
                 value={formData.gender}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
               >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
@@ -400,7 +425,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label htmlFor="mailId" className="block text-sm font-semibold">
                 {t("signupl3.mailId")}
               </label>
@@ -447,7 +472,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label htmlFor="bhage" className="block text-sm font-semibold">
                 {t("signupl3.bhage")}
               </label>
@@ -461,7 +486,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label htmlFor="gothra" className="block text-sm font-semibold">
                 {t("signupl3.gothra")}
               </label>
@@ -475,7 +500,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label
                 htmlFor="nationality"
                 className="block text-sm font-semibold"
@@ -493,14 +518,13 @@ export default function PersonalDetailsForm() {
             </div>
 
             {/* Present Address Stepper */}
-            <div>
+            <div className="hidden">
               <label className="block text-sm font-semibold">Present Address</label>
               <div className="flex flex-col gap-2">
                 <select
                   name="presentState"
                   value={selectedPresentState}
                   onChange={handlePresentStateChange}
-                  required
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 >
                   <option value="">Select State</option>
@@ -512,7 +536,6 @@ export default function PersonalDetailsForm() {
                   name="presentDistrict"
                   value={selectedPresentDistrict}
                   onChange={handlePresentDistrictChange}
-                  required={!!selectedPresentState}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   disabled={!selectedPresentState}
                 >
@@ -527,7 +550,6 @@ export default function PersonalDetailsForm() {
                   name="presentCity"
                   value={presentCity}
                   onChange={handlePresentCityChange}
-                  required={!!selectedPresentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter City Name"
                   disabled={!selectedPresentDistrict}
@@ -537,7 +559,6 @@ export default function PersonalDetailsForm() {
                   name="presentTaluk"
                   value={presentTaluk}
                   onChange={handlePresentTalukChange}
-                  required={!!selectedPresentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter Taluk Name"
                   disabled={!selectedPresentDistrict}
@@ -547,7 +568,6 @@ export default function PersonalDetailsForm() {
                   name="presentLandmark"
                   value={presentLandmark}
                   onChange={handlePresentLandmarkChange}
-                  required={!!selectedPresentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter Landmark"
                   disabled={!selectedPresentDistrict}
@@ -555,14 +575,13 @@ export default function PersonalDetailsForm() {
               </div>
             </div>
             {/* Permanent Address Stepper */}
-            <div>
+            <div className="hidden">
               <label className="block text-sm font-semibold">Permanent Address</label>
               <div className="flex flex-col gap-2">
                 <select
                   name="permanentState"
                   value={selectedPermanentState}
                   onChange={handlePermanentStateChange}
-                  required
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 >
                   <option value="">Select State</option>
@@ -574,7 +593,6 @@ export default function PersonalDetailsForm() {
                   name="permanentDistrict"
                   value={selectedPermanentDistrict}
                   onChange={handlePermanentDistrictChange}
-                  required={!!selectedPermanentState}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   disabled={!selectedPermanentState}
                 >
@@ -589,7 +607,6 @@ export default function PersonalDetailsForm() {
                   name="permanentCity"
                   value={permanentCity}
                   onChange={handlePermanentCityChange}
-                  required={!!selectedPermanentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter City Name"
                   disabled={!selectedPermanentDistrict}
@@ -599,7 +616,6 @@ export default function PersonalDetailsForm() {
                   name="permanentTaluk"
                   value={permanentTaluk}
                   onChange={handlePermanentTalukChange}
-                  required={!!selectedPermanentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter Taluk Name"
                   disabled={!selectedPermanentDistrict}
@@ -609,7 +625,6 @@ export default function PersonalDetailsForm() {
                   name="permanentLandmark"
                   value={permanentLandmark}
                   onChange={handlePermanentLandmarkChange}
-                  required={!!selectedPermanentDistrict}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white"
                   placeholder="Enter Landmark"
                   disabled={!selectedPermanentDistrict}
@@ -617,7 +632,7 @@ export default function PersonalDetailsForm() {
               </div>
             </div>
 
-            <div>
+            <div className="hidden">
               <label
                 htmlFor="qualification"
                 className="block text-sm font-semibold"
@@ -638,7 +653,7 @@ export default function PersonalDetailsForm() {
               </select>
             </div>
 
-            <div>
+            <div className="hidden">
               <label
                 htmlFor="occupation"
                 className="block text-sm font-semibold"
@@ -655,7 +670,7 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div>
+            <div className="hidden">
               <label
                 htmlFor="languageKnown"
                 className="block text-sm font-semibold"
@@ -695,7 +710,7 @@ export default function PersonalDetailsForm() {
                 ))}
               </select>
             </div> */}
-            <div>
+            <div className="hidden">
               <label htmlFor="photo" className="block text-sm font-semibold">
                 {t("signupl3.photoUrl")}
               </label>
@@ -705,7 +720,6 @@ export default function PersonalDetailsForm() {
                 id="photoUrl"
                 onChange={handleFileChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
               />
             </div>
 

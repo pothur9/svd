@@ -46,6 +46,11 @@ interface UserData {
 export default function Dashboard() {
   const [memberData, setMemberData] = useState<MemberData[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [showCompleteForm, setShowCompleteForm] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const router = useRouter();
 
@@ -108,12 +113,145 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // After userData loads, compute completeness
+  if (userData && !profileIncomplete) {
+    const requiredKeys: (keyof UserData)[] = [
+      'dob',
+      'permanentAddress',
+      'selectedL2User',
+      'photoUrl',
+    ];
+    const missing = requiredKeys.filter((k) => {
+      const v = userData[k];
+      return v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
+    });
+    if (missing.length > 0 && !profileIncomplete) {
+      setProfileIncomplete(true);
+    }
+  }
+
+  // Determine missing fields against full L3 field set (from translations signupl3)
+  useEffect(() => {
+    if (!userData) return;
+    const ALL_L3_FIELDS: string[] = [
+      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','selectedL2User','photoUrl'
+    ];
+    const userRecord = userData as unknown as Record<string, unknown>;
+    const missing: string[] = ALL_L3_FIELDS.filter((k) => {
+      const v = userRecord[k];
+      return v === undefined || v === null || (typeof v === 'string' && (v as string).trim() === '');
+    });
+    setMissingFields(missing);
+    const preset: Record<string, string> = {};
+    missing.forEach((k) => {
+      preset[k] = '';
+    });
+    setFormData(preset);
+  }, [userData]);
+
+  // Immediate prompt; no delay
+
   if (memberData.length === 0 || !userData) return <p>Loading...</p>;
+
+  // Precompute totals across peetas like L2
+  const l2TotalAll = memberData.reduce((sum, m) => sum + (m.l2UserCount ?? 0), 0);
+  const l3TotalAll = memberData.reduce((sum, m) => sum + (m.l3UserCount ?? 0), 0);
+  const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
+  const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
 
   return (
     <>
       <Navbar />
-      <div className="bg-slate-100">
+      <div className="bg-slate-100 pt-4 sm:pt-6">
+        {profileIncomplete && (
+          <div className="mx-auto max-w-[90%] sm:max-w-[95%] mt-0 mb-2 p-3 rounded bg-yellow-100 text-yellow-900 flex items-center justify-between shadow">
+            <span>Your profile is incomplete. Please fill the remaining details.</span>
+            <div className="flex gap-2">
+              <button onClick={() => setShowCompleteForm(true)} className="bg-green-600 text-white px-3 py-1 rounded">Complete Now</button>
+            </div>
+          </div>
+        )}
+        {showCompleteForm && profileIncomplete && missingFields.length > 0 && (
+          <div className="fixed inset-0 flex items-start justify-center pt-24 pointer-events-none">
+            <div className="relative z-[60] bg-white rounded-lg shadow-lg w-[95%] max-w-2xl p-5 pointer-events-auto">
+             
+              {(() => {
+                const perStep = 5;
+                const totalSteps = Math.ceil(missingFields.length / perStep);
+                const start = currentStep * perStep;
+                const end = start + perStep;
+                const fieldsForStep = missingFields.slice(start, end);
+                return (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      try {
+                        const stored = (typeof window !== 'undefined') ? (sessionStorage.getItem('userId') || '') : '';
+                        const userId = stored;
+                        const payload: Record<string, string> = {};
+                        missingFields.forEach((k) => { if (formData[k] !== undefined && formData[k] !== '') payload[k] = formData[k]; });
+                        const res = await fetch(`/api/l3/update-profile/${userId}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(payload),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data?.message || 'Failed to update');
+                        alert('Profile updated');
+                        const refreshed = await fetch(`/api/l3/dashboard/${userId}?timestamp=${Date.now()}`, { cache: 'no-store' });
+                        if (refreshed.ok) {
+                          const ud = await refreshed.json();
+                          setUserData(ud);
+                          setProfileIncomplete(false);
+                          setMissingFields([]);
+                          setFormData({});
+                          setShowCompleteForm(false);
+                          setCurrentStep(0);
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert('Error saving details');
+                      }
+                    }}
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                  >
+                    {fieldsForStep.map((field) => (
+                      <div key={field} className="flex flex-col">
+                        <label className="text-sm text-gray-700 mb-1 capitalize">{field}</label>
+                        {field === 'dob' ? (
+                          <input type="date" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
+                        ) : field === 'gender' ? (
+                          <select value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        ) : field.toLowerCase().includes('address') ? (
+                          <textarea value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" rows={2} />
+                        ) : (
+                          <input type="text" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
+                        )}
+                      </div>
+                    ))}
+                    <div className="sm:col-span-2 flex justify-between mt-2">
+                      <button type="button" onClick={() => setShowCompleteForm(false)} className="px-4 py-2 rounded bg-gray-200 text-gray-800">Close</button>
+                      <div className="flex gap-2">
+                        <button type="button" disabled={currentStep === 0} onClick={() => setCurrentStep((s) => Math.max(0, s - 1))} className={`px-4 py-2 rounded ${currentStep === 0 ? 'bg-gray-300 text-gray-400' : 'bg-blue-100 text-blue-800'}`}>Back</button>
+                        {currentStep < Math.ceil(missingFields.length / perStep) - 1 ? (
+                          <button type="button" onClick={() => setCurrentStep((s) => s + 1)} className="px-4 py-2 rounded bg-blue-600 text-white">Next</button>
+                        ) : (
+                          <button type="submit" className="px-4 py-2 rounded bg-green-600 text-white">Save</button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2 text-right text-sm text-gray-500">Step {currentStep + 1} of {totalSteps}</div>
+                  </form>
+                );
+              })()}
+            </div>
+          </div>
+        )}
         <br />
         <br />
         <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
@@ -128,7 +266,6 @@ export default function Dashboard() {
                   Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
                 </th>
                 {memberData.map((member, index) => {
-                  // Peeta images and colors as in L2
                   const bgColors = [
                     "bg-green-400",
                     "bg-red-400",
@@ -137,19 +274,22 @@ export default function Dashboard() {
                     "bg-yellow-300",
                     "bg-orange-400",
                   ];
-                  const peetaImages: { [key: string]: string } = {
-                    "Sri Rambhpuri Peeta श्री रम्भापुरी पीठ ಶ್ರೀ ರಂಭಾಪುರಿ ಪೀಠ": "/img1.jpg",
-                    "Sri Ujjayani Peeta श्री उज्जयनी पीठ ಶ್ರೀ ಉಜ್ಜಯನಿ ಪೀಠ": "/img2.jpg",
-                    "Sri Kedhara peeta श्री केदारा पीठ ಶ್ರೀ ಕೇದಾರ ಪೀಠ": "/img3.jpg",
-                    "Sri SriShaila Peeta श्री श्रीशैल पीठ ಶ್ರೀ ಶ್ರೀಶೈಲ ಪೀಠ": "/img4.jpg",
-                    "Sri Kashi Peeta श्री काशी पीठ ಶ್ರೀ ಕಾಶಿ ಪೀಠ": "/img5.jpg",
-                    "Sri viraktha parmpare श्री विरक्त  परंपरा ಶ್ರೀ ವಿರಕ್ತ  ಪರಂಪರೆ": "/img6.jpg",
-                  };
-                  const peetaKey = member.l1User.peeta.trim().toLowerCase();
-                  const matchedPeetaKey = Object.keys(peetaImages).find(
-                    key => key.trim().toLowerCase() === peetaKey
-                  );
-                  const imageUrl = matchedPeetaKey ? peetaImages[matchedPeetaKey] : "/img2.jpg";
+                  // More robust image selection using substring matching on normalized name
+                  const norm = (s: string) => s
+                    .toLowerCase()
+                    .normalize('NFKD')
+                    .replace(/[^a-z]/g, '');
+                  const peetaNorm = norm(member.l1User.peeta || '');
+                  const peetaImageBySubstring: { key: string; img: string }[] = [
+                    { key: 'rambh', img: '/img1.jpg' },
+                    { key: 'ujjay', img: '/img2.jpg' },
+                    { key: 'kedhar', img: '/img3.jpg' },
+                    { key: 'srishail', img: '/img4.jpg' },
+                    { key: 'kashi', img: '/img5.jpg' },
+                    { key: 'virakth', img: '/img6.jpg' },
+                  ];
+                  const matched = peetaImageBySubstring.find(({ key }) => peetaNorm.includes(key));
+                  const imageUrl = matched ? matched.img : '/img2.jpg';
                   return (
                     <th
                       key={index}
@@ -170,42 +310,41 @@ export default function Dashboard() {
                     </th>
                   );
                 })}
-              </tr>
-              <tr className="bg-orange-600 text-white">
-                <th className="border p-1 sm:p-2 text-left">Peeta</th>
-                {memberData.map((member, index) => (
-                  <th key={index} className="border p-1 sm:p-2 text-center">L1</th>
-                ))}
+                <th className="border border-gray-800 p-1 sm:p-2 bg-yellow-600 text-white text-center min-w-[80px]">Total</th>
               </tr>
             </thead>
             <tbody>
-              {/* L2 Row */}
+              {/* L2 Row - counts */}
               <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L2</td>
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri 108 Prabhu shivachrya</td>
                 {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount}</td>
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount ?? 0}</td>
                 ))}
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l2TotalAll}</td>
               </tr>
-              {/* L3 Row */}
+              {/* L3 Row - counts */}
               <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L3</td>
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri guru Jangam</td>
                 {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l3UserCount}</td>
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l3UserCount ?? 0}</td>
                 ))}
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l3TotalAll}</td>
               </tr>
-              {/* L4 Row */}
+              {/* L4 Row - counts */}
               <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">L4</td>
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri Veerashiva</td>
                 {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l4UserCount}</td>
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l4UserCount ?? 0}</td>
                 ))}
+                <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l4TotalAll}</td>
               </tr>
               {/* Total Row */}
               <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
                 <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
                 {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount + member.l3UserCount + member.l4UserCount}</td>
+                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{(member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)}</td>
                 ))}
+                <td className="border border-gray-800 p-1 sm:p-2 text-center">{grandTotalAll}</td>
               </tr>
             </tbody>
           </table>
@@ -215,7 +354,7 @@ export default function Dashboard() {
           <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
             <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>  
-            <span className="ml-4 text-3xl mt-3">Total: {memberData.reduce((acc, member) => acc + member.l2UserCount + member.l3UserCount + member.l4UserCount, 0)}</span>
+            <span className="ml-4 text-3xl mt-3">Total: {grandTotalAll}</span>
           </h1>
         </div>
         <br/>

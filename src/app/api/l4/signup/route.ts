@@ -8,24 +8,10 @@ export async function POST(req:NextRequest) {
 
     const {
       name,
-      dob,
-      gender,
       contactNo,
-      mailId,
-      karthruGuru,
       peeta,
-      bhage,
-      gothra,
-      nationality,
-      presentAddress,
-      permanentAddress,
-      qualification,
-      occupation,
-      languageKnown,
+      karthruGuru,
       firebaseUid,
-      selectedL2User,
-      photoUrl, 
-     
     } = await req.json();
 
     let userId;
@@ -42,24 +28,24 @@ export async function POST(req:NextRequest) {
     const newUser = new l4User({
       userId,
       name,
-      dob,
-      gender,
       contactNo,
-      mailId,
-      karthruGuru,
       peeta,
-      bhage,
-      gothra,
-      nationality,
-      presentAddress,
-      permanentAddress,
-      qualification,
-      occupation,
-      languageKnown,
-      selectedL2User,
+      karthruGuru,
       firebaseUid,
-      photoUrl, 
-     
+      // rest left empty for complete-profile
+      dob: null,
+      gender: null,
+      mailId: null,
+      bhage: null,
+      gothra: null,
+      nationality: null,
+      presentAddress: null,
+      permanentAddress: null,
+      qualification: null,
+      occupation: null,
+      languageKnown: null,
+      selectedL2User: null,
+      photoUrl: null,
     });
 
     await newUser.save();

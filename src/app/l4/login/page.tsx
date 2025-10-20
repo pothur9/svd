@@ -3,15 +3,18 @@ import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+interface Account { userId: string; name: string }
 
 const LoginPage = () => {
-  const [userId, setUserId] = useState<string>(""); // Type for userId
-  const [contactNo, setContactNo] = useState<string>(""); // Type for contact number
-  const [otp, setOtp] = useState<string>(""); // Type for OTP
-  const [otpSessionId, setOtpSessionId] = useState<string>(""); // OTP session ID
-  const [isOtpSent, setIsOtpSent] = useState<boolean>(false); // OTP sent status
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Type for loading state
-  const [isVerifying, setIsVerifying] = useState<boolean>(false); // Type for verifying OTP
+  const [contactNo, setContactNo] = useState<string>("");
+  const [otp, setOtp] = useState<string>("");
+  const [otpSessionId, setOtpSessionId] = useState<string>("");
+  const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [showAccountSelection, setShowAccountSelection] = useState<boolean>(false);
+  const [selectedAccount, setSelectedAccount] = useState<string>("");
   const router = useRouter();
 
   // Redirect to dashboard if already logged in
@@ -52,7 +55,7 @@ const LoginPage = () => {
     }
   };
 
-  // Verify OTP and login
+  // Verify OTP and fetch accounts
   const handleVerifyOtp = async () => {
     if (!otp) {
       alert("Please enter the OTP.");
@@ -66,21 +69,22 @@ const LoginPage = () => {
       const verifyData = await verifyResponse.json();
       
       if (verifyData.Status === "Success") {
-        // OTP verified, now login
-        const loginResponse = await fetch("/api/l4/login", {
+        // OTP verified, now find accounts and select
+        const accountsResponse = await fetch("/api/l4/check-accounts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, contactNo }),
+          body: JSON.stringify({ contactNo }),
         });
-        
-        const loginData = await loginResponse.json();
-        
-        if (loginResponse.ok) {
-          sessionStorage.setItem("userId", userId);
-          alert("Login successful!");
-          router.push("/l4/dashboard");
+        const accountsData = await accountsResponse.json();
+        if (accountsResponse.ok && accountsData.accounts?.length > 0) {
+          setAccounts(accountsData.accounts);
+          if (accountsData.accounts.length === 1) {
+            await handleAccountLogin(accountsData.accounts[0].userId);
+          } else {
+            setShowAccountSelection(true);
+          }
         } else {
-          alert(loginData.message || "Login failed.");
+          alert("No accounts found with this phone number.");
         }
       } else {
         alert("Invalid OTP. Please try again.");
@@ -93,28 +97,31 @@ const LoginPage = () => {
     }
   };
 
+  // Handle selected account login
+  const handleAccountLogin = async (accountId: string) => {
+    const loginResponse = await fetch("/api/l4/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: accountId }),
+    });
+    const loginData = await loginResponse.json();
+    if (loginResponse.ok) {
+      sessionStorage.setItem("userId", accountId);
+      alert("Login successful!");
+      router.push("/l4/dashboard");
+    } else {
+      alert(loginData.message || "Login failed.");
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSendOtp}
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
-      >
+      {!showAccountSelection ? (
+      <form onSubmit={handleSendOtp} className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
         <div className="flex justify-center">
           <Image src="/logo.png" alt="Logo" width={100} height={100} />
         </div>
         <h2 className="text-2xl font-bold mb-6 text-center text-black mt-4">Login</h2>
-        <label className="block mb-4">
-          <span className="text-gray-700">User ID</span>
-          <input
-            type="text"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="Enter your User ID"
-            required
-            disabled={isOtpSent}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
-          />
-        </label>
         <label className="block mb-4">
           <span className="text-gray-700">Contact Number</span>
           <input
@@ -186,6 +193,47 @@ const LoginPage = () => {
           </div>
         )}
       </form>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
+          <div className="flex justify-center">
+            <Image src="/logo.png" alt="Logo" width={100} height={100} />
+          </div>
+          <h3 className="text-lg font-semibold mb-4 text-center text-black">Select Your Account</h3>
+          <div className="space-y-2 mb-4">
+            {accounts.map((account) => (
+              <div key={account.userId}>
+                <input
+                  type="radio"
+                  id={account.userId}
+                  name="account"
+                  value={account.userId}
+                  checked={selectedAccount === account.userId}
+                  onChange={(e) => setSelectedAccount(e.target.value)}
+                  className="mr-2"
+                />
+                <label htmlFor={account.userId} className="text-gray-700">
+                  {account.name} ({account.userId})
+                </label>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={async () => {
+              if (!selectedAccount) { alert('Please select an account.'); return; }
+              await handleAccountLogin(selectedAccount);
+            }}
+            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+          >
+            Login to Selected Account
+          </button>
+          <button
+            onClick={() => { setShowAccountSelection(false); setSelectedAccount(""); setAccounts([]); }}
+            className="w-full mt-2 p-2 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400"
+          >
+            Back
+          </button>
+        </div>
+      )}
       {/* Loading Spinner */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
