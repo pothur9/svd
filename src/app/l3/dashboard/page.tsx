@@ -370,7 +370,7 @@ export default function Dashboard() {
                 className="rounded-xl w-full h-full shadow-lg overflow-hidden relative"
                 style={{ backgroundColor: '#fff', color: '#000' }}
               >
-                {/* Watermark Logo */}
+             
                 <div
                   style={{
                     position: 'absolute',
