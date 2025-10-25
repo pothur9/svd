@@ -361,7 +361,7 @@ export default function Dashboard() {
         {/* Custom Card Layout for L3 */}
         <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-6">
           <div className="flex flex-col sm:flex-row justify-center gap-8">
-            {/* Front Card */}
+           
             <div
               className="w-[85mm] h-[55mm] mx-auto"
               style={{ backgroundColor: '#fff', color: '#000' }}
