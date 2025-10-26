@@ -86,6 +86,8 @@ export default function Dashboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  
+
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
 
@@ -153,7 +155,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userData) return;
     const ALL_FIELDS: string[] = [
-      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','selectedL2User','photoUrl'
+      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl'
     ];
     const record = userData as unknown as Record<string, unknown>;
     const miss: string[] = ALL_FIELDS.filter((k) => {
@@ -508,6 +510,7 @@ export default function Dashboard() {
                   {/* Left side - Text */}
                   <div className="text-black" style={{ color: '#000', backgroundColor: '#fff' }}>
                     <p className="text-sm font-semibold ">Name: {userData.name}</p>
+                    <p className="text-sm font-semibold ">ID: {userData.userId}</p>
                     <p className="text-sm font-semibold ">Peeta: {userData.peeta || 'N/A'}</p>
                     <p className="text-sm font-semibold ">DOB: {userData.dob && !isNaN(Date.parse(userData.dob)) ? new Date(userData.dob).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }) : "N/A"}</p>
                     <p className="text-sm font-semibold">Phone: {userData.contactNo}</p>
