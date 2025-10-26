@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 const levels = [
   // { name: "Sri 1008 jagdhguru", login: "/l1/login", bgColor: "bg-yellow-100" },
-  { name: "Sri 108 Shivachryaru", login: "/l2/login", signup: "/l2/signup", bgColor: "bg-blue-100" },
+  { name: "Sri 108 Shivachryaru", login: "/l2/login", bgColor: "bg-blue-100" },
   { name: "Sri guru jangam", login: "/l3/login", signup: "/l3/signup", bgColor: "bg-green-100" },
   { name: "Sri veerashiva", login: "/l4/login", signup: "/l4/signup", bgColor: "bg-pink-100" },
 ];
