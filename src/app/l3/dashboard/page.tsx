@@ -338,7 +338,7 @@ export default function Dashboard() {
                 ))}
                 <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l4TotalAll}</td>
               </tr>
-              {/* Total Row */}
+            
               <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
                 <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
                 {memberData.map((member, index) => (
