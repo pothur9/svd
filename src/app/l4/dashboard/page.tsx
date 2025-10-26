@@ -37,6 +37,35 @@ export default function Dashboard() {
   const [showCompleteForm, setShowCompleteForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Cloudinary config (same as L2)
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+  // Upload image helper (mirrors L2 complete-profile)
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    try {
+      if (!cloudName || !uploadPreset) {
+        alert("Image upload not configured. Please paste an image URL instead.");
+        return;
+      }
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setFormData((prev) => ({ ...prev, photoUrl: data.secure_url as string }));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to upload image. Please try again or paste a URL.");
+    }
+  };
 
   const handleDownloadCard = () => {
     // Print the existing DOM so styles/structure remain identical
@@ -48,6 +77,14 @@ export default function Dashboard() {
   };
 
   const router = useRouter();
+
+  // Responsive check for mobile like L2 (declare before any early returns)
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
@@ -137,6 +174,20 @@ export default function Dashboard() {
   const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
   const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
 
+  // Helpers for mobile transposed table
+  const getUserCounts = (member: MemberData) => [
+    member.l2UserCount ?? 0,
+    member.l3UserCount ?? 0,
+    member.l4UserCount ?? 0,
+    (member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0),
+  ];
+  const userTypeFullLabels = [
+    'Sri 108 Prabhu shivachrya',
+    'Sri guru Jangam',
+    'Sri Veerashiva',
+    'Total',
+  ];
+
   return (
     <>
       <Navbar />
@@ -204,6 +255,32 @@ export default function Dashboard() {
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
                           </select>
+                        ) : field === 'photoUrl' ? (
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              placeholder="https://..."
+                              value={formData[field] || ''}
+                              onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                              className="p-2 border rounded bg-white text-black"
+                            />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) void handleImageUpload(f);
+                              }}
+                              className="p-1"
+                            />
+                            {(formData[field] || userData?.photoUrl) && (
+                              <img
+                                src={(formData[field] || userData?.photoUrl) as string}
+                                alt="Preview"
+                                className="h-16 w-16 object-cover rounded border"
+                              />
+                            )}
+                          </div>
                         ) : field.toLowerCase().includes('address') ? (
                           <textarea value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" rows={2} />
                         ) : (
@@ -236,6 +313,8 @@ export default function Dashboard() {
         </h1>
         {/* Responsive Table */}
         <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
+          {/* Desktop Table */}
+          {!isMobile && (
           <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
             <thead>
               <tr>
@@ -325,6 +404,74 @@ export default function Dashboard() {
               </tr>
             </tbody>
           </table>
+          )}
+          {/* Mobile Table (Transposed) */}
+          {isMobile && (
+            <table className="w-full table-fixed border-collapse border border-gray-800 bg-white shadow-lg text-xs">
+              <thead>
+                <tr>
+                  <th className="border border-gray-800 p-1 bg-orange-600 text-white text-center w-1/4 min-w-[60px]">Peeta</th>
+                  {userTypeFullLabels.map((label) => (
+                    <th key={label} className="border border-gray-800 p-1 bg-yellow-100 text-center w-1/5 min-w-[70px]">{label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {memberData.map((member, index) => {
+                  const bgColors = [
+                    "bg-green-400",
+                    "bg-red-400",
+                    "bg-blue-400",
+                    "bg-gray-300",
+                    "bg-yellow-300",
+                    "bg-orange-400",
+                  ];
+                  const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z]/g, '');
+                  const peetaNorm = norm(member.l1User.peeta || '');
+                  const peetaImageBySubstring: { key: string; img: string }[] = [
+                    { key: 'rambh', img: '/img1.jpg' },
+                    { key: 'ujjay', img: '/img2.jpg' },
+                    { key: 'kedhar', img: '/img3.jpg' },
+                    { key: 'srishail', img: '/img4.jpg' },
+                    { key: 'kashi', img: '/img5.jpg' },
+                    { key: 'virakth', img: '/img6.jpg' },
+                  ];
+                  const matched = peetaImageBySubstring.find(({ key }) => peetaNorm.includes(key));
+                  const imageUrl = matched ? matched.img : '/img2.jpg';
+                  const counts = getUserCounts(member);
+                  return (
+                    <tr key={index}>
+                      <td className={`border border-gray-800 p-1 text-center font-semibold ${bgColors[index % bgColors.length]} w-1/4 align-middle`} style={{fontSize:'0.7rem', minHeight: '48px', paddingTop: '6px'}}>
+                        <div className="flex flex-col items-start h-full">
+                          <div className="relative w-[32px] h-[32px] mb-1">
+                            <img src={imageUrl} alt={member.l1User.peeta} className="object-cover object-top w-[32px] h-[32px] rounded-full" />
+                          </div>
+                          <span className="block text-[10px] break-words whitespace-normal leading-snug min-h-[24px] text-left" style={{wordBreak: 'break-word'}}>{member.l1User.peeta}</span>
+                        </div>
+                      </td>
+                      {counts.map((count, i) => (
+                        <td key={i} className="border border-gray-800 p-1 text-center w-1/5" style={{fontSize:'0.8rem'}}>{count}</td>
+                      ))}
+                    </tr>
+                  );
+                })}
+                {/* Column Totals Row */}
+                <tr className="bg-orange-100 font-bold">
+                  <td className="border border-gray-800 p-1 text-center">Total</td>
+                  {(() => {
+                    const totals = [0, 0, 0, 0];
+                    memberData.forEach(member => {
+                      const counts = getUserCounts(member);
+                      counts.forEach((count, i) => { totals[i] += count; });
+                    });
+                    return totals.map((total, i) => (
+                      <td key={i} className="border border-gray-800 p-1 text-center w-1/5">{total}</td>
+                    ));
+                  })()}
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
         {/* Total Section (same style as L3) */}
         <div className="flex items-center justify-center gap-4 mt-6">
