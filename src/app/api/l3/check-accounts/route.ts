@@ -13,8 +13,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Phone number is required' }, { status: 400 });
     }
 
-    // Find all accounts with this phone number
-    const accounts = await l3User.find({ contactNo }, 'userId name');
+    const total = await l3User.countDocuments({ contactNo });
+    const accounts = await l3User
+      .find({ contactNo }, 'userId name')
+      .limit(12);
 
     if (accounts.length === 0) {
       return NextResponse.json({ error: 'No accounts found with this phone number' }, { status: 404 });
@@ -24,7 +26,8 @@ export async function POST(req: NextRequest) {
       accounts: accounts.map(account => ({
         userId: account.userId,
         name: account.name
-      }))
+      })),
+      total
     }, { status: 200 });
 
   } catch (error) {

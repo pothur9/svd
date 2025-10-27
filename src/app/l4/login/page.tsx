@@ -15,6 +15,7 @@ const LoginPage = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showAccountSelection, setShowAccountSelection] = useState<boolean>(false);
   const [selectedAccount, setSelectedAccount] = useState<string>("");
+  const [totalAccounts, setTotalAccounts] = useState<number>(0);
   const router = useRouter();
 
   // Redirect to dashboard if already logged in
@@ -78,6 +79,7 @@ const LoginPage = () => {
         const accountsData = await accountsResponse.json();
         if (accountsResponse.ok && accountsData.accounts?.length > 0) {
           setAccounts(accountsData.accounts);
+          setTotalAccounts(accountsData.total ?? accountsData.accounts.length);
           if (accountsData.accounts.length === 1) {
             await handleAccountLogin(accountsData.accounts[0].userId);
           } else {
@@ -199,6 +201,11 @@ const LoginPage = () => {
             <Image src="/logo.png" alt="Logo" width={100} height={100} />
           </div>
           <h3 className="text-lg font-semibold mb-4 text-center text-black">Select Your Account</h3>
+          {totalAccounts > 12 && (
+            <div className="mb-3 text-sm text-yellow-800 bg-yellow-100 border border-yellow-200 p-2 rounded">
+              Found {totalAccounts} accounts with this number. Showing first 12. Please refine if needed.
+            </div>
+          )}
           <div className="space-y-2 mb-4">
             {accounts.map((account) => (
               <div key={account.userId}>

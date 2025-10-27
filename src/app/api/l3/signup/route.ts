@@ -14,11 +14,10 @@ export async function POST(req: NextRequest) {
       firebaseUid,
     } = await req.json();
 
-    // Check if phone number already exists
-    const existingUser = await l3User.findOne({ contactNo });
-    if (existingUser) {
+    const existingCount = await l3User.countDocuments({ contactNo });
+    if (existingCount >= 12) {
       return NextResponse.json(
-        { message: "Phone number already registered" },
+        { message: "This phone number already has 12 accounts. Please use a different number." },
         { status: 400 }
       );
     }

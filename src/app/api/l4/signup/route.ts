@@ -14,6 +14,14 @@ export async function POST(req:NextRequest) {
       firebaseUid,
     } = await req.json();
 
+    const existingCount = await l4User.countDocuments({ contactNo });
+    if (existingCount >= 12) {
+      return NextResponse.json(
+        { error: "This phone number already has 12 accounts. Please use a different number." },
+        { status: 400 }
+      );
+    }
+
     let userId;
     let isUnique = false;
 
