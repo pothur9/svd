@@ -22,6 +22,16 @@ const l4UserSchema = new mongoose.Schema({
   firebaseUid: { type: String, required: false },
   photoUrl:{ type: String, required: false },
   selectedL2User:{ type: String, required: false },
+  // Additional optional profile fields
+  kula: { type: String },
+  married: { type: String },
+  higherDegree: { type: String },
+  maneDhevaruName: { type: String },
+  maneDhevaruAddress: { type: String },
+  subKula: { type: String },
+  guardianType: { type: String },
+  guardianName: { type: String },
+  sonOf: { type: String },
 });
 
 export default mongoose.models.l4User || mongoose.model('l4User', l4UserSchema);

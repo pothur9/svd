@@ -94,42 +94,48 @@ export default function Home() {
         height={48}
         priority
       />
-      <div
-        className={`flex flex-col items-center rounded-2xl shadow-xl transition-transform duration-200 hover:scale-105 hover:shadow-2xl ${selectedLevel.bgColor} border-4 p-8 min-h-[300px] w-full max-w-xs mx-auto`}
-        style={{ borderColor: logoBorderColor }}
-      >
-        <select
-          className="mb-6 w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#fbbf24] text-lg font-semibold text-gray-700 bg-white"
-          value={selectedLevel.name}
-          onChange={e => {
-            const level = levels.find(l => l.name === e.target.value);
-            if (level) setSelectedLevel(level);
-          }}
-        >
-          {levels.map(level => (
-            <option key={level.name} value={level.name}>
-              {level.name}
-            </option>
-          ))}
-        </select>
-        <h2 className="text-2xl font-extrabold mb-8 text-center w-full border-b pb-3 border-gray-200 tracking-wide text-gray-800">
-          {selectedLevel.name}
-        </h2>
-        <div className="flex flex-col gap-4 w-full items-center mt-4">
-          <Link
-            href={selectedLevel.login}
-            className="w-36 text-center py-2 rounded-full bg-[#fbbf24] text-white font-semibold shadow-md hover:bg-[#f59e1b] focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-colors text-base"
-          >
-            Login
-          </Link>
-          {selectedLevel.signup && (
-            <Link
-              href={selectedLevel.signup}
-              className="w-36 text-center py-2 rounded-full border-2 border-[#fbbf24] text-[#fbbf24] font-semibold shadow-md hover:bg-[#fbbf24] hover:text-white focus:ring-2 focus:ring-[#fbbf24] focus:outline-none transition-colors text-base"
+      <div className="w-full max-w-2xl">
+        <div className="flex gap-3 p-1 bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
+          {levels.map((level) => (
+            <button
+              key={level.name}
+              onClick={() => setSelectedLevel(level)}
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                selectedLevel.name === level.name
+                  ? 'bg-gray-100 text-gray-900 shadow'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
             >
-              Sign Up
-            </Link>
-          )}
+              {level.name}
+            </button>
+          ))}
+        </div>
+
+        <div
+          className={`rounded-2xl shadow-xl ${selectedLevel.bgColor} border p-6 sm:p-8`}
+          style={{ borderColor: logoBorderColor }}
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 rounded-full bg-white/70 flex items-center justify-center text-3xl text-gray-700 mb-4">👤</div>
+            <h2 className="text-2xl font-bold text-gray-900">{selectedLevel.name}</h2>
+            <div className="mt-6 w-full max-w-sm">
+              {selectedLevel.signup && (
+                <Link
+                  href={selectedLevel.signup}
+                  className="block w-full text-center py-3 rounded-lg bg-green-700 text-white font-semibold shadow hover:bg-green-800"
+                >
+                  Sign Up
+                </Link>
+              )}
+              <div className="mt-3" />
+              <Link
+                href={selectedLevel.login}
+                className="block w-full text-center py-3 rounded-lg bg-white text-gray-900 font-semibold border border-gray-300 hover:bg-gray-50"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
       <footer

@@ -38,6 +38,9 @@ export default function Dashboard() {
   const [currentStep, setCurrentStep] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  type DistrictsMap = Record<string, string[]>;
+  const [districtsMap, setDistrictsMap] = useState<DistrictsMap>({});
+  const [addressSel, setAddressSel] = useState<Record<string, { state: string; district: string; city: string }>>({});
 
   // Cloudinary config (same as L2)
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -155,7 +158,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userData) return;
     const ALL_FIELDS: string[] = [
-      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl'
+      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl',
+      // newly added optional profile fields
+      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','guardianType','guardianName','sonOf'
     ];
     const record = userData as unknown as Record<string, unknown>;
     const miss: string[] = ALL_FIELDS.filter((k) => {
@@ -284,7 +289,60 @@ export default function Dashboard() {
                             )}
                           </div>
                         ) : field.toLowerCase().includes('address') ? (
-                          <textarea value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" rows={2} />
+                          <div className="space-y-2">
+                            <select
+                              value={addressSel[field]?.state || ''}
+                              onChange={(e) => {
+                                const state = e.target.value;
+                                const district = '';
+                                const city = addressSel[field]?.city || '';
+                                const next = { state, district, city };
+                                setAddressSel((prev) => ({ ...prev, [field]: next }));
+                                const composed = [city, district, state].filter(Boolean).join(', ');
+                                setFormData((prev) => ({ ...prev, [field]: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                            >
+                              <option value="">Select State</option>
+                              {Object.keys(districtsMap).map((st) => (
+                                <option key={st} value={st}>{st}</option>
+                              ))}
+                            </select>
+                            <select
+                              value={addressSel[field]?.district || ''}
+                              onChange={(e) => {
+                                const district = e.target.value;
+                                const state = addressSel[field]?.state || '';
+                                const city = addressSel[field]?.city || '';
+                                const next = { state, district, city };
+                                setAddressSel((prev) => ({ ...prev, [field]: next }));
+                                const composed = [city, district, state].filter(Boolean).join(', ');
+                                setFormData((prev) => ({ ...prev, [field]: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                              disabled={!addressSel[field]?.state}
+                            >
+                              <option value="">Select District</option>
+                              {(districtsMap[addressSel[field]?.state || ''] || []).map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                              ))}
+                            </select>
+                            <input
+                              type="text"
+                              placeholder="City / Village"
+                              value={addressSel[field]?.city || ''}
+                              onChange={(e) => {
+                                const city = e.target.value;
+                                const state = addressSel[field]?.state || '';
+                                const district = addressSel[field]?.district || '';
+                                const next = { state, district, city };
+                                setAddressSel((prev) => ({ ...prev, [field]: next }));
+                                const composed = [city, district, state].filter(Boolean).join(', ');
+                                setFormData((prev) => ({ ...prev, [field]: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                            />
+                          </div>
                         ) : (
                           <input type="text" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
                         )}

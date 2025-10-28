@@ -134,6 +134,12 @@ export default function SignupForm() {
           setUserId(responseData.userId);
           setIsUserIdVisible(true);
           alert(`Signup successful! Your User ID is: ${responseData.userId}`);
+          try {
+            if (typeof window !== 'undefined') {
+              sessionStorage.clear();
+              localStorage.clear();
+            }
+          } catch {}
           router.push("/l3/login");
         } else {
           alert(responseData.message || "Signup failed");

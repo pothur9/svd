@@ -84,18 +84,13 @@ const LoginPage = () => {
 
         const accountsData = await accountsResponse.json();
 
-        if (accountsResponse.ok && accountsData.accounts.length > 0) {
+        if (accountsResponse.ok && accountsData.accounts?.length > 0) {
           setAccounts(accountsData.accounts);
-
-          if (accountsData.accounts.length === 1) {
-            // Single account - login directly
-            await handleAccountLogin(accountsData.accounts[0].userId);
-          } else {
-            // Multiple accounts - show selection
-            setShowAccountSelection(true);
-          }
+          setShowAccountSelection(true);
         } else {
-          alert("No accounts found with this phone number.");
+          // No accounts found - still show selection UI so user can create a new account
+          setAccounts([]);
+          setShowAccountSelection(true);
         }
       } else {
         alert("Invalid OTP. Please try again.");
@@ -260,6 +255,20 @@ const LoginPage = () => {
               className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
             >
               Login to Selected Account
+            </button>
+            <button
+              onClick={() => {
+                try {
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.clear();
+                    localStorage.clear();
+                  }
+                } catch {}
+                router.push('/l3/signup');
+              }}
+              className="w-full mt-2 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+            >
+              Create New Account
             </button>
             <button
               onClick={() => {

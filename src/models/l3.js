@@ -30,6 +30,7 @@ const l3UserSchema = new mongoose.Schema({
   subKula: { type: String },
   guardianType: { type: String },
   guardianName: { type: String },
+  sonOf: { type: String },
 });
 
 export default mongoose.models.l3User || mongoose.model('l3User', l3UserSchema);

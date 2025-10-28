@@ -70,7 +70,7 @@ const LoginPage = () => {
       const verifyData = await verifyResponse.json();
       
       if (verifyData.Status === "Success") {
-        // OTP verified, now find accounts and select
+        // OTP verified, now find accounts and always show selection
         const accountsResponse = await fetch("/api/l4/check-accounts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -80,13 +80,11 @@ const LoginPage = () => {
         if (accountsResponse.ok && accountsData.accounts?.length > 0) {
           setAccounts(accountsData.accounts);
           setTotalAccounts(accountsData.total ?? accountsData.accounts.length);
-          if (accountsData.accounts.length === 1) {
-            await handleAccountLogin(accountsData.accounts[0].userId);
-          } else {
-            setShowAccountSelection(true);
-          }
+          setShowAccountSelection(true);
         } else {
-          alert("No accounts found with this phone number.");
+          setAccounts([]);
+          setTotalAccounts(0);
+          setShowAccountSelection(true);
         }
       } else {
         alert("Invalid OTP. Please try again.");
@@ -232,6 +230,20 @@ const LoginPage = () => {
             className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
           >
             Login to Selected Account
+          </button>
+          <button
+            onClick={() => {
+              try {
+                if (typeof window !== 'undefined') {
+                  sessionStorage.clear();
+                  localStorage.clear();
+                }
+              } catch {}
+              router.push('/l4/signup');
+            }}
+            className="w-full mt-2 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+          >
+            Create New Account
           </button>
           <button
             onClick={() => { setShowAccountSelection(false); setSelectedAccount(""); setAccounts([]); }}

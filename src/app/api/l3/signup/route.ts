@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
       subKula: null,
       guardianType: null,
       guardianName: null,
+      sonOf: null,
     });
 
     await newUser.save();

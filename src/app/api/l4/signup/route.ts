@@ -54,6 +54,16 @@ export async function POST(req:NextRequest) {
       languageKnown: null,
       selectedL2User: null,
       photoUrl: null,
+      // newly added optional fields
+      kula: null,
+      married: null,
+      higherDegree: null,
+      maneDhevaruName: null,
+      maneDhevaruAddress: null,
+      subKula: null,
+      guardianType: null,
+      guardianName: null,
+      sonOf: null,
     });
 
     await newUser.save();

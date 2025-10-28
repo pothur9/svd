@@ -778,6 +778,12 @@ export default function PersonalDetailsForm() {
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                 onClick={() => {
                   setShowSuccessModal(false);
+                  try {
+                    if (typeof window !== 'undefined') {
+                      sessionStorage.clear();
+                      localStorage.clear();
+                    }
+                  } catch {}
                   router.push("/l4/login");
                 }}
               >
