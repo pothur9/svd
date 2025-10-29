@@ -56,6 +56,8 @@ export default function Dashboard() {
   type DistrictsMap = Record<string, string[]>;
   const [districtsMap, setDistrictsMap] = useState<DistrictsMap>({});
   const [addressSel, setAddressSel] = useState<Record<string, { state: string; district: string; city: string }>>({});
+  const [sonOfTitle, setSonOfTitle] = useState<string>("");
+  const [sonOfName, setSonOfName] = useState<string>("");
 
   // Cloudinary config (same approach as L2)
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -180,7 +182,7 @@ export default function Dashboard() {
     const ALL_L3_FIELDS: string[] = [
       'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl',
       // newly added optional profile fields
-      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','guardianType','guardianName','sonOf'
+      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','sonOf'
     ];
     const userRecord = userData as unknown as Record<string, unknown>;
     const missing: string[] = ALL_L3_FIELDS.filter((k) => {
@@ -298,6 +300,36 @@ export default function Dashboard() {
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
                           </select>
+                        ) : field === 'sonOf' ? (
+                          <div className="flex gap-2">
+                            <select
+                              value={sonOfTitle}
+                              onChange={(e) => {
+                                const title = e.target.value;
+                                setSonOfTitle(title);
+                                const composed = title && sonOfName ? `${title} ${sonOfName}` : '';
+                                setFormData((prev) => ({ ...prev, sonOf: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                            >
+                              <option value="">Select</option>
+                              <option value="S/O">S/O</option>
+                              <option value="D/O">D/O</option>
+                              <option value="W/O">W/O</option>
+                            </select>
+                            <input
+                              type="text"
+                              placeholder="Name"
+                              value={sonOfName}
+                              onChange={(e) => {
+                                const name = e.target.value;
+                                setSonOfName(name);
+                                const composed = sonOfTitle && name ? `${sonOfTitle} ${name}` : '';
+                                setFormData((prev) => ({ ...prev, sonOf: composed }));
+                              }}
+                              className="flex-1 p-2 border rounded bg-white text-black"
+                            />
+                          </div>
                         ) : field === 'kula' ? (
                           <select
                             value={formData.kula || ''}

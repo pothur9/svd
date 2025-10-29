@@ -277,10 +277,10 @@ const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <div className="text-center mt-4">
+        {/* <div className="text-center mt-4">
           <span className="text-gray-700">Don&apos;t have an account? </span>
           <a href="/l2/signup" className="text-blue-500 hover:text-blue-700 font-medium">Sign up</a>
-        </div>
+        </div> */}
       </div>
     </div>
   );

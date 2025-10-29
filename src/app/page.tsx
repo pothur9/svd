@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const levels = [
   // { name: "Sri 1008 jagdhguru", login: "/l1/login", bgColor: "bg-yellow-100" },
    { name: "Sri Lingayatha Veerashiva ಶ್ರೀ ವೀರಶೈವ ಲಿಂಗಾಯತ", login: "/l4/login", signup: "/l4/signup", bgColor: "bg-pink-100" },
-  { name: "Sri guru jangam ಶ್ರೀ ಗುರು ಜಂಗಮ", login: "/l3/login", signup: "/l3/signup", bgColor: "bg-green-100" },
+  { name: "Sri Veerashaiva Jangama ಶ್ರೀ ವೀರಶೈವ ಜಂಗಮ", login: "/l3/login", signup: "/l3/signup", bgColor: "bg-green-100" },
    { name: "Sri 108 Shivachryaru ಶ್ರೀ 108 ಶಿವಾಚಾರ್ಯರು", login: "/l2/login", bgColor: "bg-[#F1C338]" },
 ];
 
@@ -86,6 +86,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
+     <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p>
+     <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ, ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
       <Image
         className="mb-4"
         src="/logomain1.png"
@@ -152,6 +154,22 @@ export default function Home() {
               </Link>
             </div>
           </div>
+        </div>
+      </div>
+      <div className="w-full max-w-2xl mt-6 mb-4">
+        <p className="text-center text-gray-900 font-semibold mb-2">
+          To know how to create account, see this video
+        </p>
+        <div className="relative w-full h-56 sm:h-64 md:h-72">
+          <iframe
+            className="absolute inset-0 w-full h-full rounded-lg shadow"
+            src="https://www.youtube.com/embed/6pKNEqrw16A"
+            title="How to create account"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
         </div>
       </div>
 <div className="mt-2 mb-4">

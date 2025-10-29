@@ -26,7 +26,7 @@ const CenteredLoader: React.FC<CenteredLoaderProps> = ({ message, gifSrc = "/loa
         ) : (
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f59e0b]"></div>
         )}
-        {message ? <p className="text-gray-600 text-sm">{message}</p> : null}
+        {message ? <p className="text-gray-700 text-xl sm:text-2xl font-semibold">{message}</p> : null}
       </div>
     </div>
   );

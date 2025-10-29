@@ -60,8 +60,6 @@ export async function POST(req: NextRequest) {
       maneDhevaruName: null,
       maneDhevaruAddress: null,
       subKula: null,
-      guardianType: null,
-      guardianName: null,
       sonOf: null,
     });
 

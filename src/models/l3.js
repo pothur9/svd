@@ -28,8 +28,6 @@ const l3UserSchema = new mongoose.Schema({
   maneDhevaruName: { type: String },
   maneDhevaruAddress: { type: String },
   subKula: { type: String },
-  guardianType: { type: String },
-  guardianName: { type: String },
   sonOf: { type: String },
 });
 
