@@ -33,12 +33,15 @@ interface FormData {
   occupation?: string;
   languageKnown?: string;
   photoUrl?: File | string | null;
+  kula?: string;
+  subKula?: string;
 }
 
 export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
 
 export default function PersonalDetailsForm() {
   const [l2Users, setL2Users] = useState([]);
+  const [peetaOptions, setPeetaOptions] = useState<string[]>([]);
   const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [otp, setOtp] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -64,6 +67,8 @@ export default function PersonalDetailsForm() {
     occupation: "",
     languageKnown: "",
     photoUrl: null,
+    kula: "",
+    subKula: "",
   });
   const { t } = useTranslation();
   const router = useRouter();
@@ -100,6 +105,22 @@ export default function PersonalDetailsForm() {
   useEffect(() => {
     console.log("Updated L2 Users:", l2Users);
   }, [l2Users]);
+
+  useEffect(() => {
+    const fetchPeetaOptions = async () => {
+      try {
+        const response = await fetch("/api/l1/dashboard");
+        if (response.ok) {
+          const data = await response.json();
+          const peetas = (data as Array<{ l1User: { peeta: string } }>).map((item) => item.l1User.peeta);
+          setPeetaOptions(peetas);
+        }
+      } catch (error) {
+        console.error("Error fetching peeta options:", error);
+      }
+    };
+    fetchPeetaOptions();
+  }, []);
 
   useEffect(() => {
     fetch("/districts.json")
@@ -334,7 +355,7 @@ export default function PersonalDetailsForm() {
             {t("signupl3.title")}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
+          {/* <div>
               <label
                 htmlFor="selectedL2User"
                 className="block text-sm font-semibold"
@@ -355,7 +376,94 @@ export default function PersonalDetailsForm() {
                   </option>
                 ))}
               </select>
+            </div> */}
+                <div>
+              <label htmlFor="peeta" className="block text-sm font-semibold">
+                {t("signupl3.peeta")}
+              </label>
+              <select
+                name="peeta"
+                id="peeta"
+                value={formData.peeta}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select Peeta</option>
+                {peetaOptions.map((peeta, index) => (
+                  <option key={index} value={peeta}>{peeta}</option>
+                ))}
+              </select>
             </div>
+            <div>
+              <label htmlFor="karthruGuru" className="block text-sm font-semibold">
+                {t("signupl3.karthruGuru")}
+              </label>
+              <select
+                name="karthruGuru"
+                id="karthruGuru"
+                value={formData.karthruGuru}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select Guru</option>
+                {l2Users.map((user: { name: string }, index: number) => (
+                  <option key={index} value={user.name}>{user.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="kula" className="block text-sm font-semibold">
+                Kula / ಕುಲ
+              </label>
+              <select
+                name="kula"
+                id="kula"
+                value={formData.kula}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({ ...prev, kula: value, subKula: "" }));
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="">Select Kula</option>
+                <option value="Veerashaiva Lingayatha">Veerashaiva Lingayatha / ವೀರಶೈವ ಲಿಂಗಾಯತ</option>
+              </select>
+            </div>
+
+            {formData.kula && (
+              <div>
+                <label htmlFor="subKula" className="block text-sm font-semibold">
+                  Sub Kula / ಉಪಕುಲ
+                </label>
+                <select
+                  name="subKula"
+                  id="subKula"
+                  value={formData.subKula}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  required
+                >
+                  <option value="">Select Sub Kula</option>
+                  <option value="Panchamasaligaru">Panchamasaligaru / ಪಂಚಮಸಾಲಿಗರು</option>
+                  <option value="Banajigaru">Banajigaru / ಬಣಜಿಗರು</option>
+                  <option value="Kadi - vakkaligaru">Kadi - vakkaligaru / ಕಡಿ - ವಕ್ಕಲಿಗರು</option>
+                  <option value="Kumbararu">Kumbararu / ಕುಂಬಾರರು</option>
+                  <option value="Madivalaru">Madivalaru / ಮಡಿವಾಳರು</option>
+                  <option value="Lalagondaru">Lalagondaru / ಲಾಲಗೊಂಡರು</option>
+                  <option value="Pakanaka reddy">Pakanaka reddy / ಪಕನಕ ರೆಡ್ಡಿ</option>
+                  <option value="Reddy">Reddy / ರೆಡ್ಡಿ</option>
+                  <option value="Gaanigaru">Gaanigaru / ಗಾಣಿಗರು</option>
+                  <option value="Sadharu">Sadharu / ಸಧರು</option>
+                  <option value="Nonabaru">Nonabaru / ನೊನಬಾರು</option>
+                  <option value="Shetty ligayatha">Shetty ligayatha / ಶೆಟ್ಟಿ ಲಿಗಾಯತ</option>
+                  <option value="Gouda lingyatha">Gouda lingyatha / ಗೌಡ ಲಿಂಗಾಯತ</option>
+                </select>
+              </div>
+            )}
             <div>
               <label htmlFor="name" className="block text-sm font-semibold">
                 {t("signupl3.name")}
@@ -438,7 +546,7 @@ export default function PersonalDetailsForm() {
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
               />
             </div>
-
+{/* 
             <div>
               <label
                 htmlFor="karthruGuru"
@@ -446,31 +554,39 @@ export default function PersonalDetailsForm() {
               >
                 {t("signupl3.karthruGuru")}
               </label>
-              <input
-                type="text"
+              <select
                 name="karthruGuru"
                 id="karthruGuru"
                 value={formData.karthruGuru}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
-              />
-            </div>
+              >
+                <option value="">Select Guru</option>
+                {l2Users.map((user: { name: string }, index: number) => (
+                  <option key={index} value={user.name}>{user.name}</option>
+                ))}
+              </select>
+            </div> */}
 
-            <div>
+            {/* <div>
               <label htmlFor="peeta" className="block text-sm font-semibold">
                 {t("signupl3.peeta")}
               </label>
-              <input
-                type="text"
+              <select
                 name="peeta"
                 id="peeta"
                 value={formData.peeta}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
-              />
-            </div>
+              >
+                <option value="">Select Peeta</option>
+                {peetaOptions.map((peeta, index) => (
+                  <option key={index} value={peeta}>{peeta}</option>
+                ))}
+              </select>
+            </div> */}
 
             <div className="hidden">
               <label htmlFor="bhage" className="block text-sm font-semibold">

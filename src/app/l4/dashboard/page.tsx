@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 import { QRCodeSVG } from "qrcode.react";
+import CenteredLoader from "../../../components/CenteredLoader";
 
 interface MemberData {
   l1User: {
@@ -89,6 +90,21 @@ export default function Dashboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Load states and districts from public/districts.json
+  useEffect(() => {
+    const loadDistricts = async () => {
+      try {
+        const res = await fetch('/districts.json', { cache: 'force-cache' });
+        if (res.ok) {
+          const data = await res.json();
+          setDistrictsMap(data as DistrictsMap);
+        }
+      } catch (e) {
+        console.error('Failed to load districts.json', e);
+      }
+    };
+    loadDistricts();
+  }, []);
   
 
   useEffect(() => {
@@ -141,18 +157,7 @@ export default function Dashboard() {
     fetchMemberData();
   }, [router]);
 
-  // Evaluate profile completeness once data is available
-  if (userData && !profileIncomplete) {
-    const requiredKeys: (keyof UserData)[] = [
-      'dob',
-      // 'gender' exists in model but not in interface, we'll check it below via generic record
-      'permanentAddress',
-      'selectedL2User',
-      'photoUrl' as any, // not in interface, but exists in model; safe guard
-    ];
-    const missing = requiredKeys.filter((k) => !(userData as any)[k] || (typeof (userData as any)[k] === 'string' && ((userData as any)[k] as string).trim() === ''));
-    if (missing.length > 0) setProfileIncomplete(true);
-  }
+  // Completeness handled in the ALL_FIELDS effect below
 
   // Compute full set of missing fields similar to L3 (based on signupl3 field set)
   useEffect(() => {
@@ -168,18 +173,27 @@ export default function Dashboard() {
       return v === undefined || v === null || (typeof v === 'string' && (v as string).trim() === '');
     });
     setMissingFields(miss);
+    if (miss.length === 0) {
+      setProfileIncomplete(false);
+      setShowCompleteForm(false);
+    } else {
+      setProfileIncomplete(true);
+    }
     const preset: Record<string, string> = {};
     miss.forEach((k) => { preset[k] = ''; });
     setFormData(preset);
   }, [userData]);
 
-  if (memberData.length === 0 || !userData) return <p>Loading...</p>;
+  if (memberData.length === 0 || !userData) return <CenteredLoader message="Loading..." />;
 
   // Totals similar to L2
   const l2TotalAll = memberData.reduce((sum, m) => sum + (m.l2UserCount ?? 0), 0);
   const l3TotalAll = memberData.reduce((sum, m) => sum + (m.l3UserCount ?? 0), 0);
   const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
   const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
+
+  // Label helper for dynamic fields
+  const displayLabel = (f: string) => (f === 'mailId' ? 'Email ID' : f);
 
   // Helpers for mobile transposed table
   const getUserCounts = (member: MemberData) => [
@@ -252,7 +266,7 @@ export default function Dashboard() {
                   >
                     {fieldsForStep.map((field) => (
                       <div key={field} className="flex flex-col">
-                        <label className="text-sm text-gray-700 mb-1 capitalize">{field}</label>
+                        <label className="text-sm text-gray-700 mb-1">{displayLabel(field)}</label>
                         {field === 'dob' ? (
                           <input type="date" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
                         ) : field === 'gender' ? (
@@ -261,6 +275,37 @@ export default function Dashboard() {
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
+                          </select>
+                        ) : field === 'kula' ? (
+                          <select
+                            value={formData[field] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value, subKula: '' })}
+                            className="p-2 border rounded bg-white text-black"
+                          >
+                            <option value="">Select Kula</option>
+                            <option value="Veerashaiva Lingayatha">Veerashaiva Lingayatha / ವೀರಶೈವ ಲಿಂಗಾಯತ</option>
+                          </select>
+                        ) : field === 'subKula' ? (
+                          <select
+                            value={formData[field] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                            className="p-2 border rounded bg-white text-black"
+                            disabled={!formData['kula']}
+                          >
+                            <option value="">Select Sub Kula</option>
+                            <option value="Panchamasaligaru">Panchamasaligaru / ಪಂಚಮಸಾಲಿಗರು</option>
+                            <option value="Banajigaru">Banajigaru / ಬಣಜಿಗರು</option>
+                            <option value="Kadi - vakkaligaru">Kadi - vakkaligaru / ಕಡಿ - ವಕ್ಕಲಿಗರು</option>
+                            <option value="Kumbararu">Kumbararu / ಕುಂಬಾರರು</option>
+                            <option value="Madivalaru">Madivalaru / ಮಡಿವಾಳರು</option>
+                            <option value="Lalagondaru">Lalagondaru / ಲಾಲಗೊಂಡರು</option>
+                            <option value="Pakanaka reddy">Pakanaka reddy / ಪಕನಕ ರೆಡ್ಡಿ</option>
+                            <option value="Reddy">Reddy / ರೆಡ್ಡಿ</option>
+                            <option value="Gaanigaru">Gaanigaru / ಗಾಣಿಗರು</option>
+                            <option value="Sadharu">Sadharu / ಸಧರು</option>
+                            <option value="Nonabaru">Nonabaru / ನೊನಬಾರು</option>
+                            <option value="Shetty ligayatha">Shetty ligayatha / ಶೆಟ್ಟಿ ಲಿಗಾಯತ</option>
+                            <option value="Gouda lingyatha">Gouda lingyatha / ಗೌಡ ಲಿಂಗಾಯತ</option>
                           </select>
                         ) : field === 'photoUrl' ? (
                           <div className="space-y-2">
@@ -344,7 +389,13 @@ export default function Dashboard() {
                             />
                           </div>
                         ) : (
-                          <input type="text" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
+                          <input
+                            type={field === 'mailId' ? 'email' : 'text'}
+                            placeholder={field === 'mailId' ? 'Email ID' : ''}
+                            value={formData[field] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                            className="p-2 border rounded bg-white text-black"
+                          />
                         )}
                       </div>
                     ))}
@@ -368,7 +419,10 @@ export default function Dashboard() {
         )}
         <br />
         <br />
-        <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
+        <div className="flex justify-center">
+          <img src="/count.png" alt="Counts" className="mx-auto w-40 sm:w-56" />
+        </div>
+        <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-16">
           Dashboard
         </h1>
         {/* Responsive Table */}
@@ -588,7 +642,7 @@ export default function Dashboard() {
               <div className="rounded-xl w-full h-full shadow-lg overflow-hidden relative" style={{ backgroundColor: '#fff', color: '#000' }}>
                 {/* Red Ribbon Guru Section */}
                 <div className="p-3 flex flex-col   z-10 relative" style={{ backgroundColor: '#ea580c', color: '#fff' }}>
-                  <span className="text-xs font-semibold w-full break-words">Guru: {userData.selectedL2User || 'N/A'}</span>
+                  <span className="text-xs font-semibold w-full break-words">Guru: {userData.karthruGuru || 'N/A'}</span>
                 </div>
                 {/* Content Section (below ribbon) */}
                 <div className="px-5 pb-5 pt-2 w-full h-full z-10 relative flex flex-row items-center justify-between" style={{ backgroundColor: '#fff', color: '#000' }}>

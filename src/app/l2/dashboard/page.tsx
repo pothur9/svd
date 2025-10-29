@@ -7,6 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 import AuthManager from "../../../lib/auth";
 import Navbar from "../navbar/page";
 import Footer from "../footer/page";
+import CenteredLoader from "../../../components/CenteredLoader";
 
 interface L1User {
   _id: string;
@@ -152,14 +153,14 @@ export default function Dashboard(): JSX.Element {
 
   // Block rendering until we verify auth state to prevent flicker
   if (!authChecked) {
-    return <p>Loading...</p>;
+    return <CenteredLoader message="Checking session..." />;
   }
 
   if (memberData.length === 0 || !userData) {
     if (memberData.length === 0) {
       console.warn('memberData is empty after fetch!');
     }
-    return <p>{error ? error : 'Loading...'}</p>;
+    return <CenteredLoader message={error ? error : 'Loading...'} />;
   }
   // Define background colors for peetas in a repeating pattern
   const bgColors = [

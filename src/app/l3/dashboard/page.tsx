@@ -5,6 +5,7 @@ import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 import { QRCodeSVG } from "qrcode.react";
 import AuthManager from "../../../lib/auth";
+import CenteredLoader from "../../../components/CenteredLoader";
 
 interface MemberData {
   l1User: {
@@ -52,6 +53,9 @@ export default function Dashboard() {
   const [showCompleteForm, setShowCompleteForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  type DistrictsMap = Record<string, string[]>;
+  const [districtsMap, setDistrictsMap] = useState<DistrictsMap>({});
+  const [addressSel, setAddressSel] = useState<Record<string, { state: string; district: string; city: string }>>({});
 
   // Cloudinary config (same approach as L2)
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -89,6 +93,22 @@ export default function Dashboard() {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Load states and districts from public/districts.json
+  useEffect(() => {
+    const loadDistricts = async () => {
+      try {
+        const res = await fetch('/districts.json', { cache: 'force-cache' });
+        if (res.ok) {
+          const data = await res.json();
+          setDistrictsMap(data as DistrictsMap);
+        }
+      } catch (e) {
+        console.error('Failed to load districts.json', e);
+      }
+    };
+    loadDistricts();
   }, []);
 
   
@@ -152,28 +172,15 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // After userData loads, compute completeness
-  if (userData && !profileIncomplete) {
-    const requiredKeys: (keyof UserData)[] = [
-      'dob',
-      'permanentAddress',
-      'selectedL2User',
-      'photoUrl',
-    ];
-    const missing = requiredKeys.filter((k) => {
-      const v = userData[k];
-      return v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
-    });
-    if (missing.length > 0 && !profileIncomplete) {
-      setProfileIncomplete(true);
-    }
-  }
+  // Compute completeness handled in ALL_L3_FIELDS effect below
 
   // Determine missing fields against full L3 field set (from translations signupl3)
   useEffect(() => {
     if (!userData) return;
     const ALL_L3_FIELDS: string[] = [
-      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl'
+      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl',
+      // newly added optional profile fields
+      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','guardianType','guardianName','sonOf'
     ];
     const userRecord = userData as unknown as Record<string, unknown>;
     const missing: string[] = ALL_L3_FIELDS.filter((k) => {
@@ -181,6 +188,13 @@ export default function Dashboard() {
       return v === undefined || v === null || (typeof v === 'string' && (v as string).trim() === '');
     });
     setMissingFields(missing);
+    // If nothing missing, mark profile as complete and ensure modal is closed
+    if (missing.length === 0) {
+      setProfileIncomplete(false);
+      setShowCompleteForm(false);
+    } else {
+      setProfileIncomplete(true);
+    }
     const preset: Record<string, string> = {};
     missing.forEach((k) => {
       preset[k] = '';
@@ -190,13 +204,16 @@ export default function Dashboard() {
 
   // Immediate prompt; no delay
 
-  if (memberData.length === 0 || !userData) return <p>Loading...</p>;
+  if (memberData.length === 0 || !userData) return <CenteredLoader message="Loading..." />;
 
   // Precompute totals across peetas like L2
   const l2TotalAll = memberData.reduce((sum, m) => sum + (m.l2UserCount ?? 0), 0);
   const l3TotalAll = memberData.reduce((sum, m) => sum + (m.l3UserCount ?? 0), 0);
   const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
   const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
+
+  // Label helper for dynamic fields
+  const displayLabel = (f: string) => (f === 'mailId' ? 'Email ID' : f);
 
 
   // Helpers for mobile transposed table
@@ -271,7 +288,7 @@ export default function Dashboard() {
                   >
                     {fieldsForStep.map((field) => (
                       <div key={field} className="flex flex-col">
-                        <label className="text-sm text-gray-700 mb-1 capitalize">{field}</label>
+                        <label className="text-sm text-gray-700 mb-1">{displayLabel(field)}</label>
                         {field === 'dob' ? (
                           <input type="date" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
                         ) : field === 'gender' ? (
@@ -280,6 +297,37 @@ export default function Dashboard() {
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
+                          </select>
+                        ) : field === 'kula' ? (
+                          <select
+                            value={formData.kula || ''}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setFormData((prev) => ({ ...prev, kula: v, subKula: '' }));
+                            }}
+                            className="p-2 border rounded bg-white text-black"
+                          >
+                            <option value="">Select Kula</option>
+                            <option value="Veerashiva Lingayatha Jangama / ವೀರಶೈವ ಲಿಂಗಾಯತ ಜಂಗಮ">Veerashiva Lingayatha Jangama / ವೀರಶೈವ ಲಿಂಗಾಯತ ಜಂಗಮ</option>
+                          </select>
+                        ) : field === 'subKula' ? (
+                          <select
+                            value={formData.subKula || ''}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, subKula: e.target.value }))}
+                            className="p-2 border rounded bg-white text-black"
+                            disabled={!formData.kula}
+                          >
+                            <option value="">Select Sub-Kula</option>
+                            <option value="Mataadeesharu / ಮಠಾಧೀಶರು">Mataadeesharu / ಮಠಾಧೀಶರು</option>
+                            <option value="Matapatthi / ಮಟಪತ್ತಿ">Matapatthi / ಮಟಪತ್ತಿ</option>
+                            <option value="Ganachari / ಗಣಾಚಾರಿ">Ganachari / ಗಣಾಚಾರಿ</option>
+                            <option value="Saraganachaari / ಸರಗಣಾಚಾರಿ">Saraganachaari / ಸರಗಣಾಚಾರಿ</option>
+                            <option value="Bidi - ganangalu / ಬಿಡಿ - ಗಣಂಗಲು">Bidi - ganangalu / ಬಿಡಿ - ಗಣಂಗಲು</option>
+                            <option value="Gante ayyanoru / ಗಂಟೆ ಅಯ್ಯನೋರು">Gante ayyanoru / ಗಂಟೆ ಅಯ್ಯನೋರು</option>
+                            <option value="Shuladha ayyanoru / ಶೂಲಧ ಅಯ್ಯನೋರು">Shuladha ayyanoru / ಶೂಲಧ ಅಯ್ಯನೋರು</option>
+                            <option value="Pathri ayyanoru / ಪತ್ರಿ ಅಯ್ಯನೋರು">Pathri ayyanoru / ಪತ್ರಿ ಅಯ್ಯನೋರು</option>
+                            <option value="Kambi ayyanoru / ಕಂಬಿ ಅಯ್ಯನೋರು">Kambi ayyanoru / ಕಂಬಿ ಅಯ್ಯನೋರು</option>
+                            <option value="Ayyar / ಅಯ್ಯರ್">Ayyar / ಅಯ್ಯರ್</option>
                           </select>
                         ) : field === 'photoUrl' ? (
                           <div className="space-y-2">
@@ -308,9 +356,68 @@ export default function Dashboard() {
                             )}
                           </div>
                         ) : field.toLowerCase().includes('address') ? (
-                          <textarea value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" rows={2} />
+                          <div className="space-y-2">
+                            <select
+                              value={addressSel[field]?.state || ''}
+                              onChange={(e) => {
+                                const state = e.target.value;
+                                const district = '';
+                                const city = addressSel[field]?.city || '';
+                                const next = { state, district, city };
+                                setAddressSel((prev) => ({ ...prev, [field]: next }));
+                                const composed = [city, district, state].filter(Boolean).join(', ');
+                                setFormData((prev) => ({ ...prev, [field]: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                            >
+                              <option value="">Select State</option>
+                              {Object.keys(districtsMap).map((st) => (
+                                <option key={st} value={st}>{st}</option>
+                              ))}
+                            </select>
+                            <select
+                              value={addressSel[field]?.district || ''}
+                              onChange={(e) => {
+                                const district = e.target.value;
+                                const state = addressSel[field]?.state || '';
+                                const city = addressSel[field]?.city || '';
+                                const next = { state, district, city };
+                                setAddressSel((prev) => ({ ...prev, [field]: next }));
+                                const composed = [city, district, state].filter(Boolean).join(', ');
+                                setFormData((prev) => ({ ...prev, [field]: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                              disabled={!addressSel[field]?.state}
+                            >
+                              <option value="">Select District</option>
+                              {(districtsMap[addressSel[field]?.state || ''] || []).map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                              ))}
+                            </select>
+                            <input
+                              type="text"
+                              placeholder="City / Village"
+                              value={addressSel[field]?.city || ''}
+                              onChange={(e) => {
+                                const city = e.target.value;
+                                const state = addressSel[field]?.state || '';
+                                const district = addressSel[field]?.district || '';
+                                const next = { state, district, city };
+                                setAddressSel((prev) => ({ ...prev, [field]: next }));
+                                const composed = [city, district, state].filter(Boolean).join(', ');
+                                setFormData((prev) => ({ ...prev, [field]: composed }));
+                              }}
+                              className="p-2 border rounded bg-white text-black"
+                            />
+                          </div>
                         ) : (
-                          <input type="text" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
+                          <input
+                            type={field === 'mailId' ? 'email' : 'text'}
+                            placeholder={field === 'mailId' ? 'Email ID' : ''}
+                            value={formData[field] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                            className="p-2 border rounded bg-white text-black"
+                          />
                         )}
                       </div>
                     ))}
@@ -334,7 +441,10 @@ export default function Dashboard() {
         )}
         <br />
         <br />
-        <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-24">
+        <div className="flex justify-center">
+          <img src="/count.png" alt="Counts" className="mx-auto w-40 sm:w-56" />
+        </div>
+        <h1 className="text-center text-2xl font-bold text-gray-800 mb-6 mt-16">
           Dashboard
         </h1>
         {/* Responsive Table */}
@@ -612,7 +722,7 @@ export default function Dashboard() {
                   className="p-3 flex flex-col   z-10 relative"
                   style={{ backgroundColor: '#ea580c', color: '#fff' }}
                 >
-                  <span className="text-xs font-semibold w-full break-words">Guru: {userData.selectedL2User || 'N/A'}</span>
+                  <span className="text-xs font-semibold w-full break-words">Guru: {userData.karthruGuru || 'N/A'}</span>
                   {/* <span className="text-xs font-semibold">Guru Address: {userData.address || 'N/A'}</span> */}
                 </div>
                 {/* Content Section (below ribbon) */}
