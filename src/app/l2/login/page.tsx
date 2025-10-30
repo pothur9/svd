@@ -157,7 +157,7 @@ const LoginPage: React.FC = () => {
 
         {errorMsg && (
           <div className="mb-4 p-3 rounded-md bg-yellow-100 text-yellow-800 text-sm">
-            {errorMsg} <a href="/l2/signup" className="underline font-medium">Go to Sign up</a>
+            {errorMsg} <a href="" className="underline font-medium"></a>
           </div>
         )}
 

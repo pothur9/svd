@@ -113,7 +113,7 @@ export default function Home() {
         </a>
       </div> */}
       <div className="w-full max-w-2xl">
-        <div className="flex gap-3 p-1 bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div className="flex gap-3 p-1 bg-white rounded-xl border border-gray-200 shadow-sm mb-6 overflow-scroll">
           {levels.map((level) => (
             <button
               key={level.name}
@@ -160,7 +160,7 @@ export default function Home() {
         <p className="text-center text-gray-900 font-semibold mb-2">
           To know how to create account, see this video
         </p>
-        <div className="relative w-full h-56 sm:h-64 md:h-72">
+        <div className="relative w-full h-screen sm:h-64 md:h-72">
           <iframe
             className="absolute inset-0 w-full h-full rounded-lg shadow"
             src="https://www.youtube.com/embed/6pKNEqrw16A"

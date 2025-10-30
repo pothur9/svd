@@ -28,6 +28,9 @@ function Navbar() {
   const handleLogout = () => {
     // Clear all session storage
     sessionStorage.clear();
+    if (typeof window !== 'undefined') {
+      try { localStorage.removeItem('svd_auth_user'); } catch {}
+    }
     // Redirect to home page
     router.push('/');
   };

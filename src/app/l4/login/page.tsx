@@ -22,7 +22,8 @@ const LoginPage = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUserId = sessionStorage.getItem("userId");
-      if (storedUserId) {
+      const localAuth = localStorage.getItem('svd_auth_user');
+      if (storedUserId || localAuth) {
         router.push("/l4/dashboard");
       }
     }
@@ -107,6 +108,13 @@ const LoginPage = () => {
     const loginData = await loginResponse.json();
     if (loginResponse.ok) {
       sessionStorage.setItem("userId", accountId);
+      try {
+        if (typeof window !== 'undefined') {
+          const authObj = loginData?.user ? loginData.user : { userId: accountId };
+          localStorage.setItem('svd_auth_user', JSON.stringify(authObj));
+          sessionStorage.setItem('svd_auth_user', JSON.stringify(authObj));
+        }
+      } catch {}
       alert("Login successful!");
       router.push("/l4/dashboard");
     } else {

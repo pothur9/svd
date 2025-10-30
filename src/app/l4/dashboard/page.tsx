@@ -127,7 +127,20 @@ export default function Dashboard() {
   
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId");
+    let userId = (typeof window !== 'undefined') ? sessionStorage.getItem("userId") : null;
+    if (typeof window !== 'undefined' && !userId) {
+      try {
+        const localAuth = localStorage.getItem('svd_auth_user');
+        if (localAuth) {
+          const parsed = JSON.parse(localAuth) as { userId?: string };
+          if (parsed?.userId) {
+            sessionStorage.setItem('userId', parsed.userId);
+            sessionStorage.setItem('svd_auth_user', localAuth);
+            userId = parsed.userId;
+          }
+        }
+      } catch {}
+    }
 
     if (!userId) {
       router.push("/l4/login");
@@ -136,6 +149,15 @@ export default function Dashboard() {
 
     async function fetchMemberData() {
       try {
+        // Ensure a minimal auth record exists immediately on dashboard
+        try {
+          if (typeof window !== 'undefined') {
+            const minimal = { userId } as { userId: string };
+            localStorage.setItem('svd_auth_user', JSON.stringify(minimal));
+            sessionStorage.setItem('svd_auth_user', JSON.stringify(minimal));
+          }
+        } catch {}
+
         const memberResponse = await fetch(`/api/l1/dashboard?timestamp=${Date.now()}`, {
           method: "GET",
           cache: "no-store",
@@ -168,6 +190,18 @@ export default function Dashboard() {
         sessionStorage.setItem("peeta", userData.peeta || "");
         sessionStorage.setItem("username", userData.name);
         sessionStorage.setItem("guru", userData.selectedL2User || "");
+        try {
+          if (typeof window !== 'undefined') {
+            const authObj = {
+              userId: userData.userId,
+              name: userData.name,
+              contactNo: userData.contactNo,
+              peeta: userData.peeta,
+            };
+            localStorage.setItem('svd_auth_user', JSON.stringify(authObj));
+            sessionStorage.setItem('svd_auth_user', JSON.stringify(authObj));
+          }
+        } catch {}
       } catch (error) {
         console.error("Error fetching member data:", error);
       }
