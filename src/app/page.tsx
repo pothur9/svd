@@ -86,8 +86,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
-     <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p>
-     <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ, ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
+     <p className="text-gray-950 font-extrabold bg-yellow-300/90 px-3 py-1 rounded-md shadow-md ring-1 ring-yellow-400">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p>
+     <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
       <Image
         className="mb-4"
         src="/logomain1.png"
