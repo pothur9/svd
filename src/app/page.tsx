@@ -243,7 +243,15 @@ export default function Home() {
             <Image src="/footer1.jpg" alt="Footer 1" width={580} height={580} className="rounded shadow w-full max-w-xs md:max-w-md lg:max-w-lg" />
             <Image src="/footer2.jpg" alt="Footer 2" width={380} height={380} className="rounded shadow w-full max-w-xs md:max-w-sm lg:max-w-md" />
           </div>
-          <div className="text-black mt-3">&copy; {new Date().getFullYear()} SVD. All rights reserved.</div>
+          <div className="text-black mt-3">
+            <Link
+              href="/privacy-policy"
+              className="text-blue-700 underline hover:text-blue-900 text-xs font-medium mr-3"
+            >
+              Privacy Policy
+            </Link>
+            &copy; {new Date().getFullYear()} SVD. All rights reserved.
+          </div>
         </div>
       </footer>
     </div>
