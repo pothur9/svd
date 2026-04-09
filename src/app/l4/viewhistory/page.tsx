@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from 'react';
 import Footer from '../footer/footer';
 import Navbar from '../navbar/navbar';
@@ -104,3 +104,4 @@ export default function UserDataDisplay() {
         </>
     );
 }
+

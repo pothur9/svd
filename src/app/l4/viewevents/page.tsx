@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import Navbar from "../navbar/navbar";
 import Footer from "@/app/l1/footer/footer";
@@ -84,3 +84,4 @@ export default function EventTable() {
     </>
   );
 }
+

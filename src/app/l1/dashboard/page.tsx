@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -153,12 +153,12 @@ export default function Dashboard() {
     "bg-orange-400",
   ];
   const peetaImages: { [key: string]: string } = {
-    "Sri Rambhpuri Peeta श्री रम्भापुरी पीठ ಶ್ರೀ ರಂಭಾಪುರಿ ಪೀಠ": "/img1.jpg",
-    "Sri Ujjayani Peeta श्री उज्जयनी पीठ ಶ್ರೀ ಉಜ್ಜಯನಿ ಪೀಠ": "/img2.jpg",
-    "Sri Kedhara peeta श्री केदारा पीठ ಶ್ರೀ ಕೇದಾರ ಪೀಠ": "/img3.jpg",
-    "Sri SriShaila Peeta श्री श्रीशैल पीठ ಶ್ರೀ ಶ್ರೀಶೈಲ ಪೀಠ": "/img4.jpg",
-    "Sri Kashi Peeta श्री काशी पीठ ಶ್ರೀ ಕಾಶಿ ಪೀಠ": "/img5.jpg",
-    "Sri viraktha parmpare श्री विरक्त  परंपरा ಶ್ರೀ ವಿರಕ್ತ  ಪರಂಪರೆ": "/img6.jpg",
+    "Sri Rambhpuri Peeta à¤¶à¥à¤°à¥€ à¤°à¤®à¥à¤­à¤¾à¤ªà¥à¤°à¥€ à¤ªà¥€à¤  à²¶à³à²°à³€ à²°à²‚à²­à²¾à²ªà³à²°à²¿ à²ªà³€à² ": "/img1.jpg",
+    "Sri Ujjayani Peeta à¤¶à¥à¤°à¥€ à¤‰à¤œà¥à¤œà¤¯à¤¨à¥€ à¤ªà¥€à¤  à²¶à³à²°à³€ à²‰à²œà³à²œà²¯à²¨à²¿ à²ªà³€à² ": "/img2.jpg",
+    "Sri Kedhara peeta à¤¶à¥à¤°à¥€ à¤•à¥‡à¤¦à¤¾à¤°à¤¾ à¤ªà¥€à¤  à²¶à³à²°à³€ à²•à³‡à²¦à²¾à²° à²ªà³€à² ": "/img3.jpg",
+    "Sri SriShaila Peeta à¤¶à¥à¤°à¥€ à¤¶à¥à¤°à¥€à¤¶à¥ˆà¤² à¤ªà¥€à¤  à²¶à³à²°à³€ à²¶à³à²°à³€à²¶à³ˆà²² à²ªà³€à² ": "/img4.jpg",
+    "Sri Kashi Peeta à¤¶à¥à¤°à¥€ à¤•à¤¾à¤¶à¥€ à¤ªà¥€à¤  à²¶à³à²°à³€ à²•à²¾à²¶à²¿ à²ªà³€à² ": "/img5.jpg",
+    "Sri viraktha parmpare à¤¶à¥à¤°à¥€ à¤µà¤¿à¤°à¤•à¥à¤¤  à¤ªà¤°à¤‚à¤ªà¤°à¤¾ à²¶à³à²°à³€ à²µà²¿à²°à²•à³à²¤  à²ªà²°à²‚à²ªà²°à³†": "/img6.jpg",
   };
 
   console.log("peeta images log:", peetaImages);
@@ -203,7 +203,7 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
-                    Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
+                    Sri 1008 Jagdguru Peeta à¤¶à¥à¤°à¥€ 1008 à¤œà¤—à¤¦à¥à¤—à¥à¤°à¥ à¤ªà¥€à¤  à²¶à³à²°à³€ à³§à³¦à³¦à³® à²œà²—à²¦à³à²—à³à²°à³ à²ªà³€à² 
                   </th>
 
                   {memberData.map((member, index) => {
@@ -255,9 +255,9 @@ export default function Dashboard() {
                   <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
                     Sri 108 Prabhu shivachrya
                     <br />
-                    श्री 108 प्रभु शिवाचार्य
+                    à¤¶à¥à¤°à¥€ 108 à¤ªà¥à¤°à¤­à¥ à¤¶à¤¿à¤µà¤¾à¤šà¤¾à¤°à¥à¤¯
                     <br />
-                    ಶ್ರೀ 108 ಪ್ರಭು ಶಿವಾಚಾರ್ಯರು
+                    à²¶à³à²°à³€ 108 à²ªà³à²°à²­à³ à²¶à²¿à²µà²¾à²šà²¾à²°à³à²¯à²°à³
                   </td>
                   {memberData.map((member, index) => (
                     <td
@@ -274,9 +274,9 @@ export default function Dashboard() {
                   <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
                     Sri guru Jangam
                     <br />
-                    श्री गुरु जंगम
+                    à¤¶à¥à¤°à¥€ à¤—à¥à¤°à¥ à¤œà¤‚à¤—à¤®
                     <br />
-                    ಶ್ರೀ ಗುರು ಜಂಗಮ
+                    à²¶à³à²°à³€ à²—à³à²°à³ à²œà²‚à²—à²®
                   </td>
                   {memberData.map((member, index) => (
                     <td
@@ -293,9 +293,9 @@ export default function Dashboard() {
                   <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">
                     Sri Veerashiva
                     <br />
-                    श्री वीरशिव
+                    à¤¶à¥à¤°à¥€ à¤µà¥€à¤°à¤¶à¤¿à¤µ
                     <br />
-                    ಶ್ರೀ ವೀರಶೈವ
+                    à²¶à³à²°à³€ à²µà³€à²°à²¶à³ˆà²µ
                   </td>
                   {memberData.map((member, index) => (
                     <td
@@ -391,7 +391,7 @@ export default function Dashboard() {
           </div>
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center">
             <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>
-              →
+              â†’
             </strong>
             <span className="ml-4 text-3xl mt-3">Total: {total}</span>
           </h1>
@@ -554,3 +554,4 @@ export default function Dashboard() {
     </>
   );
 }
+

@@ -168,7 +168,7 @@ const LoginPage: React.FC = () => {
               className={`w-full p-2 rounded-md ${
                 isLoading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-orange-600 text-white hover:bg-orange-700"
               }`}
             >
               {isLoading ? "Sending OTP..." : "Send OTP"}
@@ -205,7 +205,7 @@ const LoginPage: React.FC = () => {
             Dont have an account?
             <a
               href="/l1/signup"
-              className="text-blue-500 hover:text-blue-700"
+              className="text-orange-600 hover:text-orange-800"
             >
               &nbsp; Move to Signup
             </a>
@@ -218,3 +218,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -177,13 +177,13 @@ export default function SignupForm() {
             onClick={() => changeLanguage("kn")}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
           >
-            ಕನ್ನಡ
+            à²•à²¨à³à²¨à²¡
           </button>
           <button
             onClick={() => changeLanguage("hi")}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
           >
-            हिंदी
+            à¤¹à¤¿à¤‚à¤¦à¥€
           </button>
         </div>
       </div>
@@ -351,3 +351,4 @@ export default function SignupForm() {
     </>
   );
 }
+

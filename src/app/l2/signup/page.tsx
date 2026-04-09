@@ -38,6 +38,11 @@ export default function SignupForm() {
   const [language, setLanguage] = useState<string>("en");
   const { t } = useTranslation();
   const router = useRouter();
+  // ── auto-login account picker ──
+  const [accounts, setAccounts] = useState<{ userId: string; name: string }[]>([]);
+  const [totalAccounts, setTotalAccounts] = useState(0);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState("");
 
   const changeLanguage = (lang: string) => {
     console.log(`Changing language to: ${lang}`);
@@ -110,17 +115,44 @@ export default function SignupForm() {
         const responseData = await result.json();
         
         if (result.ok) {
-          alert(responseData.message);
-          setUserId(responseData.userId);
+          const newUserId: string = responseData.userId;
+          setUserId(newUserId);
           setIsUserIdVisible(true);
-          setIsOtpSent(false);
-          setOtp("");
-          setFormData({
-            name: "",
-            contactNo: "",
-            peeta: "",
-            mataName: "",
+
+          // ── Auto-login ──
+          const loginRes = await fetch("/api/l2/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: newUserId }),
           });
+          const loginData = await loginRes.json();
+          if (loginRes.ok) {
+            try {
+              const authObj = loginData?.user ?? { userId: newUserId };
+              sessionStorage.setItem("userId", newUserId);
+              localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+              sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+            } catch {}
+          }
+
+          // ── Check multiple accounts ──
+          const acctRes = await fetch("/api/l2/check-accounts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contactNo: formData.contactNo }),
+          });
+          const acctData = await acctRes.json();
+          const allAccounts: { userId: string; name: string }[] = acctData?.accounts ?? [];
+
+          if (allAccounts.length > 1) {
+            setAccounts(allAccounts);
+            setTotalAccounts(acctData?.total ?? allAccounts.length);
+            setSelectedAccount(newUserId);
+            setIsOtpSent(false);
+            setShowAccountPicker(true);
+          } else {
+            router.push("/l2/dashboard");
+          }
         } else {
           alert(responseData.error || "Signup failed. Please try again.");
         }
@@ -198,13 +230,13 @@ export default function SignupForm() {
             onClick={() => changeLanguage("kn")}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
           >
-            ಕನ್ನಡ
+            à²•à²¨à³à²¨à²¡
           </button>
           <button
             onClick={() => changeLanguage("hi")}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
           >
-            हिंदी
+            à¤¹à¤¿à¤‚à¤¦à¥€
           </button>
         </div>
       </div>
@@ -374,7 +406,84 @@ export default function SignupForm() {
           </p>
         </div>
       </div>
+
+      {/* ── Account Picker (shown when multiple accounts on same number) ── */}
+      {showAccountPicker && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: "480px",
+            borderRadius: "1.25rem 1.25rem 0 0", padding: "1.25rem 1.1rem 2.5rem",
+            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)" }}>
+            <div style={{ width: "36px", height: "4px", background: "#e5e7eb",
+              borderRadius: "2px", margin: "0 auto 1rem" }} />
+            <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+              <div style={{ fontSize: "1.8rem" }}>🎉</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#1e1b4b", margin: "0.25rem 0 0" }}>
+                Signup Successful!
+              </h3>
+              {totalAccounts > 1 && (
+                <p style={{ fontSize: "0.78rem", color: "#6b7280", marginTop: "0.3rem" }}>
+                  Multiple accounts found. Choose one to continue.
+                </p>
+              )}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem",
+              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem" }}>
+              {accounts.map((acct) => {
+                const isNew = acct.userId === userId;
+                const active = selectedAccount === acct.userId;
+                return (
+                  <label key={acct.userId}
+                    style={{ display: "flex", alignItems: "center", gap: "0.75rem",
+                      padding: "0.7rem 0.9rem", borderRadius: "0.75rem", cursor: "pointer",
+                      border: `2px solid ${active ? "#7c3aed" : "#e5e7eb"}`,
+                      background: active ? "#f5f3ff" : "#f9fafb" }}>
+                    <input type="radio" name="account" value={acct.userId} checked={active}
+                      onChange={() => setSelectedAccount(acct.userId)}
+                      style={{ accentColor: "#7c3aed", width: "16px", height: "16px" }} />
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem", color: "#1e1b4b" }}>
+                        {acct.name}
+                      </p>
+                      <p style={{ margin: 0, fontSize: "0.75rem", color: "#6b7280" }}>
+                        ID: {acct.userId}{isNew ? " 🆕" : ""}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              onClick={async () => {
+                if (!selectedAccount) { alert("Please select an account."); return; }
+                const loginRes = await fetch("/api/l2/login", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: selectedAccount }),
+                });
+                const loginData = await loginRes.json();
+                if (loginRes.ok) {
+                  try {
+                    const authObj = loginData?.user ?? { userId: selectedAccount };
+                    sessionStorage.setItem("userId", selectedAccount);
+                    localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+                    sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+                  } catch {}
+                  router.push("/l2/dashboard");
+                } else {
+                  alert(loginData.message || "Login failed.");
+                }
+              }}
+              style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
+                border: "none", background: "linear-gradient(135deg,#ff9933,#7c3aed)",
+                color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
+              Continue to Dashboard →
+            </button>
+          </div>
+        </div>
+      )}
     
     </>
   );
 }
+

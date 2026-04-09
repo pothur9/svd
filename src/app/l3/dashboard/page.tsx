@@ -87,6 +87,14 @@ export default function Dashboard() {
     }
   };
 
+  const handleDownloadCard = () => {
+    document.body.classList.add('print-card-only');
+    setTimeout(() => {
+      window.print();
+      document.body.classList.remove('print-card-only');
+    }, 50);
+  };
+
   const router = useRouter();
 
   // Responsive check for mobile like L2 (must be declared before any early returns)
@@ -340,7 +348,7 @@ export default function Dashboard() {
                             className="p-2 border rounded bg-white text-black"
                           >
                             <option value="">Select Kula</option>
-                            <option value="Veerashiva Lingayatha Jangama / ವೀರಶೈವ ಲಿಂಗಾಯತ ಜಂಗಮ">Veerashiva Lingayatha Jangama / ವೀರಶೈವ ಲಿಂಗಾಯತ ಜಂಗಮ</option>
+                            <option value="Veerashiva Lingayatha Jangama / à²µà³€à²°à²¶à³ˆà²µ à²²à²¿à²‚à²—à²¾à²¯à²¤ à²œà²‚à²—à²®">Veerashiva Lingayatha Jangama / à²µà³€à²°à²¶à³ˆà²µ à²²à²¿à²‚à²—à²¾à²¯à²¤ à²œà²‚à²—à²®</option>
                           </select>
                         ) : field === 'subKula' ? (
                           <select
@@ -350,16 +358,16 @@ export default function Dashboard() {
                             disabled={!formData.kula}
                           >
                             <option value="">Select Sub-Kula</option>
-                            <option value="Mataadeesharu / ಮಠಾಧೀಶರು">Mataadeesharu / ಮಠಾಧೀಶರು</option>
-                            <option value="Matapatthi / ಮಟಪತ್ತಿ">Matapatthi / ಮಟಪತ್ತಿ</option>
-                            <option value="Ganachari / ಗಣಾಚಾರಿ">Ganachari / ಗಣಾಚಾರಿ</option>
-                            <option value="Saraganachaari / ಸರಗಣಾಚಾರಿ">Saraganachaari / ಸರಗಣಾಚಾರಿ</option>
-                            <option value="Bidi - ganangalu / ಬಿಡಿ - ಗಣಂಗಲು">Bidi - ganangalu / ಬಿಡಿ - ಗಣಂಗಲು</option>
-                            <option value="Gante ayyanoru / ಗಂಟೆ ಅಯ್ಯನೋರು">Gante ayyanoru / ಗಂಟೆ ಅಯ್ಯನೋರು</option>
-                            <option value="Shuladha ayyanoru / ಶೂಲಧ ಅಯ್ಯನೋರು">Shuladha ayyanoru / ಶೂಲಧ ಅಯ್ಯನೋರು</option>
-                            <option value="Pathri ayyanoru / ಪತ್ರಿ ಅಯ್ಯನೋರು">Pathri ayyanoru / ಪತ್ರಿ ಅಯ್ಯನೋರು</option>
-                            <option value="Kambi ayyanoru / ಕಂಬಿ ಅಯ್ಯನೋರು">Kambi ayyanoru / ಕಂಬಿ ಅಯ್ಯನೋರು</option>
-                            <option value="Ayyar / ಅಯ್ಯರ್">Ayyar / ಅಯ್ಯರ್</option>
+                            <option value="Mataadeesharu / à²®à² à²¾à²§à³€à²¶à²°à³">Mataadeesharu / à²®à² à²¾à²§à³€à²¶à²°à³</option>
+                            <option value="Matapatthi / à²®à²Ÿà²ªà²¤à³à²¤à²¿">Matapatthi / à²®à²Ÿà²ªà²¤à³à²¤à²¿</option>
+                            <option value="Ganachari / à²—à²£à²¾à²šà²¾à²°à²¿">Ganachari / à²—à²£à²¾à²šà²¾à²°à²¿</option>
+                            <option value="Saraganachaari / à²¸à²°à²—à²£à²¾à²šà²¾à²°à²¿">Saraganachaari / à²¸à²°à²—à²£à²¾à²šà²¾à²°à²¿</option>
+                            <option value="Bidi - ganangalu / à²¬à²¿à²¡à²¿ - à²—à²£à²‚à²—à²²à³">Bidi - ganangalu / à²¬à²¿à²¡à²¿ - à²—à²£à²‚à²—à²²à³</option>
+                            <option value="Gante ayyanoru / à²—à²‚à²Ÿà³† à²…à²¯à³à²¯à²¨à³‹à²°à³">Gante ayyanoru / à²—à²‚à²Ÿà³† à²…à²¯à³à²¯à²¨à³‹à²°à³</option>
+                            <option value="Shuladha ayyanoru / à²¶à³‚à²²à²§ à²…à²¯à³à²¯à²¨à³‹à²°à³">Shuladha ayyanoru / à²¶à³‚à²²à²§ à²…à²¯à³à²¯à²¨à³‹à²°à³</option>
+                            <option value="Pathri ayyanoru / à²ªà²¤à³à²°à²¿ à²…à²¯à³à²¯à²¨à³‹à²°à³">Pathri ayyanoru / à²ªà²¤à³à²°à²¿ à²…à²¯à³à²¯à²¨à³‹à²°à³</option>
+                            <option value="Kambi ayyanoru / à²•à²‚à²¬à²¿ à²…à²¯à³à²¯à²¨à³‹à²°à³">Kambi ayyanoru / à²•à²‚à²¬à²¿ à²…à²¯à³à²¯à²¨à³‹à²°à³</option>
+                            <option value="Ayyar / à²…à²¯à³à²¯à²°à³">Ayyar / à²…à²¯à³à²¯à²°à³</option>
                           </select>
                         ) : field === 'photoUrl' ? (
                           <div className="space-y-2">
@@ -487,7 +495,7 @@ export default function Dashboard() {
             <thead>
               <tr>
                 <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
-                  Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
+                  Sri 1008 Jagdguru Peeta à¤¶à¥à¤°à¥€ 1008 à¤œà¤—à¤¦à¥à¤—à¥à¤°à¥ à¤ªà¥€à¤  à²¶à³à²°à³€ à³§à³¦à³¦à³® à²œà²—à²¦à³à²—à³à²°à³ à²ªà³€à² 
                 </th>
                 {memberData.map((member, index) => {
                   const bgColors = [
@@ -645,13 +653,20 @@ export default function Dashboard() {
         <div className="flex items-center justify-center gap-4 mt-6">
           <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
-            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>  
+            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>&rarr;</strong>  
             <span className="ml-4 text-3xl mt-3">Total: {grandTotalAll}</span>
           </h1>
         </div>
         <br/>
        
-        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-6">
+        {/* Download Button */}
+        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 flex justify-end">
+          <button onClick={handleDownloadCard} className="px-4 py-2 bg-orange-600 text-white rounded shadow hover:bg-orange-700 transition-all">
+            Download Card
+          </button>
+        </div>
+        {/* Card section */}
+        <div id="card-print-area" className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-2">
           <div className="flex flex-col sm:flex-row justify-center gap-8">
            
             <div
@@ -797,6 +812,29 @@ export default function Dashboard() {
         <br />
       </div>
       <Footer />
+      {/* Print-only CSS to render just the card area */}
+      <style jsx global>{`
+        @media print {
+          body.print-card-only * { visibility: hidden !important; }
+          body.print-card-only #card-print-area,
+          body.print-card-only #card-print-area * { visibility: visible !important; }
+          body.print-card-only #card-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+
+          /* Force background colors to print */
+          #card-print-area * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+
+          /* Explicitly force the orange header background */
+          #card-print-area [style*="ea580c"] {
+            background-color: #ea580c !important;
+            color: #ffffff !important;
+          }
+        }
+      `}</style>
     </>
   );
 }
+

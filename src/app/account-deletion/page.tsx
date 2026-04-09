@@ -1,9 +1,9 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Deletion – SSVD",
+  title: "Account Deletion â€“ SSVD",
   description:
     "Learn how to delete your SSVD account and understand what data is removed or retained.",
 };
@@ -46,7 +46,7 @@ export default function AccountDeletionPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Request Account Deletion</h1>
         <p className="text-sm text-gray-500 mb-8">Last updated: March 5, 2026</p>
 
-        {/* ── Section 1: What deletion means ── */}
+        {/* â”€â”€ Section 1: What deletion means â”€â”€ */}
         <section className="mb-8">
           <p className="text-gray-700 leading-relaxed">
             If you would like to permanently delete your <strong>SSVD</strong> account and all
@@ -55,10 +55,10 @@ export default function AccountDeletionPage() {
           </p>
         </section>
 
-        {/* ── Section 2: Steps ── */}
+        {/* â”€â”€ Section 2: Steps â”€â”€ */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            📋 Steps to Delete Your Account
+            ðŸ“‹ Steps to Delete Your Account
           </h2>
 
           <ol className="space-y-4">
@@ -124,15 +124,15 @@ export default function AccountDeletionPage() {
               id="delete-account-btn"
               className="inline-block px-6 py-3 rounded-lg bg-red-600 text-white font-bold shadow hover:bg-red-700 transition-colors text-sm"
             >
-              🗑️ Go to Delete Account Page →
+              ðŸ—‘ï¸ Go to Delete Account Page â†’
             </Link>
           </div>
         </section>
 
-        {/* ── Section 3: Alternative – contact us ── */}
+        {/* â”€â”€ Section 3: Alternative â€“ contact us â”€â”€ */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-gray-900 mb-3">
-            📞 Alternative: Request via Phone / WhatsApp
+            ðŸ“ž Alternative: Request via Phone / WhatsApp
           </h2>
           <p className="text-gray-700 text-sm leading-relaxed mb-3">
             If you are unable to use the online form, you can contact us directly and our team will
@@ -140,13 +140,13 @@ export default function AccountDeletionPage() {
           </p>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2 text-sm text-gray-800">
             <p>
-              📞{" "}
+              ðŸ“ž{" "}
               <a href="tel:+916360064505" className="text-blue-700 underline">
                 +91 6360 064 505
               </a>
             </p>
             <p>
-              💬 WhatsApp:{" "}
+              ðŸ’¬ WhatsApp:{" "}
               <a
                 href="https://wa.me/916360064505"
                 target="_blank"
@@ -159,10 +159,10 @@ export default function AccountDeletionPage() {
           </div>
         </section>
 
-        {/* ── Section 4: Data table ── */}
+        {/* â”€â”€ Section 4: Data table â”€â”€ */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            🗂️ Data Deleted vs. Data Retained
+            ðŸ—‚ï¸ Data Deleted vs. Data Retained
           </h2>
           <p className="text-gray-600 text-sm mb-4">
             The following table details exactly what happens to each type of data when you delete
@@ -182,55 +182,55 @@ export default function AccountDeletionPage() {
                 {[
                   {
                     type: "Name, Date of Birth, Gender",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Contact Number (Mobile)",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Address (Present & Permanent)",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Profile Photo",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Community / Caste / Peeta affiliation",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Occupation, Qualification, Language",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Login credentials (User ID, Password)",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Event participation records",
-                    action: "🗑️ Permanently Deleted",
+                    action: "ðŸ—‘ï¸ Permanently Deleted",
                     retention: "Deleted immediately",
                     deleted: true,
                   },
                   {
                     type: "Anonymised app usage / error logs",
-                    action: "🔒 Retained (anonymised)",
+                    action: "ðŸ”’ Retained (anonymised)",
                     retention: "Up to 30 days, then auto-purged",
                     deleted: false,
                   },
@@ -263,7 +263,7 @@ export default function AccountDeletionPage() {
             href="/"
             className="inline-block px-6 py-2 rounded-lg bg-yellow-400 text-gray-900 font-semibold shadow hover:bg-yellow-500 transition-colors text-sm"
           >
-            ← Back to Home
+            â† Back to Home
           </Link>
         </div>
       </main>
@@ -281,3 +281,4 @@ export default function AccountDeletionPage() {
     </div>
   );
 }
+

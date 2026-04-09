@@ -1,9 +1,9 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – SSVD",
+  title: "Privacy Policy â€“ SSVD",
   description: "Privacy policy for the Sanathanaveershivadharma (SVD) application.",
 };
 
@@ -149,7 +149,7 @@ export default function PrivacyPolicyPage() {
             href="/"
             className="inline-block px-6 py-2 rounded-lg bg-yellow-400 text-gray-900 font-semibold shadow hover:bg-yellow-500 transition-colors"
           >
-            ← Back to Home
+            â† Back to Home
           </Link>
         </div>
       </main>
@@ -161,3 +161,4 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
+

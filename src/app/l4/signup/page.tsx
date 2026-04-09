@@ -49,6 +49,12 @@ export default function PersonalDetailsForm() {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [activeLanguage, setActiveLanguage] = useState("en");
+  // ── account picker (post-signup auto-login) ──
+  const [accounts, setAccounts] = useState<{ userId: string; name: string }[]>([]);
+  const [totalAccounts, setTotalAccounts] = useState(0);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState("");
   const [formData, setFormData] = useState<FormData>({
     name: "",
     contactNo: "",
@@ -86,6 +92,7 @@ export default function PersonalDetailsForm() {
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
+    setActiveLanguage(lang);
   };
   const fetchL2Users = useCallback(async () => {
     try {
@@ -303,8 +310,47 @@ export default function PersonalDetailsForm() {
 
         if (response.ok) {
           const result = await response.json();
-          setUserId(result.userId);
-          setShowSuccessModal(true);
+          const newUserId: string = result.userId;
+          setUserId(newUserId);
+
+          // ── Auto-login the newly created user ──
+          const loginRes = await fetch("/api/l4/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: newUserId }),
+          });
+          const loginData = await loginRes.json();
+          if (loginRes.ok) {
+            try {
+              const authObj = loginData?.user ?? { userId: newUserId };
+              sessionStorage.setItem("userId", newUserId);
+              localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+              sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+            } catch {}
+          }
+
+          // ── Check if multiple accounts share this phone number ──
+          const acctRes = await fetch("/api/l4/check-accounts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contactNo: formData.contactNo }),
+          });
+          const acctData = await acctRes.json();
+          const allAccounts: { userId: string; name: string }[] =
+            acctData?.accounts ?? [];
+
+          if (allAccounts.length > 1) {
+            // Multiple accounts → let user pick
+            setAccounts(allAccounts);
+            setTotalAccounts(acctData?.total ?? allAccounts.length);
+            setSelectedAccount(newUserId);
+            setShowOtpPopup(false);
+            setShowAccountPicker(true);
+          } else {
+            // Single account → go straight to dashboard
+            setShowOtpPopup(false);
+            router.push("/l4/dashboard");
+          }
         } else {
           alert("Failed to sign up user.");
         }
@@ -321,32 +367,93 @@ export default function PersonalDetailsForm() {
 
   return (
     <>
-      <div className="flex flex-col items-center p-6 bg-gray-100 rounded-xl shadow-md">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-          Select Your Language
-        </h1>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => changeLanguage("en")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
-          >
-            English
-          </button>
-          <button
-            onClick={() => changeLanguage("kn")}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
-          >
-            ಕನ್ನಡ
-          </button>
-          <button
-            onClick={() => changeLanguage("hi")}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
-          >
-            हिंदी
-          </button>
+      {/* ── Language Switcher Banner ── */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #7c2d12 0%, #c2410c 50%, #ea580c 100%)",
+          padding: "18px 24px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "12px",
+          boxShadow: "0 4px 20px rgba(194,65,12,0.35)",
+        }}
+      >
+        <p
+          style={{
+            color: "rgba(255,255,255,0.7)",
+            fontSize: "11px",
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            margin: 0,
+          }}
+        >
+          Choose Language / ಭಾಷೆ ಆಯ್ಕೆ / भाषा चुनें
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            background: "rgba(0,0,0,0.2)",
+            padding: "4px",
+            borderRadius: "50px",
+            border: "1px solid rgba(255,255,255,0.15)",
+          }}
+        >
+          {[
+            { code: "en", flag: "🇬🇧", label: "English", native: "English" },
+            { code: "kn", flag: "🇮🇳", label: "Kannada", native: "ಕನ್ನಡ" },
+            { code: "hi", flag: "🇮🇳", label: "Hindi",   native: "हिंदी" },
+          ].map(({ code, flag, label, native }) => {
+            const isActive = activeLanguage === code;
+            return (
+              <button
+                key={code}
+                onClick={() => changeLanguage(code)}
+                title={label}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 18px",
+                  borderRadius: "50px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: "14px",
+                  transition: "all 0.25s ease",
+                  background: isActive
+                    ? "linear-gradient(135deg, #ffffff, #fed7aa)"
+                    : "transparent",
+                  color: isActive ? "#c2410c" : "rgba(255,255,255,0.75)",
+                  boxShadow: isActive
+                    ? "0 3px 12px rgba(0,0,0,0.25)"
+                    : "none",
+                  transform: isActive ? "scale(1.04)" : "scale(1)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.color = "#ffffff";
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.12)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.75)";
+                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                  }
+                }}
+              >
+                <span style={{ fontSize: "15px" }}>{flag}</span>
+                <span>{native}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
-      <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
+
+      <div className="bg-gradient-to-b from-slate-50 to-orange-50 min-h-screen py-6 sm:py-10">
         <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
           <div className="flex justify-center">
             <Image src="/logo.png" alt="Logo" width={100} height={100} />
@@ -841,15 +948,29 @@ export default function PersonalDetailsForm() {
 
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition"
+              className="text-white px-4 py-2 rounded w-full transition"
+              style={{ background: isLoading ? "#fdba74" : "linear-gradient(135deg, #c2410c, #ea580c)", cursor: isLoading ? "not-allowed" : "pointer" }}
               disabled={isLoading}
             >
               {isLoading ? (
-                <span>Signing Up...</span> // You can replace this with a spinner icon
+                <span>Signing Up...</span>
               ) : (
                 "Sign Up"
               )}
             </button>
+
+            {/* Already have an account */}
+            <p className="text-center text-sm text-gray-500 mt-2">
+              Already have an account?{" "}
+              <a
+                href="/l4/login"
+                style={{ color: "#ea580c", fontWeight: 600, textDecoration: "none" }}
+                onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+                onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+              >
+                Login here
+              </a>
+            </p>
           </form>
         </div>
         {showOtpPopup && (
@@ -866,7 +987,8 @@ export default function PersonalDetailsForm() {
               <div className="flex space-x-4 mt-4">
                 <button
                   onClick={handleVerifyOtp}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                  className="text-white px-4 py-2 rounded transition flex-1"
+                  style={{ background: isVerifyingOtp ? "#fdba74" : "linear-gradient(135deg, #c2410c, #ea580c)", cursor: isVerifyingOtp ? "not-allowed" : "pointer" }}
                   disabled={isVerifyingOtp}
                 >
                   {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
@@ -891,7 +1013,8 @@ export default function PersonalDetailsForm() {
                 Your User ID is: <strong>{userId}</strong>
               </p>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                className="text-white px-4 py-2 rounded-lg"
+                style={{ background: "linear-gradient(135deg, #c2410c, #ea580c)" }}
                 onClick={() => {
                   setShowSuccessModal(false);
                   try {

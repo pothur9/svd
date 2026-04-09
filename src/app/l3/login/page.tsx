@@ -193,7 +193,7 @@ const LoginPage = () => {
                 className={`w-full text-white p-2 rounded-md ${
                   isLoading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600"
+                    : "bg-orange-600 hover:bg-orange-700"
                 }`}
               >
                 {isLoading ? "Sending OTP..." : "Send OTP"}
@@ -252,7 +252,7 @@ const LoginPage = () => {
             </div>
             <button
               onClick={handleAccountSelection}
-              className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+              className="w-full bg-orange-600 text-white p-2 rounded-md hover:bg-orange-700"
             >
               Login to Selected Account
             </button>
@@ -285,7 +285,7 @@ const LoginPage = () => {
 
         <div className="text-center mt-4">
           <span className="text-gray-700">Don&apos;t have an account? </span>
-          <a href="/l3/signup" className="text-blue-500 hover:text-blue-700 font-medium">Sign up</a>
+          <a href="/l3/signup" className="text-orange-600 hover:text-orange-800 font-medium">Sign up</a>
         </div>
       </div>
     </div>
@@ -293,3 +293,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

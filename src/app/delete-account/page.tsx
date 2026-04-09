@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -58,7 +58,7 @@ export default function DeleteAccountPage() {
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-10">
 
-        {/* ── App / Developer identity (Play Store requirement) ── */}
+        {/* â”€â”€ App / Developer identity (Play Store requirement) â”€â”€ */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-8 flex items-start gap-4">
           <Image src="/logomain1.png" alt="SSVD Logo" width={56} height={56} className="rounded-lg shadow flex-shrink-0" />
           <div>
@@ -83,9 +83,9 @@ export default function DeleteAccountPage() {
           SSVD account using the form below.
         </p>
 
-        {/* ── Steps (Play Store requirement) ── */}
+        {/* â”€â”€ Steps (Play Store requirement) â”€â”€ */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">📋 How to Delete Your Account</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">ðŸ“‹ How to Delete Your Account</h2>
           <ol className="space-y-3">
             {[
               { n: "1", title: "Enter your User ID", desc: "Type the User ID you received when you registered with SSVD." },
@@ -106,9 +106,9 @@ export default function DeleteAccountPage() {
           </ol>
         </section>
 
-        {/* ── Data deletion / retention table (Play Store requirement) ── */}
+        {/* â”€â”€ Data deletion / retention table (Play Store requirement) â”€â”€ */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-3">🗂️ Data Deleted vs. Data Retained</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-3">ðŸ—‚ï¸ Data Deleted vs. Data Retained</h2>
           <p className="text-gray-600 text-sm mb-4">
             The table below explains what happens to each type of data when you request deletion.
           </p>
@@ -123,15 +123,15 @@ export default function DeleteAccountPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {[
-                  { type: "Name, Date of Birth, Gender", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Contact Number (Mobile)", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Address (Present & Permanent)", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Profile Photo", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Community / Caste / Peeta affiliation", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Occupation, Qualification, Language", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Login credentials (User ID, Password)", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Event participation records", action: "🗑️ Permanently Deleted", retention: "Deleted immediately", del: true },
-                  { type: "Anonymised error / server logs", action: "🔒 Retained (anonymised)", retention: "Up to 30 days, then auto-purged", del: false },
+                  { type: "Name, Date of Birth, Gender", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Contact Number (Mobile)", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Address (Present & Permanent)", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Profile Photo", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Community / Caste / Peeta affiliation", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Occupation, Qualification, Language", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Login credentials (User ID, Password)", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Event participation records", action: "ðŸ—‘ï¸ Permanently Deleted", retention: "Deleted immediately", del: true },
+                  { type: "Anonymised error / server logs", action: "ðŸ”’ Retained (anonymised)", retention: "Up to 30 days, then auto-purged", del: false },
                 ].map(({ type, action, retention, del }) => (
                   <tr key={type} className={del ? "bg-white" : "bg-yellow-50"}>
                     <td className="px-4 py-3 text-gray-800">{type}</td>
@@ -147,13 +147,13 @@ export default function DeleteAccountPage() {
           </p>
         </section>
 
-        {/* ── Deletion Form ── */}
+        {/* â”€â”€ Deletion Form â”€â”€ */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">🗑️ Request Deletion Now</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">ðŸ—‘ï¸ Request Deletion Now</h2>
 
           {/* Warning banner */}
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3">
-            <span className="text-2xl mt-0.5">⚠️</span>
+            <span className="text-2xl mt-0.5">âš ï¸</span>
             <div>
               <p className="font-bold text-red-700 text-sm">This action is permanent and cannot be undone</p>
               <p className="text-red-600 text-sm mt-1">
@@ -165,7 +165,7 @@ export default function DeleteAccountPage() {
 
           {status === "success" ? (
             <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center shadow-sm">
-              <div className="text-5xl mb-4">✅</div>
+              <div className="text-5xl mb-4">âœ…</div>
               <h3 className="text-xl font-bold text-green-800 mb-2">Account Deleted</h3>
               <p className="text-green-700 text-sm mb-6">{message}</p>
               <Link
@@ -249,7 +249,7 @@ export default function DeleteAccountPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
-                    Deleting account…
+                    Deleting accountâ€¦
                   </span>
                 ) : (
                   "Delete My Account"
@@ -281,3 +281,4 @@ export default function DeleteAccountPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -176,7 +176,7 @@ export default function CompleteProfilePage() {
         onClick={() => router.push('/l2/dashboard')}
         className="fixed top-20 left-4 z-50 bg-white border px-3 py-1 rounded shadow hover:bg-gray-50"
       >
-        ← Back
+        â† Back
       </button>
       <div className="max-w-2xl mx-auto p-4 sm:p-6">
         <h1 className="text-2xl font-bold mb-4">Complete Your Profile</h1>
@@ -301,3 +301,4 @@ export default function CompleteProfilePage() {
     </div>
   );
 }
+

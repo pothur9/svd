@@ -75,7 +75,7 @@ export default function Home() {
   // Show loading while checking authentication
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-orange-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fbbf24] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -85,8 +85,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
-     <p className="text-gray-950 font-extrabold bg-yellow-300/90 px-3 py-1 rounded-md shadow-md ring-1 ring-yellow-400">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p> i
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-orange-50 px-4 py-10">
+     <p className="text-gray-950 font-extrabold bg-yellow-300/90 px-3 py-1 rounded-md shadow-md ring-1 ring-yellow-400">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p> 
      <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
       <Image
         className="mb-4"
@@ -140,7 +140,7 @@ export default function Home() {
               {selectedLevel.signup && (
                 <Link
                   href={selectedLevel.signup}
-                  className="block w-full text-center py-3 rounded-lg bg-green-700 text-white font-semibold shadow hover:bg-green-800"
+                  className="block w-full text-center py-3 rounded-lg bg-orange-600 text-white font-semibold shadow hover:bg-orange-700"
                 >
                   Create account
                 </Link>
@@ -206,7 +206,7 @@ export default function Home() {
       <div className="-mt-2 mb-6">
         <a
           href="tel:+916360064505"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white shadow hover:bg-blue-700 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600 text-white shadow hover:bg-orange-700 transition-all"
         >
           <span className="inline-flex items-center justify-center bg-white rounded-full p-1">
             {/* Phone icon */}
@@ -217,7 +217,7 @@ export default function Home() {
               height="22"
               aria-hidden="true"
             >
-              <path fill="#2563EB" d="M6.62 10.79a15.053 15.053 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.31.57 3.58.57a1 1 0 0 1 1 1V21a1 1 0 0 1-1 1C11.85 22 2 12.15 2 1a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.27.2 2.47.57 3.58a1 1 0 0 1-.24 1.01l-2.2 2.2z"/>
+              <path fill="#ea580c" d="M6.62 10.79a15.053 15.053 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.31.57 3.58.57a1 1 0 0 1 1 1V21a1 1 0 0 1-1 1C11.85 22 2 12.15 2 1a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.27.2 2.47.57 3.58a1 1 0 0 1-.24 1.01l-2.2 2.2z"/>
             </svg>
           </span>
           <span className="text-sm font-semibold">Call: +91 6360 064 505</span>
@@ -246,7 +246,7 @@ export default function Home() {
           <div className="text-black mt-3">
             <Link
               href="/privacy-policy"
-              className="text-blue-700 underline hover:text-blue-900 text-xs font-medium mr-3"
+              className="text-orange-600 underline hover:text-orange-800 text-xs font-medium mr-3"
             >
               Privacy Policy
             </Link>

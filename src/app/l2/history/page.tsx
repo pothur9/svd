@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Navbar from "../navbar/page";
@@ -135,3 +135,4 @@ export default function UserDataDisplay() {
     </>
   );
 }
+

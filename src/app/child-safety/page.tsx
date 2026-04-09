@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
@@ -51,10 +51,10 @@ export default function ChildSafetyPage() {
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Reporting and In‑App Child Safety Concerns
+            Reporting and Inâ€‘App Child Safety Concerns
           </h2>
           <p className="text-gray-700 mb-3">
-            SVLD allows users to report child safety concerns in‑app. Reports related
+            SVLD allows users to report child safety concerns inâ€‘app. Reports related
             to suspected CSAE or CSAM are treated with the highest priority. We review
             such reports promptly and take appropriate action, which may include:
           </p>
@@ -132,4 +132,5 @@ export default function ChildSafetyPage() {
     </main>
   );
 }
+
 

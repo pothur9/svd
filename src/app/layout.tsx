@@ -1,4 +1,4 @@
-import type { Metadata } from "next"; 
+﻿import type { Metadata } from "next"; 
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* ✅ Add the favicon link here */}
+        {/* âœ… Add the favicon link here */}
         <link rel="icon" href="/logomain1.png" sizes="32x32" type="image/png" />
         </head>
       <body
@@ -37,3 +37,4 @@ export default function RootLayout({
     </html>
   );
 }
+

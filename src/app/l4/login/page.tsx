@@ -165,11 +165,8 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full p-2 rounded-md text-white ${
-              isLoading
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
+            className="w-full p-2 rounded-md text-white"
+            style={{ background: isLoading ? "#fdba74" : "linear-gradient(135deg, #c2410c, #ea580c)", cursor: isLoading ? "not-allowed" : "pointer" }}
           >
             {isLoading ? "Sending OTP..." : "Send OTP"}
           </button>
@@ -179,11 +176,8 @@ const LoginPage = () => {
               type="button"
               onClick={handleVerifyOtp}
               disabled={isVerifying}
-              className={`w-full p-2 rounded-md text-white ${
-                isVerifying
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-600"
-              }`}
+              className="w-full p-2 rounded-md text-white"
+              style={{ background: isVerifying ? "#fdba74" : "linear-gradient(135deg, #c2410c, #ea580c)", cursor: isVerifying ? "not-allowed" : "pointer" }}
             >
               {isVerifying ? "Verifying..." : "Verify OTP & Login"}
             </button>
@@ -200,6 +194,19 @@ const LoginPage = () => {
             </button>
           </div>
         )}
+
+        {/* Don't have an account */}
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Don&apos;t have an account?{" "}
+          <a
+            href="/l4/signup"
+            style={{ color: "#ea580c", fontWeight: 600, textDecoration: "none" }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            Sign up here
+          </a>
+        </p>
       </form>
       ) : (
         <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
@@ -235,7 +242,8 @@ const LoginPage = () => {
               if (!selectedAccount) { alert('Please select an account.'); return; }
               await handleAccountLogin(selectedAccount);
             }}
-            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+            className="w-full text-white p-2 rounded-md"
+            style={{ background: "linear-gradient(135deg, #c2410c, #ea580c)" }}
           >
             Login to Selected Account
           </button>
@@ -249,7 +257,8 @@ const LoginPage = () => {
               } catch {}
               router.push('/l4/signup');
             }}
-            className="w-full mt-2 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+            className="w-full mt-2 p-2 rounded-md text-white"
+            style={{ background: "linear-gradient(135deg, #7c2d12, #c2410c)" }}
           >
             Create New Account
           </button>
@@ -272,3 +281,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

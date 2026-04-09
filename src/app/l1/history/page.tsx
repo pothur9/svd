@@ -1,4 +1,4 @@
-// components/UserDataDisplay.tsx
+﻿// components/UserDataDisplay.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Navbar from "../navbar/navbar";
@@ -124,3 +124,4 @@ export default function UserDataDisplay(): JSX.Element {
     </>
   );
 }
+

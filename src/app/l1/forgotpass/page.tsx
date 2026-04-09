@@ -140,7 +140,7 @@ const ForgotPasswordPage: React.FC = () => {
             type="button"
             onClick={sendOtp}
             disabled={resendTimer > 0}
-            className="w-full p-2 mb-4 bg-blue-500 text-white hover:bg-blue-600 rounded-md"
+            className="w-full p-2 mb-4 bg-orange-600 text-white hover:bg-orange-700 rounded-md"
           >
             {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Send OTP"}
           </button>
@@ -163,7 +163,7 @@ const ForgotPasswordPage: React.FC = () => {
           disabled={!isOtpVerified || !newPassword}
           className={`w-full p-2 rounded-md ${
             isOtpVerified
-              ? "bg-blue-500 text-white hover:bg-blue-600"
+              ? "bg-orange-600 text-white hover:bg-orange-700"
               : "bg-gray-400 cursor-not-allowed"
           }`}
         >
@@ -175,3 +175,4 @@ const ForgotPasswordPage: React.FC = () => {
 };
 
 export default ForgotPasswordPage;
+

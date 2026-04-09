@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from 'react';
 import Navbar from '../navbar/page';
 import Footer from '../footer/page';
@@ -102,3 +102,4 @@ export default function AddEvent() {
     </>
   );
 }
+

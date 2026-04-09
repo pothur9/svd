@@ -366,7 +366,7 @@ export default function Dashboard() {
                             className="p-2 border rounded bg-white text-black"
                           >
                             <option value="">Select Kula</option>
-                            <option value="Veerashaiva Lingayatha">Veerashaiva Lingayatha / ವೀರಶೈವ ಲಿಂಗಾಯತ</option>
+                            <option value="Veerashaiva Lingayatha">Veerashaiva Lingayatha / à²µà³€à²°à²¶à³ˆà²µ à²²à²¿à²‚à²—à²¾à²¯à²¤</option>
                           </select>
                         ) : field === 'subKula' ? (
                           <select
@@ -376,19 +376,19 @@ export default function Dashboard() {
                             disabled={!formData['kula']}
                           >
                             <option value="">Select Sub Kula</option>
-                            <option value="Panchamasaligaru">Panchamasaligaru / ಪಂಚಮಸಾಲಿಗರು</option>
-                            <option value="Banajigaru">Banajigaru / ಬಣಜಿಗರು</option>
-                            <option value="Kadi - vakkaligaru">Kadi - vakkaligaru / ಕಡಿ - ವಕ್ಕಲಿಗರು</option>
-                            <option value="Kumbararu">Kumbararu / ಕುಂಬಾರರು</option>
-                            <option value="Madivalaru">Madivalaru / ಮಡಿವಾಳರು</option>
-                            <option value="Lalagondaru">Lalagondaru / ಲಾಲಗೊಂಡರು</option>
-                            <option value="Pakanaka reddy">Pakanaka reddy / ಪಕನಕ ರೆಡ್ಡಿ</option>
-                            <option value="Reddy">Reddy / ರೆಡ್ಡಿ</option>
-                            <option value="Gaanigaru">Gaanigaru / ಗಾಣಿಗರು</option>
-                            <option value="Sadharu">Sadharu / ಸಧರು</option>
-                            <option value="Nonabaru">Nonabaru / ನೊನಬಾರು</option>
-                            <option value="Shetty ligayatha">Shetty ligayatha / ಶೆಟ್ಟಿ ಲಿಗಾಯತ</option>
-                            <option value="Gouda lingyatha">Gouda lingyatha / ಗೌಡ ಲಿಂಗಾಯತ</option>
+                            <option value="Panchamasaligaru">Panchamasaligaru / à²ªà²‚à²šà²®à²¸à²¾à²²à²¿à²—à²°à³</option>
+                            <option value="Banajigaru">Banajigaru / à²¬à²£à²œà²¿à²—à²°à³</option>
+                            <option value="Kadi - vakkaligaru">Kadi - vakkaligaru / à²•à²¡à²¿ - à²µà²•à³à²•à²²à²¿à²—à²°à³</option>
+                            <option value="Kumbararu">Kumbararu / à²•à³à²‚à²¬à²¾à²°à²°à³</option>
+                            <option value="Madivalaru">Madivalaru / à²®à²¡à²¿à²µà²¾à²³à²°à³</option>
+                            <option value="Lalagondaru">Lalagondaru / à²²à²¾à²²à²—à³Šà²‚à²¡à²°à³</option>
+                            <option value="Pakanaka reddy">Pakanaka reddy / à²ªà²•à²¨à²• à²°à³†à²¡à³à²¡à²¿</option>
+                            <option value="Reddy">Reddy / à²°à³†à²¡à³à²¡à²¿</option>
+                            <option value="Gaanigaru">Gaanigaru / à²—à²¾à²£à²¿à²—à²°à³</option>
+                            <option value="Sadharu">Sadharu / à²¸à²§à²°à³</option>
+                            <option value="Nonabaru">Nonabaru / à²¨à³Šà²¨à²¬à²¾à²°à³</option>
+                            <option value="Shetty ligayatha">Shetty ligayatha / à²¶à³†à²Ÿà³à²Ÿà²¿ à²²à²¿à²—à²¾à²¯à²¤</option>
+                            <option value="Gouda lingyatha">Gouda lingyatha / à²—à³Œà²¡ à²²à²¿à²‚à²—à²¾à²¯à²¤</option>
                           </select>
                         ) : field === 'photoUrl' ? (
                           <div className="space-y-2">
@@ -516,7 +516,7 @@ export default function Dashboard() {
             <thead>
               <tr>
                 <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
-                  Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
+                Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
                 </th>
                 {memberData.map((member, index) => {
                   const bgColors = [
@@ -674,7 +674,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-center gap-4 mt-6">
           <img src="/logomain1.png" alt="Logo" style={{ width: "150px", height: "150px" }} />
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center">
-            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>→</strong>
+            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>&rarr;</strong>
             <span className="ml-4 text-3xl mt-3">Total: {grandTotalAll}</span>
           </h1>
         </div>
@@ -752,11 +752,25 @@ export default function Dashboard() {
       <style jsx global>{`
         @media print {
           body.print-card-only * { visibility: hidden !important; }
-          body.print-card-only #card-print-area, 
+          body.print-card-only #card-print-area,
           body.print-card-only #card-print-area * { visibility: visible !important; }
           body.print-card-only #card-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+
+          /* Force background colors to print — browsers suppress them by default */
+          #card-print-area * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+
+          /* Explicitly force the orange header background */
+          #card-print-area [style*="ea580c"] {
+            background-color: #ea580c !important;
+            color: #ffffff !important;
+          }
         }
       `}</style>
     </>
   );
 }
+

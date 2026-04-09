@@ -34,6 +34,12 @@ export default function SignupForm() {
   const [peetaOptions, setPeetaOptions] = useState<string[]>([]);
   const [l2Users, setL2Users] = useState<string[]>([]);
 
+  const [accounts, setAccounts] = useState<{ userId: string; name: string }[]>([]);
+  const [totalAccounts, setTotalAccounts] = useState(0);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState("");
+  const [activeLanguage, setActiveLanguage] = useState("en");
+
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -79,7 +85,7 @@ export default function SignupForm() {
   const sendOtp = async () => {
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN2/SVD`
       );
       console.log("OTP sent:", response.data);
       setOtpSessionId(response.data.Details);
@@ -131,16 +137,43 @@ export default function SignupForm() {
         const responseData = await result.json();
 
         if (result.ok) {
-          setUserId(responseData.userId);
+          const newUserId: string = responseData.userId;
+          setUserId(newUserId);
           setIsUserIdVisible(true);
-          alert(`Signup successful! Your User ID is: ${responseData.userId}`);
-          try {
-            if (typeof window !== 'undefined') {
-              sessionStorage.clear();
-              localStorage.clear();
-            }
-          } catch {}
-          router.push("/l3/login");
+
+          // ── Auto-login ──
+          const loginRes = await fetch("/api/l3/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: newUserId }),
+          });
+          const loginData = await loginRes.json();
+          if (loginRes.ok) {
+            try {
+              const authObj = loginData?.user ?? { userId: newUserId };
+              sessionStorage.setItem("userId", newUserId);
+              localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+              sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+            } catch {}
+          }
+
+          // ── Check multiple accounts ──
+          const acctRes = await fetch("/api/l3/check-accounts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contactNo: formData.contactNo }),
+          });
+          const acctData = await acctRes.json();
+          const allAccounts: { userId: string; name: string }[] = acctData?.accounts ?? [];
+
+          if (allAccounts.length > 1) {
+            setAccounts(allAccounts);
+            setTotalAccounts(acctData?.total ?? allAccounts.length);
+            setSelectedAccount(newUserId);
+            setShowAccountPicker(true);
+          } else {
+            router.push("/l3/dashboard");
+          }
         } else {
           alert(responseData.message || "Signup failed");
         }
@@ -170,34 +203,100 @@ export default function SignupForm() {
     setIsSubmitting(false);
   };
 
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setActiveLanguage(lang);
+  };
+
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-blue-100 min-h-screen py-6 sm:py-10">
-      <div className="flex flex-col items-center p-6 bg-gray-100 rounded-xl shadow-md mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-          Select Your Language
-        </h1>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => i18n.changeLanguage("en")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
-          >
-            English
-          </button>
-          <button
-            onClick={() => i18n.changeLanguage("kn")}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
-          >
-            ಕನ್ನಡ
-          </button>
-          <button
-            onClick={() => i18n.changeLanguage("hi")}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
-          >
-            हिंदी
-          </button>
+    <>
+      {/* ── Language Switcher Banner ── */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #7c2d12 0%, #c2410c 50%, #ea580c 100%)",
+          padding: "18px 24px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "12px",
+          boxShadow: "0 4px 20px rgba(194,65,12,0.35)",
+        }}
+      >
+        <p
+          style={{
+            color: "rgba(255,255,255,0.7)",
+            fontSize: "11px",
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            margin: 0,
+          }}
+        >
+          Choose Language / ಭಾಷೆ ಆಯ್ಕೆ / भाषा चुनें
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            background: "rgba(0,0,0,0.2)",
+            padding: "4px",
+            borderRadius: "50px",
+            border: "1px solid rgba(255,255,255,0.15)",
+          }}
+        >
+          {[
+            { code: "en", flag: "🇬🇧", label: "English", native: "English" },
+            { code: "kn", flag: "🇮🇳", label: "Kannada", native: "ಕನ್ನಡ" },
+            { code: "hi", flag: "🇮🇳", label: "Hindi",   native: "हिंदी" },
+          ].map(({ code, flag, label, native }) => {
+            const isActive = activeLanguage === code;
+            return (
+              <button
+                key={code}
+                onClick={() => changeLanguage(code)}
+                title={label}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 18px",
+                  borderRadius: "50px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: "14px",
+                  transition: "all 0.25s ease",
+                  background: isActive
+                    ? "linear-gradient(135deg, #ffffff, #fed7aa)"
+                    : "transparent",
+                  color: isActive ? "#c2410c" : "rgba(255,255,255,0.75)",
+                  boxShadow: isActive
+                    ? "0 3px 12px rgba(0,0,0,0.25)"
+                    : "none",
+                  transform: isActive ? "scale(1.04)" : "scale(1)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.color = "#ffffff";
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.12)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.75)";
+                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                  }
+                }}
+              >
+                <span style={{ fontSize: "15px" }}>{flag}</span>
+                <span>{native}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      <div className="bg-gradient-to-b from-slate-50 to-orange-50 min-h-screen py-6 sm:py-10">
       <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
         <div className="flex justify-center">
           <Image src="/logo.png" alt="Logo" width={100} height={100} />
@@ -289,8 +388,8 @@ export default function SignupForm() {
               disabled={isSubmitting}
               className={`w-full p-3 rounded-md text-white font-semibold ${
                 isSubmitting
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600"
+                  ? "bg-orange-300 cursor-not-allowed"
+                  : "bg-orange-600 hover:bg-orange-700"
               }`}
             >
               {isSubmitting ? "Sending OTP..." : "Send OTP"}
@@ -353,13 +452,91 @@ export default function SignupForm() {
 
         <div className="text-center mt-6">
           <span className="text-gray-700">Already have an account? </span>
-          <a href="/l3/login" className="text-blue-500 hover:text-blue-700 font-medium">
+          <a href="/l3/login" className="text-orange-600 hover:text-orange-800 font-medium">
             Login here
           </a>
         </div>
       </div>
-    </div>
+      </div>
+
+      {/* ── Account Picker (shown when multiple accounts on same number) ── */}
+      {showAccountPicker && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: "480px",
+            borderRadius: "1.25rem 1.25rem 0 0", padding: "1.25rem 1.1rem 2.5rem",
+            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)" }}>
+            <div style={{ width: "36px", height: "4px", background: "#e5e7eb",
+              borderRadius: "2px", margin: "0 auto 1rem" }} />
+            <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+              <div style={{ fontSize: "1.8rem" }}>🎉</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#1e1b4b", margin: "0.25rem 0 0" }}>
+                Signup Successful!
+              </h3>
+              {totalAccounts > 1 && (
+                <p style={{ fontSize: "0.78rem", color: "#6b7280", marginTop: "0.3rem" }}>
+                  Multiple accounts found. Choose one to continue.
+                </p>
+              )}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem",
+              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem" }}>
+              {accounts.map((acct) => {
+                const isNew = acct.userId === userId;
+                const active = selectedAccount === acct.userId;
+                return (
+                  <label key={acct.userId}
+                    style={{ display: "flex", alignItems: "center", gap: "0.75rem",
+                      padding: "0.7rem 0.9rem", borderRadius: "0.75rem", cursor: "pointer",
+                      border: `2px solid ${active ? "#7c3aed" : "#e5e7eb"}`,
+                      background: active ? "#f5f3ff" : "#f9fafb" }}>
+                    <input type="radio" name="account" value={acct.userId} checked={active}
+                      onChange={() => setSelectedAccount(acct.userId)}
+                      style={{ accentColor: "#7c3aed", width: "16px", height: "16px" }} />
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem", color: "#1e1b4b" }}>
+                        {acct.name}
+                      </p>
+                      <p style={{ margin: 0, fontSize: "0.75rem", color: "#6b7280" }}>
+                        ID: {acct.userId}{isNew ? " 🆕" : ""}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              onClick={async () => {
+                if (!selectedAccount) { alert("Please select an account."); return; }
+                const loginRes = await fetch("/api/l3/login", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: selectedAccount }),
+                });
+                const loginData = await loginRes.json();
+                if (loginRes.ok) {
+                  try {
+                    const authObj = loginData?.user ?? { userId: selectedAccount };
+                    sessionStorage.setItem("userId", selectedAccount);
+                    localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+                    sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+                  } catch {}
+                  router.push("/l3/dashboard");
+                } else {
+                  alert(loginData.message || "Login failed.");
+                }
+              }}
+              style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
+                border: "none", background: "linear-gradient(135deg,#ff9933,#7c3aed)",
+                color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
+              Continue to Dashboard →
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
 export const dynamic = "force-dynamic";
+

@@ -201,7 +201,7 @@ const LoginPage: React.FC = () => {
                 className={`w-full text-white p-2 rounded-md ${
                   isLoading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600"
+                    : "bg-orange-600 hover:bg-orange-700"
                 }`}
               >
                 {isLoading ? "Sending OTP..." : "Send OTP"}
@@ -215,7 +215,7 @@ const LoginPage: React.FC = () => {
                   className={`w-full text-white p-2 rounded-md ${
                     isVerifying
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-500 hover:bg-green-600"
+                      : "bg-orange-600 hover:bg-orange-700"
                   }`}
                 >
                   {isVerifying ? "Verifying..." : "Verify OTP"}
@@ -260,7 +260,7 @@ const LoginPage: React.FC = () => {
             </div>
             <button
               onClick={handleAccountSelection}
-              className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+              className="w-full bg-orange-600 text-white p-2 rounded-md hover:bg-orange-700"
             >
               Login to Selected Account
             </button>
@@ -287,3 +287,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+

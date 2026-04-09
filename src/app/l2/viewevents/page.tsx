@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
@@ -105,3 +105,4 @@ export default function EventCalendar() {
     </>
   );
 }
+

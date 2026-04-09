@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -175,3 +175,4 @@ const ForgotPasswordPage: React.FC = () => {
 };
 
 export default ForgotPasswordPage;
+
