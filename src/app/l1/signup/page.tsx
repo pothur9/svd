@@ -63,7 +63,7 @@ export default function SignupForm() {
       setResendTimer(10); // Reset the timer to 30 seconds
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("Failed to send OTP. Please check your phone number.");
+      console.log("Failed to send OTP. Please check your phone number.");
       setIsSubmitting(false);
     }
   };
@@ -91,7 +91,7 @@ export default function SignupForm() {
           console.error("Firebase user creation error:", firebaseError);
           // If user already exists, try to sign in
           if ((firebaseError as { code?: string }).code === 'auth/email-already-in-use') {
-            alert("This phone number is already registered.");
+            console.log("This phone number is already registered.");
             return;
           }
         }
@@ -103,7 +103,7 @@ export default function SignupForm() {
           body: JSON.stringify(submitData),
         });
         const responseData = await result.json();
-        alert(responseData.message);
+        console.log(responseData.message);
         setUserId(responseData.userId);
         setIsUserIdVisible(true);
         setIsOtpSent(false);
@@ -117,11 +117,11 @@ export default function SignupForm() {
         setIsOtpSent(false);
         setOtp("");
       } else {
-        alert(`OTP verification failed: ${response.data.Details}`);
+        console.log(`OTP verification failed: ${response.data.Details}`);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("An error occurred during OTP verification.");
+      console.log("An error occurred during OTP verification.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -236,7 +236,7 @@ export default function SignupForm() {
                   }}
                   onBlur={() => {
                     if (formData.contactNo.length !== 10) {
-                      alert("Phone number must be exactly 10 digits.");
+                      console.log("Phone number must be exactly 10 digits.");
                     }
                   }}
                   required

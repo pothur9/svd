@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next"; 
+import type { Metadata } from "next"; 
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light">
       <head>
         {/* âœ… Add the favicon link here */}
         <link rel="icon" href="/logomain1.png" sizes="32x32" type="image/png" />

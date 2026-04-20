@@ -137,7 +137,7 @@ export default function CompleteProfilePage() {
       router.push("/l2/dashboard");
     } catch (e) {
       console.error(e);
-      alert("Failed to update profile. Please try again.");
+      console.log("Failed to update profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -148,7 +148,7 @@ export default function CompleteProfilePage() {
     if (!file) return;
     try {
       if (!cloudName || !uploadPreset) {
-        alert("Image upload not configured. Please paste an image URL instead.");
+        console.log("Image upload not configured. Please paste an image URL instead.");
         return;
       }
       const fd = new FormData();
@@ -160,7 +160,7 @@ export default function CompleteProfilePage() {
       setForm(prev => ({ ...prev, imageUrl: data.secure_url }));
     } catch (e) {
       console.error(e);
-      alert('Failed to upload image. Please try again or paste a URL.');
+      console.log('Failed to upload image. Please try again or paste a URL.');
     }
   };
 

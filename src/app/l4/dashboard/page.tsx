@@ -71,7 +71,7 @@ export default function Dashboard() {
     if (!file) return;
     try {
       if (!cloudName || !uploadPreset) {
-        alert("Image upload not configured. Please paste an image URL instead.");
+        console.log("Image upload not configured. Please paste an image URL instead.");
         return;
       }
       const fd = new FormData();
@@ -86,7 +86,7 @@ export default function Dashboard() {
       setFormData((prev) => ({ ...prev, photoUrl: data.secure_url as string }));
     } catch (e) {
       console.error(e);
-      alert("Failed to upload image. Please try again or paste a URL.");
+      console.log("Failed to upload image. Please try again or paste a URL.");
     }
   };
 
@@ -299,7 +299,7 @@ export default function Dashboard() {
                         });
                         const data = await res.json();
                         if (!res.ok) throw new Error(data?.message || 'Failed to update');
-                        alert('Profile updated');
+                        console.log('Profile updated');
                         const refreshed = await fetch(`/api/l4/dashboard/${userId}?timestamp=${Date.now()}`, { cache: 'no-store' });
                         if (refreshed.ok) {
                           const ud = await refreshed.json();
@@ -312,7 +312,7 @@ export default function Dashboard() {
                         }
                       } catch (err) {
                         console.error(err);
-                        alert('Error saving details');
+                        console.log('Error saving details');
                       }
                     }}
                     className="grid grid-cols-1 sm:grid-cols-2 gap-3"

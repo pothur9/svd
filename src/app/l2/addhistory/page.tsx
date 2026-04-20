@@ -37,7 +37,7 @@ export default function UserDataForm() {
       });
 
       if (response.ok) {
-        alert("Data saved successfully");
+        console.log("Data saved successfully");
         setFormData({
           username: formData.username, // Keep the userId from session storage
           history: "",
@@ -46,7 +46,7 @@ export default function UserDataForm() {
           institutes: "",
         });
       } else {
-        alert("Error saving data");
+        console.log("Error saving data");
       }
     } catch (error) {
       console.error("Error:", error);

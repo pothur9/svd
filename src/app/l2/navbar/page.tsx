@@ -1,11 +1,142 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthManager from "../../../lib/auth";
 
+// SVG Icon Components
+const HomeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const AddIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M12 5v14"/><path d="M5 12h14"/>
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
+  </svg>
+);
+
+const HistoryIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" />
+  </svg>
+);
+
+const ClipboardIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+  </svg>
+);
+
+// Akshay Patre (Savings / Vessel / Plate icon)
+const AkshayPatreIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}
+  >
+    <path d="M4 10h16" />
+    <path d="M6 10c0 6 2 10 6 10s6-4 6-10" />
+    <path d="M8 6h8" />
+    <path d="M10 4h4" />
+    <path d="M4 10c0 2 1 3 2 3" />
+    <path d="M20 10c0 2-1 3-2 3" />
+  </svg>
+);
+
+// JKayaka (Job Seekers & Donors — briefcase/handshake icon)
+const JKayakaIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+  </svg>
+);
+
+// Samsara Vadhu Vara (Marriage / Couple icon — rings)
+const SamsaraIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <circle cx="8" cy="12" r="4" /><circle cx="16" cy="12" r="4" />
+  </svg>
+);
+
+// Purohita ID (Priest / Book icon)
+const PurohitaIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+  </svg>
+);
+
+// Self Help Group (community / users icon)
+const SelfHelpGroupIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+// Wallet icon
+const WalletIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+  </svg>
+);
+
+const newNavItems = [
+  {
+    label: 'Akshaya Patra',
+    href: '/l2/coming-soon?feature=Akshay+Patre',
+    Icon: AkshayPatreIcon,
+  },
+  {
+    label: 'JKayaka',
+    href: '/l2/coming-soon?feature=JKayaka+%28Job+Seekers+%26+Donors%29',
+    Icon: JKayakaIcon,
+  },
+  {
+    label: 'Samsara Vadhu Vara',
+    href: '/l2/coming-soon?feature=Samsara+Vadhu+Vara',
+    Icon: SamsaraIcon,
+  },
+  {
+    label: 'Purohita ID',
+    href: '/l2/coming-soon?feature=Purohita+ID',
+    Icon: PurohitaIcon,
+  },
+  {
+    label: 'Self Help Group',
+    href: '/l2/coming-soon?feature=Self+Help+Group',
+    Icon: SelfHelpGroupIcon,
+  },
+  {
+    label: 'Wallet',
+    href: '/l2/coming-soon?feature=Wallet',
+    Icon: WalletIcon,
+  },
+];
+
 function Navbar() {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,26 +152,29 @@ function Navbar() {
       }
     };
 
-    // Fetch the initial count
     fetchUserCount();
-
-    // Fetch every 10 minutes (600000 ms)
     const interval = setInterval(fetchUserCount, 600000);
 
-    return () => clearInterval(interval); // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
+  // Close "More" dropdown on outside click
+  useEffect(() => {
+    const handler = () => setMoreMenuOpen(false);
+    if (moreMenuOpen) {
+      document.addEventListener('click', handler);
+    }
+    return () => document.removeEventListener('click', handler);
+  }, [moreMenuOpen]);
+
   const handleLogout = () => {
-    // Clear auth (both localStorage and sessionStorage)
     AuthManager.logout();
-    // Redirect to home page
     router.push('/');
   };
 
   return (
-    <div>
-     <div className="navbar bg-white text-black fixed z-50">
-
+    <div style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: '#ffffff' }}>
+      <div className="navbar shadow-md" style={{ backgroundColor: '#ffffff', color: '#000000', borderBottom: '1px solid #f0f0f0' }}>
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -59,41 +193,151 @@ function Navbar() {
                 />
               </svg>
             </div>
+            {/* Mobile dropdown menu */}
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow"
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-60 p-2 shadow"
             >
-              <li><Link href="/l2/dashboard" className="text-lg">Home</Link></li>
-               <li><Link href="/l2/profile" className="text-lg">Profile</Link></li>
-              <li><Link href="/l2/addevent" className="text-lg">Add Event</Link></li>
-              <li><Link href="/l2/viewevents" className="text-lg">Event Calendar</Link></li>
-              <li><Link href="/l2/history" className="text-lg">History</Link></li>
-              <li><Link href="/l2/addhistory" className="text-lg">Add History</Link></li>
-              <li><Link href="/l2/generalhistory" className="text-lg">General History</Link></li>
+              <li><Link href="/l2/dashboard" className="text-base text-black flex items-center gap-1"><HomeIcon /> Home</Link></li>
+              <li><Link href="/l2/profile" className="text-base text-black flex items-center gap-1"><UserIcon /> Profile</Link></li>
+              <li><Link href="/l2/addevent" className="text-base text-black flex items-center gap-1"><AddIcon /> Add Event</Link></li>
+              <li><Link href="/l2/viewevents" className="text-base text-black flex items-center gap-1"><CalendarIcon /> Event Calendar</Link></li>
+              <li><Link href="/l2/history" className="text-base text-black flex items-center gap-1"><HistoryIcon /> History</Link></li>
+              <li><Link href="/l2/addhistory" className="text-base text-black flex items-center gap-1"><AddIcon /> Add History</Link></li>
+              <li><Link href="/l2/generalhistory" className="text-base text-black flex items-center gap-1"><ClipboardIcon /> General History</Link></li>
+              {/* New items in mobile */}
+              <li className="menu-title"><span className="text-xs text-gray-500 uppercase tracking-wider">More Features</span></li>
+              {newNavItems.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-base text-black flex items-center gap-1">
+                    <item.Icon /> {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <Link href="/l2/dashboard" className="btn btn-ghost text-xl">SVD</Link>
         </div>
 
+        {/* Desktop nav */}
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            <li><Link href="/l2/dashboard" className="text-lg">Home</Link></li>
-            <li><Link href="/l2/profile" className="text-lg">Profile</Link></li>
-            <li><Link href="/l2/addevent" className="text-lg">Add Event</Link></li>
-            <li><Link href="/l2/viewevents" className="text-lg">Event Calendar</Link></li>
-            <li><Link href="/l2/history" className="text-lg">History</Link></li>
-            <li><Link href="/l2/addhistory" className="text-lg">Add History</Link></li>
-            <li><Link href="/l2/generalhistory" className="text-lg">General History</Link></li>
+          <ul className="menu menu-horizontal px-1 flex-nowrap">
+            <li><Link href="/l2/dashboard" className="text-sm text-black flex items-center gap-1"><HomeIcon /> Home</Link></li>
+            <li><Link href="/l2/profile" className="text-sm text-black flex items-center gap-1"><UserIcon /> Profile</Link></li>
+            <li><Link href="/l2/addevent" className="text-sm text-black flex items-center gap-1"><AddIcon /> Add Event</Link></li>
+            <li><Link href="/l2/viewevents" className="text-sm text-black flex items-center gap-1"><CalendarIcon /> Event Calendar</Link></li>
+            <li><Link href="/l2/history" className="text-sm text-black flex items-center gap-1"><HistoryIcon /> History</Link></li>
+            <li><Link href="/l2/addhistory" className="text-sm text-black flex items-center gap-1"><AddIcon /> Add History</Link></li>
+            <li><Link href="/l2/generalhistory" className="text-sm text-black flex items-center gap-1"><ClipboardIcon /> General History</Link></li>
+
+            {/* "More" dropdown for new features */}
+            <li style={{ position: 'relative' }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setMoreMenuOpen((v) => !v); }}
+                className="text-sm text-black flex items-center gap-1"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '8px',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px' }}>
+                  <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
+                </svg>
+                More
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+
+              {moreMenuOpen && (
+                <ul
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    zIndex: 999,
+                    background: '#fff',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+                    minWidth: '220px',
+                    padding: '0.5rem 0',
+                    listStyle: 'none',
+                    margin: 0,
+                    border: '1px solid #f0f0f0',
+                  }}
+                >
+                  {newNavItems.map((item) => (
+                    <li key={item.label}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setMoreMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '0.6rem 1.2rem',
+                          color: '#1e293b',
+                          fontWeight: 500,
+                          fontSize: '0.92rem',
+                          textDecoration: 'none',
+                          transition: 'background 0.15s',
+                          borderRadius: '8px',
+                          margin: '0 0.25rem',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = '#fff7f0')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <span style={{ color: '#ea580c', display: 'flex', alignItems: 'center' }}>
+                          <item.Icon />
+                        </span>
+                        <span>{item.label}</span>
+                        <span style={{
+                          marginLeft: 'auto',
+                          fontSize: '0.65rem',
+                          background: 'linear-gradient(90deg, #ea580c, #f97316)',
+                          color: '#fff',
+                          borderRadius: '999px',
+                          padding: '1px 7px',
+                          fontWeight: 700,
+                          letterSpacing: '0.03em',
+                        }}>
+                          Soon
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
           </ul>
         </div>
 
         <div className="navbar-end">
           {totalUsers !== null && (
-            <div className="text-black p-2 text-center">
+            <div style={{ color: '#000', padding: '0.5rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
               Total Users: {totalUsers}
             </div>
           )}
-          <button onClick={handleLogout} className="btn">
+          <button
+            onClick={handleLogout}
+            style={{
+              background: '#f3f4f6',
+              color: '#111827',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              padding: '0.4rem 1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
             Logout
           </button>
         </div>
@@ -103,4 +347,3 @@ function Navbar() {
 }
 
 export default Navbar;
-

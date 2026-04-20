@@ -216,7 +216,7 @@ export default function PersonalDetailsForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.contactNo) {
-      alert("Please enter a valid contact number.");
+      console.log("Please enter a valid contact number.");
       return;
     }
 
@@ -231,11 +231,11 @@ export default function PersonalDetailsForm() {
         setSessionId(otpData.Details);
         setShowOtpPopup(true);
       } else {
-        alert("Failed to send OTP. Please try again.");
+        console.log("Failed to send OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("An error occurred while sending the OTP.");
+      console.log("An error occurred while sending the OTP.");
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +243,7 @@ export default function PersonalDetailsForm() {
 
   const handleVerifyOtp = async () => {
     if (!sessionId) {
-      alert("Session ID is missing. Please retry OTP verification.");
+      console.log("Session ID is missing. Please retry OTP verification.");
       return;
     }
 
@@ -255,7 +255,7 @@ export default function PersonalDetailsForm() {
       const verifyData = await verifyResponse.json();
 
       if (verifyData.Status === "Success") {
-        alert("OTP verified successfully. Completing signup...");
+        console.log("OTP verified successfully. Completing signup...");
 
         // Conditionally upload photo if provided
         let uploadedPhotoUrl: string | undefined;
@@ -290,7 +290,7 @@ export default function PersonalDetailsForm() {
         } catch (firebaseError) {
           console.error("Firebase user creation error:", firebaseError);
           if ((firebaseError as { code?: string }).code === 'auth/email-already-in-use') {
-            alert("This phone number is already registered.");
+            console.log("This phone number is already registered.");
             return;
           }
         }
@@ -352,14 +352,14 @@ export default function PersonalDetailsForm() {
             router.push("/l4/dashboard");
           }
         } else {
-          alert("Failed to sign up user.");
+          console.log("Failed to sign up user.");
         }
       } else {
-        alert("Invalid OTP. Please try again.");
+        console.log("Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("An error occurred during OTP verification.");
+      console.log("An error occurred during OTP verification.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -632,7 +632,7 @@ export default function PersonalDetailsForm() {
                 onChange={handleInputChange}
                 onBlur={() => {
                   if (!/^\d{10}$/.test(formData.contactNo)) {
-                    alert("Please enter a valid 10-digit phone number.");
+                    console.log("Please enter a valid 10-digit phone number.");
                   }
                 }}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"

@@ -83,9 +83,18 @@ const SelfHelpGroupIcon = () => (
   </svg>
 );
 
+// Wallet icon
+const WalletIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+  </svg>
+);
+
 const newNavItems = [
   {
-    label: 'Akshay Patre',
+    label: 'Akshaya Patra',
     href: '/l4/coming-soon?feature=Akshay+Patre',
     Icon: AkshayPatreIcon,
   },
@@ -108,6 +117,11 @@ const newNavItems = [
     label: 'Self Help Group',
     href: '/l4/coming-soon?feature=Self+Help+Group',
     Icon: SelfHelpGroupIcon,
+  },
+  {
+    label: 'Wallet',
+    href: '/l4/coming-soon?feature=Wallet',
+    Icon: WalletIcon,
   },
 ];
 
@@ -155,8 +169,8 @@ function Navbar() {
   };
 
   return (
-    <div>
-      <div className="navbar bg-white text-black z-50 shadow-md">
+    <div style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: '#ffffff' }}>
+      <div className="navbar shadow-md" style={{ backgroundColor: '#ffffff', color: '#000000', borderBottom: '1px solid #f0f0f0' }}>
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -330,11 +344,22 @@ function Navbar() {
 
         <div className="navbar-end">
           {totalUsers !== null && (
-            <div className="text-black p-2 text-center">
+            <div style={{ color: '#000', padding: '0.5rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
               Total Users: {totalUsers}
             </div>
           )}
-          <button onClick={handleLogout} className="btn bg-gray-100 text-black">
+          <button
+            onClick={handleLogout}
+            style={{
+              background: '#f3f4f6',
+              color: '#111827',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              padding: '0.4rem 1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
             Logout
           </button>
         </div>

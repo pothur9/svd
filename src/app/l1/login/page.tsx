@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
   const handleSendOtp = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!contactNo || !/^\d{10}$/.test(contactNo)) {
-      alert("Please enter a valid 10-digit phone number.");
+      console.log("Please enter a valid 10-digit phone number.");
       return;
     }
     setIsLoading(true);
@@ -41,13 +41,13 @@ const LoginPage: React.FC = () => {
       if (data.Status === "Success") {
         setOtpSessionId(data.Details);
         setIsOtpSent(true);
-        alert("OTP sent successfully!");
+        console.log("OTP sent successfully!");
       } else {
-        alert("Failed to send OTP. Please try again.");
+        console.log("Failed to send OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("An error occurred while sending OTP.");
+      console.log("An error occurred while sending OTP.");
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
   // Verify OTP and login
   const handleVerifyOtp = async () => {
     if (!otp) {
-      alert("Please enter the OTP.");
+      console.log("Please enter the OTP.");
       return;
     }
     setIsVerifying(true);
@@ -78,17 +78,17 @@ const LoginPage: React.FC = () => {
         
         if (loginResponse.ok) {
           sessionStorage.setItem("userId", userId);
-          alert("Login successful!");
+          console.log("Login successful!");
           router.push("/l1/dashboard");
         } else {
-          alert(loginData.message || "Login failed.");
+          console.log(loginData.message || "Login failed.");
         }
       } else {
-        alert("Invalid OTP. Please try again.");
+        console.log("Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("An error occurred during verification.");
+      console.log("An error occurred during verification.");
     } finally {
       setIsVerifying(false);
     }

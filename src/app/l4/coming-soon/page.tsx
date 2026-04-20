@@ -20,8 +20,11 @@ function ComingSoonContent() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          padding: "2rem",
+          justifyContent: "flex-start",
+          paddingTop: "5rem",
+          paddingBottom: "3rem",
+          paddingLeft: "1rem",
+          paddingRight: "1rem",
         }}
       >
         {/* Decorative circles */}

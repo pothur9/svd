@@ -92,7 +92,7 @@ export default function SignupForm() {
       setIsOtpSent(true);
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("Failed to send OTP. Please check your phone number.");
+      console.log("Failed to send OTP. Please check your phone number.");
       setIsSubmitting(false);
     }
   };
@@ -119,7 +119,7 @@ export default function SignupForm() {
           const errorCode = (firebaseError as { code?: string }).code;
 
           if (errorCode === 'auth/email-already-in-use') {
-            alert("This phone number is already registered.");
+            console.log("This phone number is already registered.");
             return;
           }
 
@@ -175,14 +175,14 @@ export default function SignupForm() {
             router.push("/l3/dashboard");
           }
         } else {
-          alert(responseData.message || "Signup failed");
+          console.log(responseData.message || "Signup failed");
         }
       } else {
-        alert("Invalid OTP. Please try again.");
+        console.log("Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("An error occurred during verification.");
+      console.log("An error occurred during verification.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -191,11 +191,11 @@ export default function SignupForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.name || !formData.contactNo || !formData.peeta || !formData.karthruGuru) {
-      alert("Please fill in all fields.");
+      console.log("Please fill in all fields.");
       return;
     }
     if (!/^\d{10}$/.test(formData.contactNo)) {
-      alert("Please enter a valid 10-digit phone number.");
+      console.log("Please enter a valid 10-digit phone number.");
       return;
     }
     setIsSubmitting(true);
@@ -507,7 +507,7 @@ export default function SignupForm() {
             </div>
             <button
               onClick={async () => {
-                if (!selectedAccount) { alert("Please select an account."); return; }
+                if (!selectedAccount) { console.log("Please select an account."); return; }
                 const loginRes = await fetch("/api/l3/login", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ userId: selectedAccount }),
@@ -522,7 +522,7 @@ export default function SignupForm() {
                   } catch {}
                   router.push("/l3/dashboard");
                 } else {
-                  alert(loginData.message || "Login failed.");
+                  console.log(loginData.message || "Login failed.");
                 }
               }}
               style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",

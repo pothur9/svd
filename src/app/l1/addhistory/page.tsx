@@ -39,7 +39,7 @@ export default function UserDataForm() {
 
     // Ensure username exists
     if (!formData.username) {
-      alert("Username is missing. Please log in again.");
+      console.log("Username is missing. Please log in again.");
       setLoading(false);
       return;
     }
@@ -52,7 +52,7 @@ export default function UserDataForm() {
       });
 
       if (response.ok) {
-        alert("Data saved successfully");
+        console.log("Data saved successfully");
         setFormData({
           username: formData.username,
           history: "",
@@ -62,7 +62,7 @@ export default function UserDataForm() {
           contactDetails:""
         });
       } else {
-        alert("Error saving data");
+        console.log("Error saving data");
       }
     } catch (error) {
       console.error("Error:", error);

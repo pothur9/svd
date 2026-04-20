@@ -18,7 +18,7 @@ export default function AddEvent() {
     // Get the username from session storage
     const username = sessionStorage.getItem('username');
     if (!username) {
-      alert("UserId not found in session. Please log in again.");
+      console.log("UserId not found in session. Please log in again.");
       return;
     }
 
@@ -33,10 +33,10 @@ export default function AddEvent() {
       });
 
       if (response.ok) {
-        alert('Event added successfully');
+        console.log('Event added successfully');
         setFormData({ date: '', title: '', description: '' });
       } else {
-        alert('Error adding event');
+        console.log('Error adding event');
       }
     } catch (error) {
       console.error('Error:', error);

@@ -33,7 +33,7 @@ export default function AddEvent() {
     const { username } = formData;
 
     if (!username) {
-      alert("User name is missing.");
+      console.log("User name is missing.");
       return;
     }
 
@@ -46,7 +46,7 @@ export default function AddEvent() {
       });
 
       if (response.ok) {
-        alert("Event added successfully");
+        console.log("Event added successfully");
         setFormData({
           date: "",
           title: "",
@@ -54,7 +54,7 @@ export default function AddEvent() {
           username: formData.username,
         });
       } else {
-        alert("Error adding event");
+        console.log("Error adding event");
       }
     } catch (error) {
       console.error("Error:", error);

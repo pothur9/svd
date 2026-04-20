@@ -69,7 +69,7 @@ export default function SignupForm() {
       setResendTimer(10);
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("Failed to send OTP. Please check your phone number.");
+      console.log("Failed to send OTP. Please check your phone number.");
       setIsSubmitting(false);
     }
   };
@@ -97,7 +97,7 @@ export default function SignupForm() {
           const errorCode = (firebaseError as { code?: string }).code;
 
           if (errorCode === 'auth/email-already-in-use') {
-            alert("This phone number is already registered.");
+            console.log("This phone number is already registered.");
             return;
           }
 
@@ -154,14 +154,14 @@ export default function SignupForm() {
             router.push("/l2/dashboard");
           }
         } else {
-          alert(responseData.error || "Signup failed. Please try again.");
+          console.log(responseData.error || "Signup failed. Please try again.");
         }
       } else {
-        alert(`OTP verification failed: ${response.data.Details}`);
+        console.log(`OTP verification failed: ${response.data.Details}`);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("An error occurred during OTP verification.");
+      console.log("An error occurred during OTP verification.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -289,7 +289,7 @@ export default function SignupForm() {
                   }}
                   onBlur={() => {
                     if (formData.contactNo.length !== 10) {
-                      alert("Phone number must be exactly 10 digits.");
+                      console.log("Phone number must be exactly 10 digits.");
                     }
                   }}
                   required
@@ -455,7 +455,7 @@ export default function SignupForm() {
             </div>
             <button
               onClick={async () => {
-                if (!selectedAccount) { alert("Please select an account."); return; }
+                if (!selectedAccount) { console.log("Please select an account."); return; }
                 const loginRes = await fetch("/api/l2/login", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ userId: selectedAccount }),
@@ -470,7 +470,7 @@ export default function SignupForm() {
                   } catch {}
                   router.push("/l2/dashboard");
                 } else {
-                  alert(loginData.message || "Login failed.");
+                  console.log(loginData.message || "Login failed.");
                 }
               }}
               style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",

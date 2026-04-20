@@ -218,7 +218,7 @@ export default function Dashboard(): JSX.Element {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF.');
+      console.log('Failed to generate PDF.');
     } finally {
       setIsDownloading(false);
     }
