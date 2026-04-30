@@ -120,7 +120,7 @@ const newNavItems = [
   },
   {
     label: 'Wallet',
-    href: '/l4/coming-soon?feature=Wallet',
+    href: '/l4/wallet',
     Icon: WalletIcon,
   },
 ];

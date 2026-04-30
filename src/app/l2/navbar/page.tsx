@@ -129,7 +129,7 @@ const newNavItems = [
   },
   {
     label: 'Wallet',
-    href: '/l2/coming-soon?feature=Wallet',
+    href: '/l2/wallet',
     Icon: WalletIcon,
   },
 ];

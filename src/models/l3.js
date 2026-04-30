@@ -29,6 +29,7 @@ const l3UserSchema = new mongoose.Schema({
   maneDhevaruAddress: { type: String },
   subKula: { type: String },
   sonOf: { type: String },
+  walletBalance: { type: Number, default: 0 },
 });
 
 export default mongoose.models.l3User || mongoose.model('l3User', l3UserSchema);

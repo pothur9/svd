@@ -1,6 +1,7 @@
 // app/api/l2/signup/route.ts
 import dbConnect from "@/lib/dbconnect";
-import l2User from '@/models/l2'; // Assuming l2 user model is available
+import l2User from '@/models/l2';
+import WalletTransaction from '@/models/walletTransaction';
 import { NextRequest, NextResponse } from "next/server";
 
 async function generateUniqueUserId() {
@@ -47,7 +48,20 @@ export async function POST(req: NextRequest) {
         });
 
         await newUser.save();
-        
+
+        // Credit ₹500 signup bonus
+        await l2User.findOneAndUpdate({ userId }, { walletBalance: 500 });
+        await WalletTransaction.create({
+          fromUserId: 'SYSTEM',
+          toUserId: userId,
+          fromName: 'System',
+          toName: name,
+          amount: 500,
+          type: 'signup_bonus',
+          note: 'Welcome bonus on registration',
+          userLevel: 'l2',
+        });
+
         return NextResponse.json({ message: 'User signed up successfully!', userId }, { status: 201 });
     } catch (error) {
         console.error("Signup Error:", error);

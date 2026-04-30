@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbconnect";
 import l4User from "@/models/l4";
+import WalletTransaction from "@/models/walletTransaction";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req:NextRequest) {
@@ -65,6 +66,19 @@ export async function POST(req:NextRequest) {
     });
 
     await newUser.save();
+
+    // Credit ₹500 signup bonus
+    await l4User.findOneAndUpdate({ userId }, { walletBalance: 500 });
+    await WalletTransaction.create({
+      fromUserId: 'SYSTEM',
+      toUserId: userId,
+      fromName: 'System',
+      toName: name,
+      amount: 500,
+      type: 'signup_bonus',
+      note: 'Welcome bonus on registration',
+      userLevel: 'l4',
+    });
 
     return NextResponse.json(
       { message: "User signed up successfully!", userId },
