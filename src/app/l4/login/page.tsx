@@ -12,6 +12,7 @@ const LoginPage = () => {
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const [accountError, setAccountError] = useState<string>("");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showAccountSelection, setShowAccountSelection] = useState<boolean>(false);
   const [selectedAccount, setSelectedAccount] = useState<string>("");
@@ -37,7 +38,22 @@ const LoginPage = () => {
       return;
     }
     setIsLoading(true);
+    setAccountError("");
     try {
+      // ── Step 1: Check if account exists before sending OTP ──
+      const checkRes = await fetch("/api/l4/check-accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactNo }),
+      });
+      if (!checkRes.ok) {
+        // 404 = no account found
+        setAccountError("No account found for this number. Please create an account first.");
+        setIsLoading(false);
+        return;
+      }
+
+      // ── Step 2: Account exists — send OTP ──
       const response = await fetch(
         `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${contactNo}/AUTOGEN3/SVD`
       );
@@ -130,7 +146,7 @@ const LoginPage = () => {
           <Image src="/logo.png" alt="Logo" width={100} height={100} />
         </div>
         <h2 className="text-2xl font-bold mb-6 text-center text-black mt-4">Login</h2>
-        <label className="block mb-4">
+        <label className="block mb-2">
           <span className="text-gray-700">Contact Number</span>
           <input
             type="text"
@@ -138,6 +154,7 @@ const LoginPage = () => {
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "").slice(0, 10);
               setContactNo(value);
+              if (accountError) setAccountError("");
             }}
             placeholder="Enter your 10-digit phone number"
             required
@@ -146,6 +163,20 @@ const LoginPage = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black"
           />
         </label>
+
+        {/* Account not found error */}
+        {accountError && (
+          <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-700 font-medium">⚠️ {accountError}</p>
+            <a
+              href="/l4/signup"
+              className="text-sm font-semibold mt-1 inline-block"
+              style={{ color: "#ea580c" }}
+            >
+              → Create an account
+            </a>
+          </div>
+        )}
         
         {isOtpSent && (
           <label className="block mb-4">

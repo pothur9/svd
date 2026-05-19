@@ -38,7 +38,21 @@ const LoginPage: React.FC = () => {
       return;
     }
     setIsLoading(true);
+    setErrorMsg("");
     try {
+      // ── Step 1: Check if account exists before sending OTP ──
+      const checkRes = await fetch("/api/l2/check-accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactNo }),
+      });
+      if (!checkRes.ok) {
+        setErrorMsg("No account found for this number. Please create an account first.");
+        setIsLoading(false);
+        return;
+      }
+
+      // ── Step 2: Account exists — send OTP ──
       const response = await fetch(
         `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN3/SVD`
       );
@@ -156,14 +170,17 @@ const LoginPage: React.FC = () => {
         </h2>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-md bg-yellow-100 text-yellow-800 text-sm">
-            {errorMsg} <a href="" className="underline font-medium"></a>
+          <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200">
+            <p className="text-sm text-red-700 font-medium">⚠️ {errorMsg}</p>
+            {/* <a href="/l2/signup" className="text-sm font-semibold mt-1 inline-block" style={{ color: "#ea580c" }}>
+              → Create an account
+            </a> */}
           </div>
         )}
 
         {!showAccountSelection ? (
           <form onSubmit={handleSendOtp}>
-            <label className="block mb-4">
+            <label className="block mb-2">
               <span className="text-gray-700">Contact Number</span>
               <input
                 type="text"
@@ -171,6 +188,7 @@ const LoginPage: React.FC = () => {
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, "").slice(0, 10);
                   setContactNo(value);
+                  if (errorMsg) setErrorMsg("");
                 }}
                 placeholder="Enter your 10-digit phone number"
                 required

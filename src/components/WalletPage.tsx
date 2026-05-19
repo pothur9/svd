@@ -17,7 +17,7 @@ interface Transaction {
 }
 
 // ─── Denomination breakdown ───────────────────────────────────────────────────
-const DENOMINATIONS = [500, 200, 100, 50, 20, 10];
+const DENOMINATIONS = [500, 200, 100, 50, 20, 10, 5, 2, 1];
 
 function breakIntoNotes(balance: number): { denom: number; count: number }[] {
   let remaining = balance;
@@ -35,25 +35,29 @@ function breakIntoNotes(balance: number): { denom: number; count: number }[] {
 
 
 
-// ─── Map each denomination to its note image ─────────────────────────────────
-// 500 → /500.jpeg (dedicated photo), 100 → /100.jpeg (dedicated photo)
-// 200/50/20/10 → /100.jpeg base with a colour overlay to differentiate visually
+// ─── Map each denomination to its real note image ─────────────────────────────
 const DENOM_NOTE_SRC: Record<number, string> = {
   500: "/500.jpeg",
-  200: "/100.jpeg",
+  200: "/200.jpg.jpeg",
   100: "/100.jpeg",
-  50:  "/100.jpeg",
-  20:  "/100.jpeg",
-  10:  "/100.jpeg",
+  50:  "/50.jpg.jpeg",
+  20:  "/20.jpeg",
+  10:  "/10.jpeg",
+  5:   "/5.jpeg",
+  2:   "/2.jpeg",
+  1:   "/1.jpeg",
 };
 
 const DENOM_TINT: Record<number, string> = {
   500: "transparent",
-  200: "rgba(34,197,94,0.26)",   // green tint
+  200: "transparent",
   100: "transparent",
-  50:  "rgba(234,179,8,0.28)",   // amber tint
-  20:  "rgba(168,85,247,0.26)",  // violet tint
-  10:  "rgba(99,102,241,0.26)",  // indigo tint
+  50:  "transparent",
+  20:  "transparent",
+  10:  "transparent",
+  5:   "transparent",
+  2:   "transparent",
+  1:   "transparent",
 };
 
 const DENOM_SHADOW: Record<number, string> = {
@@ -63,6 +67,9 @@ const DENOM_SHADOW: Record<number, string> = {
   50:  "rgba(161,101,13,0.40)",
   20:  "rgba(126,13,84,0.40)",
   10:  "rgba(46,125,50,0.40)",
+  5:   "rgba(180,83,9,0.40)",
+  2:   "rgba(120,53,15,0.40)",
+  1:   "rgba(92,40,9,0.40)",
 };
 
 // ─── Currency Note Component ──────────────────────────────────────────────────
@@ -425,16 +432,7 @@ export default function WalletPage({ level }: { level: "l2" | "l3" | "l4" }) {
                   <RudhraNote key={denom} denom={denom} count={count} />
                 ))}
               </div>
-              {balance && balance % 10 !== 0 && (
-                <p style={{
-                  color: "rgba(255,255,255,0.4)",
-                  fontSize: "11px",
-                  textAlign: "center",
-                  marginTop: "12px",
-                }}>
-                  * ₹{balance % 10} remaining coins (not shown as notes)
-                </p>
-              )}
+
             </div>
           )}
         </div>

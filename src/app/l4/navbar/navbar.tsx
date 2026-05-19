@@ -173,19 +173,19 @@ function Navbar() {
       <div className="navbar shadow-md" style={{ backgroundColor: '#ffffff', color: '#000000', borderBottom: '1px solid #f0f0f0' }}>
         <div className="navbar-start">
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden" style={{ marginLeft: '8px' }}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
+                className="h-7 w-7"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                strokeWidth={2.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
+                  d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
             </div>
@@ -223,6 +223,23 @@ function Navbar() {
                   </Link>
                 </li>
               ))}
+              {/* Divider */}
+              <li style={{ borderTop: '1px solid #e5e7eb', margin: '0.25rem 0' }} />
+              {/* Logout */}
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="text-base flex items-center gap-1 w-full"
+                  style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0.75rem', borderRadius: '8px', fontWeight: 600 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                  </svg>
+                  Logout
+                </button>
+              </li>
             </ul>
           </div>
           <Link href="/l4/dashboard" className="btn btn-ghost text-xl">SVD</Link>
@@ -321,21 +338,60 @@ function Navbar() {
                           <item.Icon />
                         </span>
                         <span>{item.label}</span>
-                        <span style={{
-                          marginLeft: 'auto',
-                          fontSize: '0.65rem',
-                          background: 'linear-gradient(90deg, #ea580c, #f97316)',
-                          color: '#fff',
-                          borderRadius: '999px',
-                          padding: '1px 7px',
-                          fontWeight: 700,
-                          letterSpacing: '0.03em',
-                        }}>
-                          Soon
-                        </span>
+                        {item.label !== 'Wallet' && (
+                          <span style={{
+                            marginLeft: 'auto',
+                            fontSize: '0.65rem',
+                            background: 'linear-gradient(90deg, #ea580c, #f97316)',
+                            color: '#fff',
+                            borderRadius: '999px',
+                            padding: '1px 7px',
+                            fontWeight: 700,
+                            letterSpacing: '0.03em',
+                          }}>
+                            Soon
+                          </span>
+                        )}
                       </Link>
                     </li>
                   ))}
+                  {/* Divider */}
+                  <li style={{ borderTop: '1px solid #f0f0f0', margin: '0.25rem 0' }} />
+                  {/* Logout in 3-dots dropdown */}
+                  <li>
+                    <button
+                      onClick={() => { setMoreMenuOpen(false); handleLogout(); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '0.6rem 1.2rem',
+                        color: '#dc2626',
+                        fontWeight: 500,
+                        fontSize: '0.92rem',
+                        textDecoration: 'none',
+                        transition: 'background 0.15s',
+                        borderRadius: '8px',
+                        margin: '0 0.25rem',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = '#fff1f2')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <span style={{ color: '#dc2626', display: 'flex', alignItems: 'center' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }}>
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" x2="9" y1="12" y2="12" />
+                        </svg>
+                      </span>
+                      <span>Logout</span>
+                    </button>
+                  </li>
                 </ul>
               )}
             </li>
@@ -348,20 +404,30 @@ function Navbar() {
               Total Users: {totalUsers}
             </div>
           )}
-          <button
-            onClick={handleLogout}
+          <Link
+            href="/l4/wallet"
             style={{
-              background: '#f3f4f6',
-              color: '#111827',
-              border: '1px solid #e5e7eb',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'linear-gradient(135deg, #ea580c, #f97316)',
+              color: '#fff',
+              border: 'none',
               borderRadius: '8px',
               padding: '0.4rem 1rem',
               fontWeight: 600,
               cursor: 'pointer',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
             }}
           >
-            Logout
-          </button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+            </svg>
+            Wallet
+          </Link>
         </div>
       </div>
     </div>

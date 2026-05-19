@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../../i18n"; // Ensure the correct path
 import Image from "next/image";
-import { auth } from "../../../lib/firebase";
+import { auth, generateCustomUID } from "../../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 interface FormData {
@@ -47,6 +47,8 @@ export default function PersonalDetailsForm() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [activeLanguage, setActiveLanguage] = useState("en");
@@ -229,6 +231,8 @@ export default function PersonalDetailsForm() {
 
       if (otpData.Status === "Success") {
         setSessionId(otpData.Details);
+        setOtp("");
+        setOtpTimer(60);
         setShowOtpPopup(true);
       } else {
         console.log("Failed to send OTP. Please try again.");
@@ -238,6 +242,41 @@ export default function PersonalDetailsForm() {
       console.log("An error occurred while sending the OTP.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 60-second countdown timer
+  useEffect(() => {
+    if (!showOtpPopup || otpTimer <= 0) return;
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) { clearInterval(interval); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [showOtpPopup, otpTimer]);
+
+  const handleResendOtp = async () => {
+    if (!formData.contactNo) return;
+    setIsResending(true);
+    try {
+      const otpResponse = await fetch(
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN3/SVD`
+      );
+      const otpData = await otpResponse.json();
+      if (otpData.Status === "Success") {
+        setSessionId(otpData.Details);
+        setOtp("");
+        setOtpTimer(60);
+        console.log("OTP resent successfully.");
+      } else {
+        console.log("Failed to resend OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -289,9 +328,16 @@ export default function PersonalDetailsForm() {
           console.log("Firebase user created with UID:", firebaseUid);
         } catch (firebaseError) {
           console.error("Firebase user creation error:", firebaseError);
-          if ((firebaseError as { code?: string }).code === 'auth/email-already-in-use') {
-            console.log("This phone number is already registered.");
-            return;
+          const errorCode = (firebaseError as { code?: string }).code;
+
+          if (errorCode === 'auth/email-already-in-use') {
+            // Phone number already in Firebase — generate a custom UID and continue
+            firebaseUid = generateCustomUID();
+            console.log("Phone already in Firebase; using custom UID:", firebaseUid);
+          } else {
+            // Other Firebase errors — still generate a fallback UID and proceed
+            firebaseUid = generateCustomUID();
+            console.log("Firebase error; using custom UID as fallback:", firebaseUid);
           }
         }
 
@@ -974,17 +1020,41 @@ export default function PersonalDetailsForm() {
           </form>
         </div>
         {showOtpPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm">
-              <h3 className="text-lg font-semibold mb-4">Enter OTP</h3>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm mx-4">
+              <h3 className="text-lg font-semibold mb-1">Enter OTP</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                OTP sent to <strong>{formData.contactNo}</strong>
+              </p>
               <input
                 type="text"
                 value={otp}
                 onChange={handleOtpChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
                 placeholder="Enter OTP"
+                maxLength={6}
               />
-              <div className="flex space-x-4 mt-4">
+
+              {/* Timer + Resend */}
+              <div className="flex items-center justify-between mt-3 mb-1">
+                {otpTimer > 0 ? (
+                  <p className="text-sm text-gray-500">
+                    Resend OTP in{" "}
+                    <span className="font-semibold text-orange-600">{otpTimer}s</span>
+                  </p>
+                ) : (
+                  <button
+                    onClick={handleResendOtp}
+                    disabled={isResending}
+                    className="text-sm font-semibold"
+                    style={{ color: isResending ? "#fdba74" : "#ea580c", cursor: isResending ? "not-allowed" : "pointer", background: "none", border: "none", padding: 0 }}
+                  >
+                    {isResending ? "Resending..." : "Resend OTP"}
+                  </button>
+                )}
+              </div>
+
+              <div className="flex space-x-4 mt-3">
                 <button
                   onClick={handleVerifyOtp}
                   className="text-white px-4 py-2 rounded transition flex-1"
@@ -994,7 +1064,7 @@ export default function PersonalDetailsForm() {
                   {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
                 </button>
                 <button
-                  onClick={() => setShowOtpPopup(false)}
+                  onClick={() => { setShowOtpPopup(false); setOtp(""); setOtpTimer(0); }}
                   className="flex-1 p-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
                 >
                   Cancel
