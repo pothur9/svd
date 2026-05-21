@@ -5,6 +5,7 @@ const l4UserSchema = new mongoose.Schema({
   userId: { type: String, unique: true, required: true },
   name: { type: String, required: true },
   dob: { type: Date, required: false },
+  guardianId: { type: String, required: false },
   gender: { type: String, required: false },
   contactNo: { type: String, required: true },
   mailId: { type: String, required: false },

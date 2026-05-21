@@ -3,6 +3,7 @@ import { useState, FormEvent, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AuthManager from "../../../lib/auth";
+import Toast from "../../../components/Toast";
 
 interface Account {
   userId: string;
@@ -20,6 +21,7 @@ const LoginPage = () => {
   const [accounts, setAccounts] = useState<Account[]>([]); // Multiple accounts for selection
   const [showAccountSelection, setShowAccountSelection] = useState<boolean>(false); // Show account selection
   const [selectedAccount, setSelectedAccount] = useState<string>(""); // Selected account ID
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const hasCheckedAuth = useRef<boolean>(false); // Track if auth has been checked
   const router = useRouter();
 
@@ -38,7 +40,7 @@ const LoginPage = () => {
   const handleSendOtp = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!contactNo || !/^\d{10}$/.test(contactNo)) {
-      console.log("Please enter a valid 10-digit phone number.");
+      setToast({ message: "Please enter a valid 10-digit phone number.", type: "error" });
       return;
     }
     setIsLoading(true);
@@ -52,6 +54,7 @@ const LoginPage = () => {
       });
       if (!checkRes.ok) {
         setAccountError("No account found for this number. Please create an account first.");
+        setToast({ message: "No account found for this number. Please create an account first.", type: "error" });
         setIsLoading(false);
         return;
       }
@@ -64,13 +67,15 @@ const LoginPage = () => {
       if (data.Status === "Success") {
         setOtpSessionId(data.Details);
         setIsOtpSent(true);
+        setToast({ message: "OTP sent successfully! 📱", type: "success" });
         console.log("OTP sent successfully!");
       } else {
+        setToast({ message: "Failed to send OTP. Please try again.", type: "error" });
         console.log("Failed to send OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      console.log("An error occurred while sending OTP.");
+      setToast({ message: "An error occurred while sending OTP.", type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +84,7 @@ const LoginPage = () => {
   // Verify OTP and check for accounts
   const handleVerifyOtp = async (): Promise<void> => {
     if (!otp) {
-      console.log("Please enter the OTP.");
+      setToast({ message: "Please enter the OTP.", type: "error" });
       return;
     }
     setIsVerifying(true);
@@ -90,6 +95,7 @@ const LoginPage = () => {
       const verifyData = await verifyResponse.json();
 
       if (verifyData.Status === "Success" || otp === "1234") {
+        setToast({ message: "OTP verified successfully!", type: "success" });
         // Check for accounts with this phone number
         const accountsResponse = await fetch("/api/l3/check-accounts", {
           method: "POST",
@@ -108,11 +114,12 @@ const LoginPage = () => {
           setShowAccountSelection(true);
         }
       } else {
+        setToast({ message: "Invalid OTP. Please try again.", type: "error" });
         console.log("Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      console.log("An error occurred during verification.");
+      setToast({ message: "An error occurred during verification.", type: "error" });
     } finally {
       setIsVerifying(false);
     }
@@ -138,21 +145,28 @@ const LoginPage = () => {
           peeta: loginData.user.peeta,
         });
 
-        console.log("Login successful!");
-        router.push("/l3/dashboard");
+        setToast({
+          message: `Login successful! Welcome back, ${loginData.user.name || "User"}! 🎉`,
+          type: "success",
+        });
+
+        setTimeout(() => {
+          router.push("/l3/dashboard");
+        }, 1500);
       } else {
+        setToast({ message: loginData.message || "Login failed.", type: "error" });
         console.log(loginData.message || "Login failed.");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      console.log("An error occurred during login.");
+      setToast({ message: "An error occurred during login.", type: "error" });
     }
   };
 
   // Handle account selection
   const handleAccountSelection = async () => {
     if (!selectedAccount) {
-      console.log("Please select an account.");
+      setToast({ message: "Please select an account.", type: "error" });
       return;
     }
     await handleAccountLogin(selectedAccount);
@@ -160,6 +174,13 @@ const LoginPage = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm" style={{marginTop:"-80px"}}>
         <div className="flex justify-center">
           <Image src="/logo.png" alt="Logo" width={100} height={100} />

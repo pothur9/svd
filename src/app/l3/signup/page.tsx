@@ -8,13 +8,30 @@ import { auth } from "../../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { generateCustomUID } from "../../../lib/firebase";
 import Image from "next/image";
+import Toast from "../../../components/Toast";
+
 
 interface FormData {
   name: string;
   contactNo: string;
   peeta: string;
   karthruGuru: string;
+  dob?: string;
+  guardianId?: string;
+  customGuru?: string;
 }
+
+const calculateAge = (dobString: string) => {
+  if (!dobString) return 0;
+  const today = new Date();
+  const birthDate = new Date(dobString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<FormData>({
@@ -22,6 +39,9 @@ export default function SignupForm() {
     contactNo: "",
     peeta: "",
     karthruGuru: "",
+    dob: "",
+    guardianId: "",
+    customGuru: "",
   });
   const [otp, setOtp] = useState<string>("");
   const [otpSessionId, setOtpSessionId] = useState<string>("");
@@ -39,9 +59,11 @@ export default function SignupForm() {
   const [showAccountPicker, setShowAccountPicker] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [activeLanguage, setActiveLanguage] = useState("en");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
 
   const { t } = useTranslation();
   const router = useRouter();
+
 
   useEffect(() => {
     // Fetch peeta options for dropdown
@@ -90,12 +112,14 @@ export default function SignupForm() {
       console.log("OTP sent:", response.data);
       setOtpSessionId(response.data.Details);
       setIsOtpSent(true);
+      setToast({ message: "OTP sent successfully! 📱", type: "success" });
     } catch (error) {
       console.error("Error sending OTP:", error);
-      console.log("Failed to send OTP. Please check your phone number.");
+      setToast({ message: "Failed to send OTP. Please check your phone number.", type: "error" });
       setIsSubmitting(false);
     }
   };
+
 
   const verifyOtp = async () => {
     setIsVerifyingOtp(true);
@@ -119,7 +143,7 @@ export default function SignupForm() {
           const errorCode = (firebaseError as { code?: string }).code;
 
           if (errorCode === 'auth/email-already-in-use') {
-            console.log("This phone number is already registered.");
+            setToast({ message: "This phone number is already registered.", type: "error" });
             return;
           }
 
@@ -128,7 +152,12 @@ export default function SignupForm() {
           console.log("Generated custom UID:", firebaseUid);
         }
 
-        const submitData = { ...formData, firebaseUid };
+        const submitData = {
+          ...formData,
+          karthruGuru: formData.karthruGuru === "Other" ? formData.customGuru : formData.karthruGuru,
+          guardianId: (formData.dob && calculateAge(formData.dob) < 18) ? formData.guardianId : undefined,
+          firebaseUid,
+        };
         const result = await fetch("/api/l3/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -172,36 +201,50 @@ export default function SignupForm() {
             setSelectedAccount(newUserId);
             setShowAccountPicker(true);
           } else {
-            router.push("/l3/dashboard");
+            sessionStorage.setItem("showWelcomeBonus", "true");
+            setToast({ message: "Signup Successful! 🎉 Redirecting...", type: "success" });
+            setTimeout(() => {
+              router.push("/l3/dashboard");
+            }, 1500);
           }
         } else {
-          console.log(responseData.message || "Signup failed");
+          setToast({ message: responseData.message || "Signup failed. Please try again.", type: "error" });
         }
       } else {
-        console.log("Invalid OTP. Please try again.");
+        setToast({ message: "Invalid OTP. Please try again.", type: "error" });
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      console.log("An error occurred during verification.");
+      setToast({ message: "An error occurred during verification.", type: "error" });
     } finally {
       setIsVerifyingOtp(false);
     }
   };
 
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.contactNo || !formData.peeta || !formData.karthruGuru) {
-      console.log("Please fill in all fields.");
+    if (!formData.name || !formData.contactNo || !formData.peeta || !formData.karthruGuru || !formData.dob) {
+      setToast({ message: "Please fill in all fields.", type: "error" });
+      return;
+    }
+    if (formData.karthruGuru === "Other" && !formData.customGuru) {
+      setToast({ message: "Please enter the Guru name manually.", type: "error" });
+      return;
+    }
+    if (calculateAge(formData.dob) < 18 && !formData.guardianId) {
+      setToast({ message: "Guardian ID is required for users under 18.", type: "error" });
       return;
     }
     if (!/^\d{10}$/.test(formData.contactNo)) {
-      console.log("Please enter a valid 10-digit phone number.");
+      setToast({ message: "Please enter a valid 10-digit phone number.", type: "error" });
       return;
     }
     setIsSubmitting(true);
     await sendOtp();
     setIsSubmitting(false);
   };
+
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -210,6 +253,14 @@ export default function SignupForm() {
 
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* ── Language Switcher Banner ── */}
       <div
         style={{
@@ -343,6 +394,39 @@ export default function SignupForm() {
           </div>
 
           <div>
+            <label htmlFor="dob" className="block text-sm font-semibold mb-1">
+              Date of Birth / ಹುಟ್ಟಿದ ದಿನಾಂಕ
+            </label>
+            <input
+              type="date"
+              name="dob"
+              id="dob"
+              value={formData.dob}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+              required
+            />
+          </div>
+
+          {formData.dob && calculateAge(formData.dob) < 18 && (
+            <div>
+              <label htmlFor="guardianId" className="block text-sm font-semibold mb-1">
+                Guardian ID / ಪೋಷಕರ ಐಡಿ
+              </label>
+              <input
+                type="text"
+                name="guardianId"
+                id="guardianId"
+                value={formData.guardianId}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                placeholder="Enter Guardian ID"
+                required
+              />
+            </div>
+          )}
+
+          <div>
             <label htmlFor="peeta" className="block text-sm font-semibold mb-1">
               {t("signupl3.peeta")}
             </label>
@@ -379,8 +463,27 @@ export default function SignupForm() {
               {l2Users.map((name, idx) => (
                 <option key={idx} value={name}>{name}</option>
               ))}
+              <option value="Other">Other / ಇತರೆ / अन्य</option>
             </select>
           </div>
+
+          {formData.karthruGuru === "Other" && (
+            <div>
+              <label htmlFor="customGuru" className="block text-sm font-semibold mb-1">
+                Enter Guru Name Manually / ಗುರು ಹೆಸರನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ನಮೂದಿಸಿ
+              </label>
+              <input
+                type="text"
+                name="customGuru"
+                id="customGuru"
+                value={formData.customGuru}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                placeholder="Enter Guru Name"
+                required
+              />
+            </div>
+          )}
 
           {!isOtpSent ? (
             <button
@@ -507,7 +610,7 @@ export default function SignupForm() {
             </div>
             <button
               onClick={async () => {
-                if (!selectedAccount) { console.log("Please select an account."); return; }
+                if (!selectedAccount) { setToast({ message: "Please select an account.", type: "error" }); return; }
                 const loginRes = await fetch("/api/l3/login", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ userId: selectedAccount }),
@@ -520,11 +623,18 @@ export default function SignupForm() {
                     localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
                     sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
                   } catch {}
-                  router.push("/l3/dashboard");
+                  if (selectedAccount === userId) {
+                    sessionStorage.setItem("showWelcomeBonus", "true");
+                  }
+                  setToast({ message: "Login successful! Redirecting...", type: "success" });
+                  setTimeout(() => {
+                    router.push("/l3/dashboard");
+                  }, 1500);
                 } else {
-                  console.log(loginData.message || "Login failed.");
+                  setToast({ message: loginData.message || "Login failed.", type: "error" });
                 }
               }}
+
               style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
                 border: "none", background: "linear-gradient(135deg,#ff9933,#7c3aed)",
                 color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer",

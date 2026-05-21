@@ -8,6 +8,7 @@ import i18n from "../../../../i18n";
 import { auth } from "../../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { generateCustomUID } from "../../../lib/firebase";
+import Toast from "../../../components/Toast";
 
 interface FormData {
   name: string;
@@ -23,6 +24,7 @@ export default function SignupForm() {
     peeta: "",
     mataName: "",
   });
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const [otp, setOtp] = useState<string>("");
   const [otpSessionId, setOtpSessionId] = useState<string>("");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
@@ -119,6 +121,11 @@ export default function SignupForm() {
           setUserId(newUserId);
           setIsUserIdVisible(true);
 
+          setToast({
+            message: "Signup Successful! 🎉 Redirecting...",
+            type: "success",
+          });
+
           // ── Auto-login ──
           const loginRes = await fetch("/api/l2/login", {
             method: "POST",
@@ -151,17 +158,22 @@ export default function SignupForm() {
             setIsOtpSent(false);
             setShowAccountPicker(true);
           } else {
-            router.push("/l2/dashboard");
+            sessionStorage.setItem("showWelcomeBonus", "true");
+            setTimeout(() => {
+              router.push("/l2/dashboard");
+            }, 1500);
           }
         } else {
+          setToast({ message: responseData.error || "Signup failed. Please try again.", type: "error" });
           console.log(responseData.error || "Signup failed. Please try again.");
         }
       } else {
+        setToast({ message: "Invalid OTP. Please try again.", type: "error" });
         console.log(`OTP verification failed: ${response.data.Details}`);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      console.log("An error occurred during OTP verification.");
+      setToast({ message: "An error occurred during OTP verification.", type: "error" });
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -215,6 +227,13 @@ export default function SignupForm() {
   console.log(isOtpVerified);
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="flex flex-col items-center p-6 bg-gray-100 rounded-xl shadow-md">
         <h1 className="text-2xl font-semibold text-gray-800 mb-4">
           Select Your Language
@@ -455,7 +474,7 @@ export default function SignupForm() {
             </div>
             <button
               onClick={async () => {
-                if (!selectedAccount) { console.log("Please select an account."); return; }
+                if (!selectedAccount) { setToast({ message: "Please select an account.", type: "error" }); return; }
                 const loginRes = await fetch("/api/l2/login", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ userId: selectedAccount }),
@@ -468,8 +487,15 @@ export default function SignupForm() {
                     localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
                     sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
                   } catch {}
-                  router.push("/l2/dashboard");
+                  if (selectedAccount === userId) {
+                    sessionStorage.setItem("showWelcomeBonus", "true");
+                  }
+                  setToast({ message: "Login successful! Redirecting...", type: "success" });
+                  setTimeout(() => {
+                    router.push("/l2/dashboard");
+                  }, 1500);
                 } else {
+                  setToast({ message: loginData.message || "Login failed.", type: "error" });
                   console.log(loginData.message || "Login failed.");
                 }
               }}

@@ -2,8 +2,10 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Toast from "../../../components/Toast";
 
 interface Account { userId: string; name: string }
+
 
 const LoginPage = () => {
   const [contactNo, setContactNo] = useState<string>("");
@@ -17,7 +19,9 @@ const LoginPage = () => {
   const [showAccountSelection, setShowAccountSelection] = useState<boolean>(false);
   const [selectedAccount, setSelectedAccount] = useState<string>("");
   const [totalAccounts, setTotalAccounts] = useState<number>(0);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const router = useRouter();
+
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -34,11 +38,12 @@ const LoginPage = () => {
   const handleSendOtp = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!contactNo || !/^\d{10}$/.test(contactNo)) {
-      console.log("Please enter a valid 10-digit phone number.");
+      setToast({ message: "Please enter a valid 10-digit phone number.", type: "error" });
       return;
     }
     setIsLoading(true);
     setAccountError("");
+
     try {
       // ── Step 1: Check if account exists before sending OTP ──
       const checkRes = await fetch("/api/l4/check-accounts", {
@@ -49,9 +54,11 @@ const LoginPage = () => {
       if (!checkRes.ok) {
         // 404 = no account found
         setAccountError("No account found for this number. Please create an account first.");
+        setToast({ message: "No account found for this number. Please create an account first.", type: "error" });
         setIsLoading(false);
         return;
       }
+
 
       // ── Step 2: Account exists — send OTP ──
       const response = await fetch(
@@ -61,25 +68,29 @@ const LoginPage = () => {
       if (data.Status === "Success") {
         setOtpSessionId(data.Details);
         setIsOtpSent(true);
+        setToast({ message: "OTP sent successfully! 📱", type: "success" });
         console.log("OTP sent successfully!");
       } else {
+        setToast({ message: "Failed to send OTP. Please try again.", type: "error" });
         console.log("Failed to send OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      console.log("An error occurred while sending OTP.");
+      setToast({ message: "An error occurred while sending OTP.", type: "error" });
     } finally {
       setIsLoading(false);
     }
+
   };
 
   // Verify OTP and fetch accounts
   const handleVerifyOtp = async () => {
     if (!otp) {
-      console.log("Please enter the OTP.");
+      setToast({ message: "Please enter the OTP.", type: "error" });
       return;
     }
     setIsVerifying(true);
+
     try {
       const verifyResponse = await fetch(
         `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${otpSessionId}/${otp}`
@@ -87,6 +98,7 @@ const LoginPage = () => {
       const verifyData = await verifyResponse.json();
       
       if (verifyData.Status === "Success" || otp === "1234") {
+        setToast({ message: "OTP verified successfully!", type: "success" });
         // OTP verified, now find accounts and always show selection
         const accountsResponse = await fetch("/api/l4/check-accounts", {
           method: "POST",
@@ -104,14 +116,15 @@ const LoginPage = () => {
           setShowAccountSelection(true);
         }
       } else {
-        console.log("Invalid OTP. Please try again.");
+        setToast({ message: "Invalid OTP. Please try again.", type: "error" });
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      console.log("An error occurred during verification.");
+      setToast({ message: "An error occurred during verification.", type: "error" });
     } finally {
       setIsVerifying(false);
     }
+
   };
 
   // Handle selected account login
@@ -131,16 +144,30 @@ const LoginPage = () => {
           sessionStorage.setItem('svd_auth_user', JSON.stringify(authObj));
         }
       } catch {}
-      console.log("Login successful!");
-      router.push("/l4/dashboard");
+      setToast({
+        message: `Login successful! Welcome back, ${loginData.user?.name || "User"}! 🎉`,
+        type: "success",
+      });
+      setTimeout(() => {
+        router.push("/l4/dashboard");
+      }, 1500);
     } else {
-      console.log(loginData.message || "Login failed.");
+      setToast({ message: loginData.message || "Login failed.", type: "error" });
     }
+
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       {!showAccountSelection ? (
+
       <form onSubmit={handleSendOtp} className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
         <div className="flex justify-center">
           <Image src="/logo.png" alt="Logo" width={100} height={100} />
@@ -270,10 +297,11 @@ const LoginPage = () => {
           </div>
           <button
             onClick={async () => {
-              if (!selectedAccount) { console.log('Please select an account.'); return; }
+              if (!selectedAccount) { setToast({ message: 'Please select an account.', type: 'error' }); return; }
               await handleAccountLogin(selectedAccount);
             }}
             className="w-full text-white p-2 rounded-md"
+
             style={{ background: "linear-gradient(135deg, #c2410c, #ea580c)" }}
           >
             Login to Selected Account

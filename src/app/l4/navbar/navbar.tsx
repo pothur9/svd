@@ -173,20 +173,32 @@ function Navbar() {
       <div className="navbar shadow-md" style={{ backgroundColor: '#ffffff', color: '#000000', borderBottom: '1px solid #f0f0f0' }}>
         <div className="navbar-start">
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden" style={{ marginLeft: '8px' }}>
+            <div tabIndex={0} role="button" className="lg:hidden" style={{
+              marginLeft: '6px',
+              background: 'linear-gradient(135deg, #ea580c, #c2410c)',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '8px 10px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(234,88,12,0.35)',
+            }}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
+                width="24"
+                height="24"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
+                stroke="#ffffff"
                 strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </div>
             {/* Mobile dropdown menu */}

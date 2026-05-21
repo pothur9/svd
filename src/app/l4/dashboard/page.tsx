@@ -6,6 +6,7 @@ import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
 import { QRCodeSVG } from "qrcode.react";
 import CenteredLoader from "../../../components/CenteredLoader";
+import Toast from "../../../components/Toast";
 
 interface MemberData {
   l1User: {
@@ -63,6 +64,7 @@ export default function Dashboard() {
   const [sonOfTitle, setSonOfTitle] = useState<string>("");
   const [sonOfName, setSonOfName] = useState<string>("");
   const [cardSide, setCardSide] = useState<"front" | "back">("front");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -138,6 +140,14 @@ export default function Dashboard() {
     if (!userId) {
       router.push("/l4/login");
       return;
+    }
+
+    if (sessionStorage.getItem("showWelcomeBonus") === "true") {
+      setToast({
+        message: "Welcome! 🎉\n500 Rudhars have been added to your wallet!",
+        type: "bonus",
+      });
+      sessionStorage.removeItem("showWelcomeBonus");
     }
 
     async function fetchMemberData() {
@@ -285,6 +295,13 @@ export default function Dashboard() {
   if (isMobile) {
     return (
       <>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
         <Navbar />
 
         <style jsx global>{`
@@ -764,7 +781,6 @@ export default function Dashboard() {
                     <tr>
                       <th>Level</th>
                       <th style={{ textAlign: "right" }}>Count</th>
-                      <th style={{ textAlign: "right" }}>Share</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -777,9 +793,6 @@ export default function Dashboard() {
                       <tr key={i}>
                         <td>{row.lbl}</td>
                         <td style={{ textAlign: "right" }}>{row.val}</td>
-                        <td style={{ textAlign: "right", color: "#64748b" }}>
-                          {i < 3 ? `${selTotal > 0 ? Math.round((row.val / selTotal) * 100) : 0}%` : "—"}
-                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -991,6 +1004,13 @@ export default function Dashboard() {
 
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <Navbar />
       <div className="bg-slate-100 pt-4 sm:pt-6">
         {profileIncomplete && (

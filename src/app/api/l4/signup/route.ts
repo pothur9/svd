@@ -13,6 +13,8 @@ export async function POST(req:NextRequest) {
       peeta,
       karthruGuru,
       firebaseUid,
+      dob,
+      guardianId,
     } = await req.json();
 
     const existingCount = await l4User.countDocuments({ contactNo });
@@ -42,7 +44,8 @@ export async function POST(req:NextRequest) {
       karthruGuru,
       firebaseUid,
       // rest left empty for complete-profile
-      dob: null,
+      dob: dob || null,
+      guardianId: guardianId || null,
       gender: null,
       mailId: null,
       bhage: null,

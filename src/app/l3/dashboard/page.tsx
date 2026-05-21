@@ -6,6 +6,8 @@ import Footer from "../footer/footer";
 import { QRCodeSVG } from "qrcode.react";
 import AuthManager from "../../../lib/auth";
 import CenteredLoader from "../../../components/CenteredLoader";
+import Toast from "../../../components/Toast";
+
 
 interface MemberData {
   l1User: {
@@ -58,6 +60,10 @@ export default function Dashboard() {
   const [addressSel, setAddressSel] = useState<Record<string, { state: string; district: string; city: string }>>({});
   const [sonOfTitle, setSonOfTitle] = useState<string>("");
   const [sonOfName, setSonOfName] = useState<string>("");
+  const [selectedPeethaIndex, setSelectedPeethaIndex] = useState<number>(0);
+  const [l3CardSide, setL3CardSide] = useState<'front' | 'back'>('front');
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
+
 
   // Cloudinary config (same approach as L2)
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -135,6 +141,15 @@ export default function Dashboard() {
       router.replace("/l3/login");
       return;
     }
+
+    if (sessionStorage.getItem("showWelcomeBonus") === "true") {
+      setToast({
+        message: "Welcome! 🎉\n500 Rudhars have been added to your wallet!",
+        type: "bonus",
+      });
+      sessionStorage.removeItem("showWelcomeBonus");
+    }
+
 
     async function fetchMemberData() {
       try {
@@ -240,9 +255,343 @@ export default function Dashboard() {
     'Total',
   ];
 
+  const peethaColors = [
+    { bg: '#fef3c7', text: '#92400e' },
+    { bg: '#ede9fe', text: '#5b21b6' },
+    { bg: '#e0f2fe', text: '#075985' },
+    { bg: '#fce7f3', text: '#9d174d' },
+    { bg: '#dcfce7', text: '#166534' },
+    { bg: '#fee2e2', text: '#991b1b' },
+  ];
+  const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z]/g, '');
+  const peetaImageBySubstring: { key: string; img: string }[] = [
+    { key: 'rambh', img: '/img1.jpg' },
+    { key: 'ujjay', img: '/img2.jpg' },
+    { key: 'kedhar', img: '/img3.jpg' },
+    { key: 'srishail', img: '/img4.jpg' },
+    { key: 'kashi', img: '/img5.jpg' },
+    { key: 'virakth', img: '/img6.jpg' },
+  ];
+  const selectedMember = memberData[selectedPeethaIndex] ?? null;
+  const selTotal = selectedMember
+    ? (selectedMember.l2UserCount ?? 0) + (selectedMember.l3UserCount ?? 0) + (selectedMember.l4UserCount ?? 0)
+    : 0;
+
+  // ── MOBILE LAYOUT ────────────────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+        <Navbar />
+
+        <style jsx global>{`
+          @keyframes l3fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+          @keyframes l3heroPulse { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.04); } }
+          @keyframes l3badgePop { 0%{ transform:scale(0.6); opacity:0; } 70%{ transform:scale(1.12); } 100%{ transform:scale(1); opacity:1; } }
+          .l3a0 { animation:l3fadeUp 0.4s ease both; }
+          .l3a1 { animation:l3fadeUp 0.4s 0.06s ease both; }
+          .l3a2 { animation:l3fadeUp 0.4s 0.12s ease both; }
+          .l3a3 { animation:l3fadeUp 0.4s 0.18s ease both; }
+          .l3a4 { animation:l3fadeUp 0.4s 0.24s ease both; }
+          .l3hero { animation:l3heroPulse 3s ease-in-out infinite; }
+          .l3badge { animation:l3badgePop 0.5s 0.4s ease both; opacity:0; animation-fill-mode:both; }
+          .l3card { background:#fff; border:1px solid #f1f5f9; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+          .l3lbl { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#94a3b8; margin:0 0 10px; }
+          .l3chip { flex:1; background:#f8fafc; border:1px solid #f1f5f9; border-radius:12px; padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:3px; }
+          .l3scroll { display:flex; gap:8px; overflow-x:auto; padding:4px 0 8px; scrollbar-width:none; }
+          .l3scroll::-webkit-scrollbar { display:none; }
+          .l3pbtn { display:flex; flex-direction:column; align-items:center; gap:5px; min-width:72px; padding:10px 6px; background:#fff; border:1.5px solid #f1f5f9; border-radius:14px; cursor:pointer; transition:border-color 0.2s,transform 0.15s; }
+          .l3pbtn:active { transform:scale(0.95); }
+          .l3pbtn.active { border-color:#ea580c; box-shadow:0 2px 8px rgba(234,88,12,0.2); }
+          .l3tbl { width:100%; border-collapse:collapse; font-size:13px; }
+          .l3tbl th { background:#f8fafc; padding:7px 10px; font-size:11px; font-weight:600; color:#64748b; text-align:left; }
+          .l3tbl td { padding:9px 10px; border-bottom:1px solid #f1f5f9; color:#1e293b; }
+          .l3tbl tr:last-child td { border-bottom:none; font-weight:600; }
+        `}</style>
+
+        <div style={{ background: '#f8fafc', minHeight: '100vh', paddingBottom: '2rem' }}>
+          {profileIncomplete && (
+            <div className="l3a0" style={{ margin: '12px 16px 0', background: '#fffbeb', border: '1px solid #fde68a', borderLeft: '3px solid #f59e0b', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '18px' }}>⚠️</span>
+              <span style={{ fontSize: '13px', color: '#78350f', flex: 1 }}>Profile incomplete — {missingFields.length} fields missing</span>
+              <button onClick={() => setShowCompleteForm(true)} style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>Fill now</button>
+            </div>
+          )}
+          {showCompleteForm && profileIncomplete && missingFields.length > 0 && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
+              <div style={{ background: '#fff', width: '100%', borderRadius: '20px 20px 0 0', padding: '20px 16px 32px', maxHeight: '85vh', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Complete Your Profile</h2>
+                  <button onClick={() => setShowCompleteForm(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '8px', padding: '6px 10px', cursor: 'pointer' }}>✕</button>
+                </div>
+                {(() => {
+                  const perStep = 5;
+                  const totalSteps = Math.ceil(missingFields.length / perStep);
+                  const fieldsForStep = missingFields.slice(currentStep * perStep, currentStep * perStep + perStep);
+                  return (
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      try {
+                        const stored = typeof window !== 'undefined' ? sessionStorage.getItem('userId') || '' : '';
+                        const payload: Record<string, string> = {};
+                        missingFields.forEach((k) => { if (formData[k] !== undefined && formData[k] !== '') payload[k] = formData[k]; });
+                        const res = await fetch(`/api/l3/update-profile/${stored}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data?.message || 'Failed');
+                        const refreshed = await fetch(`/api/l3/dashboard/${stored}?timestamp=${Date.now()}`, { cache: 'no-store' });
+                        if (refreshed.ok) { const ud = await refreshed.json(); setUserData(ud); setProfileIncomplete(false); setMissingFields([]); setFormData({}); setShowCompleteForm(false); setCurrentStep(0); }
+                      } catch (err) { console.error(err); }
+                    }} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {fieldsForStep.map((field) => (
+                        <div key={field}>
+                          <label style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '5px', textTransform: 'capitalize' }}>{displayLabel(field)}</label>
+                          {field === 'dob' ? (
+                            <input type="date" value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', background: '#fff', color: '#1e293b', boxSizing: 'border-box' }} />
+                          ) : field === 'gender' ? (
+                            <select value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', background: '#fff', color: '#1e293b' }}>
+                              <option value="">Select gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
+                            </select>
+                          ) : (
+                            <input type={field === 'mailId' ? 'email' : 'text'} value={formData[field] || ''} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', background: '#fff', color: '#1e293b', boxSizing: 'border-box' }} />
+                          )}
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                        <button type="button" disabled={currentStep === 0} onClick={() => setCurrentStep((s) => Math.max(0, s - 1))} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', color: currentStep === 0 ? '#94a3b8' : '#1e293b', fontSize: '14px', cursor: currentStep === 0 ? 'default' : 'pointer' }}>← Back</button>
+                        {currentStep < totalSteps - 1 ? (
+                          <button type="button" onClick={() => setCurrentStep((s) => s + 1)} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#ea580c', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Next →</button>
+                        ) : (
+                          <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#16a34a', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Save ✓</button>
+                        )}
+                      </div>
+                      <p style={{ textAlign: 'center', fontSize: '12px', color: '#94a3b8', margin: '4px 0 0' }}>Step {currentStep + 1} of {totalSteps}</p>
+                    </form>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
+          <div style={{ padding: '16px 16px 0' }}>
+            {/* Hero Card */}
+            <div className="l3a0" style={{ background: 'linear-gradient(135deg,#ea580c 0%,#c2410c 100%)', borderRadius: '20px', padding: '18px 16px', color: '#fff', marginBottom: '14px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', right: -20, top: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
+                <div className="l3hero" style={{ width: 56, height: 56, borderRadius: '50%', border: '2.5px solid rgba(255,255,255,0.6)', overflow: 'hidden', flexShrink: 0, background: 'rgba(255,255,255,0.2)' }}>
+                  <img src={userData.photoUrl && userData.photoUrl.startsWith('http') ? userData.photoUrl : '/default-avatar.jpg'} alt={userData.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.src = '/default-avatar.jpg'; }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 2px', fontSize: '11px', opacity: 0.8 }}>Welcome back</p>
+                  <p style={{ margin: '0 0 2px', fontSize: '17px', fontWeight: 600 }}>{userData.name}</p>
+                  <p style={{ margin: 0, fontSize: '12px', opacity: 0.75 }}>ID: {userData.userId}</p>
+                </div>
+                <span className="l3badge" style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '20px', padding: '5px 10px', fontSize: '11px', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>Guru Jangam</span>
+              </div>
+              <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.2)', display: 'flex', gap: '4px', position: 'relative', zIndex: 1 }}>
+                {[{ val: grandTotalAll, lbl: 'Total members' }, { val: memberData.length, lbl: 'Peethas' }, { val: 3, lbl: 'Levels' }].map((s, i) => (
+                  <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+                    <p style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 2px' }}>{s.val}</p>
+                    <p style={{ fontSize: '10px', opacity: 0.75, margin: 0 }}>{s.lbl}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Count Chips */}
+            <p className="l3lbl l3a1">Member counts</p>
+            <div className="l3a1" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              {[{ val: l2TotalAll, lbl: 'Prabhu Shivacharya', color: '#ea580c' }, { val: l3TotalAll, lbl: 'Guru Jangam', color: '#16a34a' }, { val: l4TotalAll, lbl: 'Sri Veerashiva', color: '#2563eb' }].map((s, i) => (
+                <div key={i} className="l3chip"><span style={{ fontSize: '22px', fontWeight: 600, color: s.color }}>{s.val}</span><span style={{ fontSize: '10px', color: '#64748b', textAlign: 'center', lineHeight: 1.3 }}>{s.lbl}</span></div>
+              ))}
+            </div>
+
+            {/* Peetha Selector */}
+            <p className="l3lbl l3a2">Select peetha</p>
+            <div className="l3scroll l3a2" style={{ marginBottom: '14px' }}>
+              {memberData.map((member, index) => {
+                const color = peethaColors[index % peethaColors.length];
+                const pNorm = norm(member.l1User.peeta || '');
+                const imgMatch = peetaImageBySubstring.find(({ key }) => pNorm.includes(key));
+                const imgUrl = imgMatch ? imgMatch.img : '/img2.jpg';
+                const isActive = selectedPeethaIndex === index;
+                return (
+                  <button key={index} onClick={() => setSelectedPeethaIndex(index)} className={`l3pbtn${isActive ? ' active' : ''}`}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: color.bg, overflow: 'hidden', border: isActive ? '2px solid #ea580c' : '2px solid transparent' }}>
+                      <img src={imgUrl} alt={member.l1User.peeta} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} onError={(e) => { e.currentTarget.src = '/img2.jpg'; }} />
+                    </div>
+                    <span style={{ fontSize: '9px', color: isActive ? '#ea580c' : '#64748b', textAlign: 'center', lineHeight: 1.2, fontWeight: isActive ? 600 : 400 }}>{member.l1User.peeta}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Peetha Detail */}
+            {selectedMember && (
+              <div className="l3card l3a3" style={{ padding: '14px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: peethaColors[selectedPeethaIndex % peethaColors.length].bg, overflow: 'hidden' }}>
+                    <img src={(() => { const m = peetaImageBySubstring.find(({ key }) => norm(selectedMember.l1User.peeta).includes(key)); return m ? m.img : '/img2.jpg'; })()} alt={selectedMember.l1User.peeta} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} onError={(e) => { e.currentTarget.src = '/img2.jpg'; }} />
+                  </div>
+                  <div style={{ flex: 1 }}><p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>{selectedMember.l1User.peeta}</p><p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>Sri 1008 Jagadguru</p></div>
+                  <span style={{ background: peethaColors[selectedPeethaIndex % peethaColors.length].bg, color: peethaColors[selectedPeethaIndex % peethaColors.length].text, borderRadius: '20px', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}>Total: {selTotal}</span>
+                </div>
+                <table className="l3tbl">
+                  <thead><tr><th>Level</th><th style={{ textAlign: 'right' }}>Count</th></tr></thead>
+                  <tbody>
+                    {[{ lbl: 'Prabhu Shivacharya', val: selectedMember.l2UserCount ?? 0 }, { lbl: 'Guru Jangam', val: selectedMember.l3UserCount ?? 0 }, { lbl: 'Sri Veerashiva', val: selectedMember.l4UserCount ?? 0 }, { lbl: 'Total', val: selTotal }].map((row, i) => (
+                      <tr key={i}><td>{row.lbl}</td><td style={{ textAlign: 'right' }}>{row.val}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Membership Card — Front / Back tabs */}
+            <p className="l3lbl l3a4">Your membership card</p>
+
+            {/* Front / Back toggle */}
+            <div className="l3a4" style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+              {(['front', 'back'] as const).map((side) => (
+                <button key={side} onClick={() => setL3CardSide(side)} style={{
+                  flex: 1, padding: '9px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                  border: l3CardSide === side ? 'none' : '1.5px solid #e2e8f0',
+                  background: l3CardSide === side ? 'linear-gradient(135deg,#ea580c,#c2410c)' : '#fff',
+                  color: l3CardSide === side ? '#fff' : '#64748b',
+                  transition: 'all 0.2s',
+                  boxShadow: l3CardSide === side ? '0 4px 12px rgba(234,88,12,0.3)' : 'none',
+                }}>
+                  {side === 'front' ? '🪪 Front' : '🔁 Back'}
+                </button>
+              ))}
+            </div>
+
+            <div id="card-print-area">
+              {/* Front Card — PAN card size 324×204px */}
+              {l3CardSide === 'front' && (
+                <div className="l3a4" style={{
+                  width: '100%', maxWidth: '324px', height: '204px', margin: '0 auto 14px',
+                  borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                  boxShadow: '0 8px 28px rgba(234,88,12,0.2), 0 2px 8px rgba(0,0,0,0.08)',
+                  border: '1.5px solid rgba(234,88,12,0.15)', background: '#fff', position: 'relative',
+                }}>
+                  {/* Card header */}
+                  <div style={{
+                    background: 'linear-gradient(135deg,#ea580c 0%,#c2410c 60%,#9a3412 100%)',
+                    padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '8px',
+                    position: 'relative', overflow: 'hidden', flexShrink: 0,
+                  }}>
+                    <div style={{ position: 'absolute', top: -15, right: -10, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                    <img src="/logomain1.png" alt="Logo"
+                      style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: '6px', background: '#fff', padding: '2px', flexShrink: 0, zIndex: 1 }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <div style={{ zIndex: 1 }}>
+                      <p style={{ margin: 0, fontSize: '10px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>Sanathana Veera Shiva</p>
+                      <p style={{ margin: 0, fontSize: '8px', color: 'rgba(255,255,255,0.85)' }}>Lingayatha Dharma • Member Card</p>
+                    </div>
+                  </div>
+                  {/* Watermark */}
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
+                    <img src="/logomain1.png" alt="" style={{ opacity: 0.04, width: '45%' }} />
+                  </div>
+                  {/* Body */}
+                  <div style={{ padding: '8px 10px', display: 'flex', gap: '10px', alignItems: 'flex-start', position: 'relative', zIndex: 1, flex: 1, overflow: 'hidden' }}>
+                    <div style={{ flex: 1 }}>
+                      {[{ lbl: 'Full Name', val: userData.name }, { lbl: 'Member ID', val: userData.userId }, { lbl: 'Peetha', val: userData.peeta || 'N/A' }, { lbl: 'DOB', val: userData.dob && !isNaN(Date.parse(userData.dob)) ? new Date(userData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A' }, { lbl: 'Phone', val: userData.contactNo }].map((row, i) => (
+                        <div key={i} style={{ marginBottom: '5px' }}>
+                          <span style={{ fontSize: '6.5px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block' }}>{row.lbl}</span>
+                          <p style={{ margin: '1px 0 0', fontSize: '10px', color: '#0f172a', fontWeight: 600, lineHeight: 1.2 }}>{row.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                      <div style={{ borderRadius: '6px', overflow: 'hidden', border: '2px solid #ea580c', boxShadow: '0 2px 8px rgba(234,88,12,0.3)' }}>
+                        <img src={userData.photoUrl && userData.photoUrl.startsWith('http') ? userData.photoUrl : '/default-avatar.jpg'} alt={userData.name} style={{ width: 50, height: 62, objectFit: 'cover', display: 'block' }} onError={(e) => { e.currentTarget.src = '/default-avatar.jpg'; }} />
+                      </div>
+                      <span style={{ fontSize: '6px', color: '#ef4444', fontWeight: 700, background: '#fef2f2', padding: '1px 4px', borderRadius: '20px', border: '1px solid #fca5a5', whiteSpace: 'nowrap' }}>E-KYC PENDING</span>
+                    </div>
+                  </div>
+                  {/* Footer strip */}
+                  <div style={{ background: 'linear-gradient(90deg,#fef3c7,#fde68a)', padding: '4px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '6.5px', color: '#92400e', fontWeight: 700 }}>SRI GURU JANGAM LINGAYATHA</span>
+                    <span style={{ fontSize: '6.5px', color: '#92400e' }}>Valid ✓</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Back Card — PAN card size 324×204px */}
+              {l3CardSide === 'back' && (
+                <div className="l3a4" style={{
+                  width: '100%', maxWidth: '324px', height: '204px', margin: '0 auto 14px',
+                  borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                  boxShadow: '0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.07)',
+                  border: '1.5px solid #e2e8f0', background: '#fff', position: 'relative',
+                }}>
+                  {/* Back header */}
+                  <div style={{
+                    background: 'linear-gradient(135deg,#ea580c 0%,#c2410c 100%)',
+                    padding: '6px 10px',
+                  }}>
+                    <p style={{ margin: 0, fontSize: '8px', color: 'rgba(255,255,255,0.75)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Guru / Karthru Guru</p>
+                    <p style={{ margin: '2px 0 0', fontSize: '11px', fontWeight: 700, color: '#fff', wordBreak: 'break-word' }}>{userData.karthruGuru || 'N/A'}</p>
+                  </div>
+                  {/* Body — details + QR */}
+                  <div style={{ padding: '8px 10px', display: 'flex', gap: '10px', alignItems: 'center', flex: 1, overflow: 'hidden' }}>
+                    <div style={{ flex: 1 }}>
+                      {[{ lbl: 'Kula', val: userData.kula || 'N/A' }, { lbl: 'Address', val: userData.permanentAddress || 'N/A' }].map((row, i) => (
+                        <div key={i} style={{ marginBottom: '6px' }}>
+                          <span style={{ fontSize: '6.5px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block' }}>{row.lbl}</span>
+                          <p style={{ margin: '1px 0 0', fontSize: '10px', color: '#0f172a', fontWeight: 500, lineHeight: 1.25 }}>{row.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                      <div style={{ background: '#fff', padding: '4px', borderRadius: '8px', border: '2px solid #ea580c', boxShadow: '0 2px 8px rgba(234,88,12,0.2)' }}>
+                        <QRCodeSVG
+                          value={JSON.stringify({ name: userData.name, id: userData.userId, phone: userData.contactNo, dob: userData.dob, guru: userData.selectedL2User })}
+                          size={72} level="H" includeMargin={false}
+                        />
+                      </div>
+                      <span style={{ fontSize: '6.5px', color: '#64748b', fontWeight: 600 }}>Scan to verify</span>
+                    </div>
+                  </div>
+                  {/* Footer strip */}
+                  <div style={{ background: 'linear-gradient(90deg,#fef3c7,#fde68a)', padding: '4px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '6px', color: '#92400e', fontWeight: 700 }}>SRI GURU JANGAM LINGAYATHA DHARMA</span>
+                    <span style={{ fontSize: '8px', color: '#92400e' }}>🔱</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="l3a4" style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+              <button onClick={handleDownloadCard} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: '#ea580c', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>⬇ Download card</button>
+              <button onClick={() => setShowCompleteForm(true)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#1e293b', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>✏ Edit profile</button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <Navbar />
+
       <div className="bg-slate-100 pt-4 sm:pt-6">
         {profileIncomplete && (
           <div className="mx-auto max-w-[90%] sm:max-w-[95%] mt-0 mb-2 p-3 rounded bg-yellow-100 text-yellow-900 flex items-center justify-between shadow">

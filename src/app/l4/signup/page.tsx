@@ -13,6 +13,7 @@ import i18n from "../../../../i18n"; // Ensure the correct path
 import Image from "next/image";
 import { auth, generateCustomUID } from "../../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import Toast from "../../../components/Toast";
 
 interface FormData {
   name: string;
@@ -35,7 +36,21 @@ interface FormData {
   photoUrl?: File | string | null;
   kula?: string;
   subKula?: string;
+  guardianId?: string;
+  customGuru?: string;
 }
+
+const calculateAge = (dobString: string) => {
+  if (!dobString) return 0;
+  const today = new Date();
+  const birthDate = new Date(dobString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
 
 export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
 
@@ -57,6 +72,7 @@ export default function PersonalDetailsForm() {
   const [totalAccounts, setTotalAccounts] = useState(0);
   const [showAccountPicker, setShowAccountPicker] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     contactNo: "",
@@ -77,6 +93,8 @@ export default function PersonalDetailsForm() {
     photoUrl: null,
     kula: "",
     subKula: "",
+    guardianId: "",
+    customGuru: "",
   });
   const { t } = useTranslation();
   const router = useRouter();
@@ -217,8 +235,20 @@ export default function PersonalDetailsForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.contactNo) {
-      console.log("Please enter a valid contact number.");
+    if (!formData.dob) {
+      setToast({ message: "Date of Birth is required.", type: "error" });
+      return;
+    }
+    if (formData.karthruGuru === "Other" && !formData.customGuru) {
+      setToast({ message: "Please enter the Guru name manually.", type: "error" });
+      return;
+    }
+    if (calculateAge(formData.dob) < 18 && !formData.guardianId) {
+      setToast({ message: "Guardian ID is required for users under 18.", type: "error" });
+      return;
+    }
+    if (!formData.contactNo || !/^\d{10}$/.test(formData.contactNo)) {
+      setToast({ message: "Please enter a valid 10-digit phone number.", type: "error" });
       return;
     }
 
@@ -234,12 +264,13 @@ export default function PersonalDetailsForm() {
         setOtp("");
         setOtpTimer(60);
         setShowOtpPopup(true);
+        setToast({ message: "OTP sent successfully! 📱", type: "success" });
       } else {
-        console.log("Failed to send OTP. Please try again.");
+        setToast({ message: "Failed to send OTP. Please try again.", type: "error" });
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      console.log("An error occurred while sending the OTP.");
+      setToast({ message: "An error occurred while sending the OTP.", type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -269,12 +300,13 @@ export default function PersonalDetailsForm() {
         setSessionId(otpData.Details);
         setOtp("");
         setOtpTimer(60);
-        console.log("OTP resent successfully.");
+        setToast({ message: "OTP resent successfully! 📱", type: "success" });
       } else {
-        console.log("Failed to resend OTP. Please try again.");
+        setToast({ message: "Failed to resend OTP. Please try again.", type: "error" });
       }
     } catch (error) {
       console.error("Error resending OTP:", error);
+      setToast({ message: "An error occurred while resending the OTP.", type: "error" });
     } finally {
       setIsResending(false);
     }
@@ -282,7 +314,7 @@ export default function PersonalDetailsForm() {
 
   const handleVerifyOtp = async () => {
     if (!sessionId) {
-      console.log("Session ID is missing. Please retry OTP verification.");
+      setToast({ message: "Session ID is missing. Please retry OTP verification.", type: "error" });
       return;
     }
 
@@ -348,8 +380,10 @@ export default function PersonalDetailsForm() {
             name: formData.name,
             contactNo: formData.contactNo,
             peeta: formData.peeta,
-            karthruGuru: formData.karthruGuru,
+            karthruGuru: formData.karthruGuru === "Other" ? formData.customGuru : formData.karthruGuru,
             firebaseUid,
+            dob: formData.dob,
+            guardianId: (formData.dob && calculateAge(formData.dob) < 18) ? formData.guardianId : undefined,
             ...(uploadedPhotoUrl ? { photoUrl: uploadedPhotoUrl } : {}),
           }),
         });
@@ -394,18 +428,22 @@ export default function PersonalDetailsForm() {
             setShowAccountPicker(true);
           } else {
             // Single account → go straight to dashboard
+            sessionStorage.setItem("showWelcomeBonus", "true");
+            setToast({ message: "Signup Successful! 🎉 Redirecting...", type: "success" });
             setShowOtpPopup(false);
-            router.push("/l4/dashboard");
+            setTimeout(() => {
+              router.push("/l4/dashboard");
+            }, 1500);
           }
         } else {
-          console.log("Failed to sign up user.");
+          setToast({ message: "Failed to sign up user. Please try again.", type: "error" });
         }
       } else {
-        console.log("Invalid OTP. Please try again.");
+        setToast({ message: "Invalid OTP. Please try again.", type: "error" });
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      console.log("An error occurred during OTP verification.");
+      setToast({ message: "An error occurred during OTP verification.", type: "error" });
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -413,6 +451,13 @@ export default function PersonalDetailsForm() {
 
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       {/* ── Language Switcher Banner ── */}
       <div
         style={{
@@ -564,8 +609,27 @@ export default function PersonalDetailsForm() {
                 {l2Users.map((user: { name: string }, index: number) => (
                   <option key={index} value={user.name}>{user.name}</option>
                 ))}
+                <option value="Other">Other / ಇತರೆ / अन्य</option>
               </select>
             </div>
+
+            {formData.karthruGuru === "Other" && (
+              <div>
+                <label htmlFor="customGuru" className="block text-sm font-semibold mb-1">
+                  Enter Guru Name Manually / ಗುರು ಹೆಸರನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ನಮೂದಿಸಿ
+                </label>
+                <input
+                  type="text"
+                  name="customGuru"
+                  id="customGuru"
+                  value={formData.customGuru}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                  placeholder="Enter Guru Name"
+                  required
+                />
+              </div>
+            )}
 
             <div>
               <label htmlFor="kula" className="block text-sm font-semibold">
@@ -632,9 +696,9 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
-            <div className="hidden">
+            <div>
               <label htmlFor="dob" className="block text-sm font-semibold">
-                {t("signupl3.dob")}
+                {t("signupl3.dob")} / ಹುಟ್ಟಿದ ದಿನಾಂಕ
               </label>
               <input
                 type="date"
@@ -643,8 +707,27 @@ export default function PersonalDetailsForm() {
                 value={formData.dob}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
               />
             </div>
+
+            {formData.dob && calculateAge(formData.dob) < 18 && (
+              <div>
+                <label htmlFor="guardianId" className="block text-sm font-semibold">
+                  Guardian ID / ಪೋಷಕರ ಐಡಿ
+                </label>
+                <input
+                  type="text"
+                  name="guardianId"
+                  id="guardianId"
+                  value={formData.guardianId}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                  placeholder="Enter Guardian ID"
+                  required
+                />
+              </div>
+            )}
 
             <div className="hidden">
               <label htmlFor="gender" className="block text-sm font-semibold">
@@ -1102,6 +1185,89 @@ export default function PersonalDetailsForm() {
           </div>
         )}
       </div>
+
+      {/* ── Account Picker (shown when multiple accounts on same number) ── */}
+      {showAccountPicker && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: "480px",
+            borderRadius: "1.25rem 1.25rem 0 0", padding: "1.25rem 1.1rem 2.5rem",
+            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)" }}>
+            <div style={{ width: "36px", height: "4px", background: "#e5e7eb",
+              borderRadius: "2px", margin: "0 auto 1rem" }} />
+            <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+              <div style={{ fontSize: "1.8rem" }}>🎉</div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#1e1b4b", margin: "0.25rem 0 0" }}>
+                Signup Successful!
+              </h3>
+              {totalAccounts > 1 && (
+                <p style={{ fontSize: "0.78rem", color: "#6b7280", marginTop: "0.3rem" }}>
+                  Multiple accounts found. Choose one to continue.
+                </p>
+              )}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem",
+              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem" }}>
+              {accounts.map((acct) => {
+                const isNew = acct.userId === userId;
+                const active = selectedAccount === acct.userId;
+                return (
+                  <label key={acct.userId}
+                    style={{ display: "flex", alignItems: "center", gap: "0.75rem",
+                      padding: "0.7rem 0.9rem", borderRadius: "0.75rem", cursor: "pointer",
+                      border: `2px solid ${active ? "#ea580c" : "#e5e7eb"}`,
+                      background: active ? "#fff7ed" : "#f9fafb" }}>
+                    <input type="radio" name="account" value={acct.userId} checked={active}
+                      onChange={() => setSelectedAccount(acct.userId)}
+                      style={{ accentColor: "#ea580c", width: "16px", height: "16px" }} />
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem", color: "#1e1b4b" }}>
+                        {acct.name}
+                      </p>
+                      <p style={{ margin: 0, fontSize: "0.75rem", color: "#6b7280" }}>
+                        ID: {acct.userId}{isNew ? " 🆕" : ""}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              onClick={async () => {
+                if (!selectedAccount) { setToast({ message: "Please select an account.", type: "error" }); return; }
+                const loginRes = await fetch("/api/l4/login", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: selectedAccount }),
+                });
+                const loginData = await loginRes.json();
+                if (loginRes.ok) {
+                  try {
+                    const authObj = loginData?.user ?? { userId: selectedAccount };
+                    sessionStorage.setItem("userId", selectedAccount);
+                    localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+                    sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
+                  } catch {}
+                  if (selectedAccount === userId) {
+                    sessionStorage.setItem("showWelcomeBonus", "true");
+                  }
+                  setToast({ message: "Login successful! Redirecting...", type: "success" });
+                  setTimeout(() => {
+                    router.push("/l4/dashboard");
+                  }, 1500);
+                } else {
+                  setToast({ message: loginData.message || "Login failed.", type: "error" });
+                }
+              }}
+
+              style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
+                border: "none", background: "linear-gradient(135deg, #c2410c, #ea580c)",
+                color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(234,88,12,0.3)" }}>
+              Continue to Dashboard →
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
