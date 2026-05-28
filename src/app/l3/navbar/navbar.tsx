@@ -45,11 +45,11 @@ const AkshayPatreIcon = () => (
     {/* Pot body */}
     <path d="M4 10h16" />
     <path d="M6 10c0 6 2 10 6 10s6-4 6-10" />
-    
+
     {/* Pot top (lid) */}
     <path d="M8 6h8" />
     <path d="M10 4h4" />
-    
+
     {/* Handles */}
     <path d="M4 10c0 2 1 3 2 3" />
     <path d="M20 10c0 2-1 3-2 3" />
@@ -163,14 +163,14 @@ function Navbar() {
     // Clear all session storage
     sessionStorage.clear();
     if (typeof window !== 'undefined') {
-      try { localStorage.removeItem('svd_auth_user'); } catch {}
+      try { localStorage.removeItem('svd_auth_user'); } catch { }
     }
     // Redirect to home page
     router.push('/');
   };
 
   return (
-    <div style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: '#ffffff', paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))' }}>
+    <div style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: '#ffffff', paddingTop: 'env(safe-area-inset-top, 12px)' }}>
       <div className="navbar shadow-md" style={{ backgroundColor: '#ffffff', color: '#000000', borderBottom: '1px solid #f0f0f0' }}>
         <div className="navbar-start">
           <div className="dropdown">

@@ -36,8 +36,8 @@ export default function AccountDeletionPage() {
             </p>
             <p className="text-xs text-gray-500 mt-1">
               Contact:{" "}
-              <a href="tel:+916360064505" className="text-blue-700 underline">
-                +91 6360 064 505
+              <a href="tel:  +919480111889" className="text-blue-700 underline">
+                  +919480111889
               </a>
             </p>
           </div>
@@ -141,19 +141,19 @@ export default function AccountDeletionPage() {
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2 text-sm text-gray-800">
             <p>
               ðŸ“ž{" "}
-              <a href="tel:+916360064505" className="text-blue-700 underline">
-                +91 6360 064 505
+              <a href="tel:  +919480111889" className="text-blue-700 underline">
+                 +919480111889
               </a>
             </p>
             <p>
               ðŸ’¬ WhatsApp:{" "}
               <a
-                href="https://wa.me/916360064505"
+                href="https://wa.me/919480111889"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-green-700 underline"
               >
-                +91 6360 064 505
+                 +919480111889
               </a>
             </p>
           </div>

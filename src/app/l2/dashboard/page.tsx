@@ -347,13 +347,19 @@ export default function Dashboard(): JSX.Element {
                 </div>
                 <span className="l2badge" style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '20px', padding: '5px 10px', fontSize: '11px', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>Prabhu Shivacharya</span>
               </div>
-              <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.2)', display: 'flex', gap: '4px', position: 'relative', zIndex: 1 }}>
-                {[{ val: grandTotalAll, lbl: 'Total members' }, { val: memberData.length, lbl: 'Peethas' }, { val: 3, lbl: 'Levels' }].map((s, i) => (
-                  <div key={i} style={{ flex: 1, textAlign: 'center' }}>
-                    <p style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 2px' }}>{s.val}</p>
-                    <p style={{ fontSize: '10px', opacity: 0.75, margin: 0 }}>{s.lbl}</p>
-                  </div>
-                ))}
+              <div style={{
+                marginTop: '16px',
+                paddingTop: '14px',
+                borderTop: '1px solid rgba(255,255,255,0.15)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}>
+                <span style={{ fontSize: '32px', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{grandTotalAll}</span>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '6px' }}>Total Members</span>
               </div>
             </div>
 
@@ -398,7 +404,7 @@ export default function Dashboard(): JSX.Element {
                 <table className="l2tbl">
                   <thead><tr><th>Level</th><th style={{ textAlign: 'right' }}>Count</th></tr></thead>
                   <tbody>
-                    {[{ lbl: 'Prabhu Shivacharya', val: selMember.l2UserCount ?? 0 }, { lbl: 'Guru Jangam', val: selMember.l3UserCount ?? 0 }, { lbl: 'Sri Veerashiva', val: selMember.l4UserCount ?? 0 }, { lbl: 'Total', val: selTotal }].map((row, i) => (
+                    {[{ lbl: 'Sri 108 Shivacharyaru', val: selMember.l2UserCount ?? 0 }, { lbl: 'Jangamaru', val: selMember.l3UserCount ?? 0 }, { lbl: 'Sri Veerashava Lingayatharu', val: selMember.l4UserCount ?? 0 }, { lbl: 'Total', val: selTotal }].map((row, i) => (
                       <tr key={i}><td>{row.lbl}</td><td style={{ textAlign: 'right' }}>{row.val}</td></tr>
                     ))}
                   </tbody>
@@ -445,8 +451,8 @@ export default function Dashboard(): JSX.Element {
                       style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: '6px', background: '#fff', padding: '2px', flexShrink: 0, zIndex: 1 }}
                       onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     <div style={{ zIndex: 1 }}>
-                      <p style={{ margin: 0, fontSize: '10px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>Sanathana Veera Shiva</p>
-                      <p style={{ margin: 0, fontSize: '8px', color: 'rgba(255,255,255,0.85)' }}>Lingayatha Dharma • Member Card</p>
+                      <p style={{ margin: 0, fontSize: '9px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>Sanathana Veera Shiva Lingayatha Dharma</p>
+                      <p style={{ margin: 0, fontSize: '8px', color: 'rgba(255,255,255,0.85)' }}>Member Card</p>
                     </div>
                   </div>
                   {/* Watermark */}
@@ -815,8 +821,8 @@ export default function Dashboard(): JSX.Element {
                     <div style={{ position: 'absolute', top: -15, right: -10, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
                     <img src="/logomain1.png" alt="Logo" style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: '6px', background: '#fff', padding: '2px', flexShrink: 0, zIndex: 1 }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     <div style={{ zIndex: 1 }}>
-                      <p style={{ margin: 0, fontSize: '10px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>Sanathana Veera Shiva</p>
-                      <p style={{ margin: 0, fontSize: '8px', color: 'rgba(255,255,255,0.85)' }}>Lingayatha Dharma • Member Card</p>
+                      <p style={{ margin: 0, fontSize: '9px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>Sanathana Veera Shiva Lingayatha Dharma</p>
+                      <p style={{ margin: 0, fontSize: '8px', color: 'rgba(255,255,255,0.85)' }}>Member Card</p>
                     </div>
                   </div>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>

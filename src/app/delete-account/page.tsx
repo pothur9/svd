@@ -70,8 +70,8 @@ export default function DeleteAccountPage() {
             </p>
             <p className="text-xs text-gray-500 mt-1">
               Helpline:{" "}
-              <a href="tel:+916360064505" className="text-blue-700 underline">
-                +91 6360 064 505
+              <a href="tel:+919480111889" className="text-blue-700 underline">
+                +919480111889
               </a>
             </p>
           </div>
@@ -258,12 +258,12 @@ export default function DeleteAccountPage() {
 
               <p className="text-xs text-center text-gray-400">
                 Can&apos;t access your account?{" "}
-                <a href="https://wa.me/916360064505" target="_blank" rel="noopener noreferrer" className="text-green-700 underline">
+                <a href="https://wa.me/919480111889" target="_blank" rel="noopener noreferrer" className="text-green-700 underline">
                   WhatsApp us
                 </a>{" "}
                 or{" "}
-                <a href="tel:+916360064505" className="text-blue-600 underline">
-                  Call +91 6360 064 505
+                <a href="tel:+919480111889" className="text-blue-600 underline">
+                  Call   +919480111889
                 </a>
               </p>
             </form>

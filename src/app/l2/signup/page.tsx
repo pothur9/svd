@@ -25,6 +25,7 @@ export default function SignupForm() {
     mataName: "",
   });
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [otp, setOtp] = useState<string>("");
   const [otpSessionId, setOtpSessionId] = useState<string>("");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
@@ -187,6 +188,10 @@ export default function SignupForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      setToast({ message: "Please accept the Terms & Conditions and Privacy Policy to proceed.", type: "error" });
+      return;
+    }
     setIsSubmitting(true);
     await sendOtp();
   };
@@ -349,6 +354,63 @@ export default function SignupForm() {
               </label>
             </div>
 
+            {/* Terms & Conditions + Privacy Policy Checkbox */}
+            {!isOtpSent && (
+              <div
+                style={{
+                  background: termsAccepted ? "#fff7ed" : "#fafafa",
+                  border: `1.5px solid ${termsAccepted ? "#ea580c" : "#e5e7eb"}`,
+                  borderRadius: "10px",
+                  padding: "12px 14px",
+                  marginBottom: "12px",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <label
+                  htmlFor="termsAcceptedL2"
+                  style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}
+                >
+                  <input
+                    type="checkbox"
+                    id="termsAcceptedL2"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    style={{
+                      accentColor: "#ea580c",
+                      width: "16px",
+                      height: "16px",
+                      marginTop: "2px",
+                      flexShrink: 0,
+                      cursor: "pointer",
+                    }}
+                  />
+                  <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.5 }}>
+                    I have read and agree to the{" "}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Privacy Policy
+                    </a>
+                    {" "}and{" "}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Terms &amp; Conditions
+                    </a>
+                    {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                  </span>
+                </label>
+              </div>
+            )}
+
             {isOtpSent ? (
               <>
                 <div className="mb-4">
@@ -400,6 +462,7 @@ export default function SignupForm() {
                   type="submit"
                   disabled={isSubmitting}
                   className="bg-blue-500 text-white py-2 px-4 rounded-md"
+                  style={{ opacity: termsAccepted ? 1 : 0.7 }}
                 >
                   {isSubmitting ? "Sending OTP..." : "Send OTP"}
                 </button>

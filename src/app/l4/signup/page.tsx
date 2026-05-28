@@ -73,6 +73,7 @@ export default function PersonalDetailsForm() {
   const [showAccountPicker, setShowAccountPicker] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     contactNo: "",
@@ -249,6 +250,10 @@ export default function PersonalDetailsForm() {
     }
     if (!formData.contactNo || !/^\d{10}$/.test(formData.contactNo)) {
       setToast({ message: "Please enter a valid 10-digit phone number.", type: "error" });
+      return;
+    }
+    if (!termsAccepted) {
+      setToast({ message: "Please accept the Terms & Conditions and Privacy Policy to proceed.", type: "error" });
       return;
     }
 
@@ -1075,10 +1080,64 @@ export default function PersonalDetailsForm() {
               />
             </div>
 
+            {/* Terms & Conditions + Privacy Policy Checkbox */}
+            <div
+              style={{
+                background: termsAccepted ? "#fff7ed" : "#fafafa",
+                border: `1.5px solid ${termsAccepted ? "#ea580c" : "#e5e7eb"}`,
+                borderRadius: "10px",
+                padding: "12px 14px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <label
+                htmlFor="termsAccepted"
+                style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}
+              >
+                <input
+                  type="checkbox"
+                  id="termsAccepted"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  style={{
+                    accentColor: "#ea580c",
+                    width: "16px",
+                    height: "16px",
+                    marginTop: "2px",
+                    flexShrink: 0,
+                    cursor: "pointer",
+                  }}
+                />
+                <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.5 }}>
+                  I have read and agree to the{" "}
+                  <a
+                    href="/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Privacy Policy
+                  </a>
+                  {" "}and{" "}
+                  <a
+                    href="/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Terms &amp; Conditions
+                  </a>
+                  {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                </span>
+              </label>
+            </div>
+
             <button
               type="submit"
               className="text-white px-4 py-2 rounded w-full transition"
-              style={{ background: isLoading ? "#fdba74" : "linear-gradient(135deg, #c2410c, #ea580c)", cursor: isLoading ? "not-allowed" : "pointer" }}
+              style={{ background: isLoading ? "#fdba74" : "linear-gradient(135deg, #c2410c, #ea580c)", cursor: isLoading ? "not-allowed" : "pointer", opacity: termsAccepted ? 1 : 0.7 }}
               disabled={isLoading}
             >
               {isLoading ? (

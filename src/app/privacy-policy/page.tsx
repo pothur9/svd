@@ -118,19 +118,19 @@ export default function PrivacyPolicyPage() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-gray-800 space-y-1">
             <p>
               <strong>Helpline:</strong>{" "}
-              <a href="tel:+916360064505" className="text-blue-700 underline">
-                +91 6360 064 505
+              <a href="tel:+919480111889" className="text-blue-700 underline">
+             +919480111889
               </a>
             </p>
             <p>
               <strong>WhatsApp:</strong>{" "}
               <a
-                href="https://wa.me/916360064505"
+                href="https://wa.me/919480111889"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-green-700 underline"
               >
-                +91 6360 064 505
+                +919480111889
               </a>
             </p>
           </div>

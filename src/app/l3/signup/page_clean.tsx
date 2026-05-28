@@ -263,11 +263,10 @@ export default function SignupForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full p-3 rounded-md text-white font-semibold ${
-                isSubmitting
+              className={`w-full p-3 rounded-md text-white font-semibold ${isSubmitting
                   ? "bg-blue-300 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-600"
-              }`}
+                }`}
             >
               {isSubmitting ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -292,11 +291,10 @@ export default function SignupForm() {
                 type="button"
                 onClick={verifyOtp}
                 disabled={isVerifyingOtp}
-                className={`w-full p-3 rounded-md text-white font-semibold ${
-                  isVerifyingOtp
+                className={`w-full p-3 rounded-md text-white font-semibold ${isVerifyingOtp
                     ? "bg-green-300 cursor-not-allowed"
                     : "bg-green-500 hover:bg-green-600"
-                }`}
+                  }`}
               >
                 {isVerifyingOtp ? "Verifying..." : "Verify OTP & Signup"}
               </button>

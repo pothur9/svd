@@ -69,14 +69,14 @@ export async function POST(req: NextRequest) {
 
     await newUser.save();
 
-    // Credit ₹500 signup bonus
-    await l3User.findOneAndUpdate({ userId }, { walletBalance: 500 });
+    // Credit ₹508 signup bonus
+    await l3User.findOneAndUpdate({ userId }, { walletBalance: 508 });
     await WalletTransaction.create({
       fromUserId: 'SYSTEM',
       toUserId: userId,
       fromName: 'System',
       toName: name,
-      amount: 500,
+      amount: 508,
       type: 'signup_bonus',
       note: 'Welcome bonus on registration',
       userLevel: 'l3',

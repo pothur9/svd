@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -80,7 +80,7 @@ function CardPreviewContent() {
               className="text-sm font-bold ml-2"
               style={{ color: '#fff', backgroundColor: '#ea580c', boxSizing: 'border-box' }}
             >
-              Sanathana Veera Shiva <br/>Lingayatha Dharma
+              Sanathana Veera Shiva Lingayatha Dharma
             </h1>
           </div>
           {/* Content Section */}

@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 
 const levels = [
   // { name: "Sri 1008 jagdhguru", login: "/l1/login", bgColor: "bg-yellow-100" },
-   { name: "Sri Lingayatha Veerashiva ಶ್ರೀ ವೀರಶೈವ ಲಿಂಗಾಯತ", login: "/l4/login", signup: "/l4/signup", bgColor: "bg-pink-100" },
+  { name: "Sri Lingayatha Veerashiva ಶ್ರೀ ವೀರಶೈವ ಲಿಂಗಾಯತ", login: "/l4/login", signup: "/l4/signup", bgColor: "bg-pink-100" },
   { name: "Sri Veerashaiva Jangama ಶ್ರೀ ವೀರಶೈವ ಜಂಗಮ", login: "/l3/login", signup: "/l3/signup", bgColor: "bg-green-100" },
-   { name: "Sri 108 Shivachryaru ಶ್ರೀ 108 ಶಿವಾಚಾರ್ಯರು", login: "/l2/login", bgColor: "bg-[#F1C338]" },
+  { name: "Sri 108 Shivachryaru ಶ್ರೀ 108 ಶಿವಾಚಾರ್ಯರು", login: "/l2/login", bgColor: "bg-[#F1C338]" },
 ];
 
 export default function Home() {
@@ -86,8 +86,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-orange-50 px-4 py-10">
-     <p className="text-gray-950 font-extrabold bg-yellow-300/90 px-3 py-1 rounded-md shadow-md ring-1 ring-yellow-400">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p> 
-     <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
+      <p className="text-gray-950 font-extrabold bg-yellow-300/90 px-3 py-1 rounded-md shadow-md ring-1 ring-yellow-400">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p>
+      <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
       <Image
         className="mb-4"
         src="/logomain1.png"
@@ -118,11 +118,10 @@ export default function Home() {
             <button
               key={level.name}
               onClick={() => setSelectedLevel(level)}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                selectedLevel.name === level.name
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition ${selectedLevel.name === level.name
                   ? `${level.bgColor} text-gray-900 shadow`
                   : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
+                }`}
             >
               {level.name}
             </button>
@@ -172,40 +171,40 @@ export default function Home() {
           />
         </div>
       </div>
-<div className="mt-2 mb-4">
-  <a
-    href="https://wa.me/916360064505"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white shadow hover:bg-green-700 transition-all"
-  >
-    <span className="inline-flex items-center justify-center bg-white rounded-full p-1">
-      {/* ✅ Perfect WhatsApp Logo */}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        width="22"
-        height="22"
-        aria-hidden="true"
-      >
-        <path
-          fill="#25D366"
-          d="M256.064 0C114.849 0 0 114.844 0 256.056c0 45.177 11.854 89.385 34.353 128.277L24.067 512l131.757-34.537c37.421 20.463 79.486 31.234 122.313 31.234h.001C397.266 508.697 512 393.85 512 252.637 512 113.016 397.112 0 256.064 0z"
-        />
-        <path
-          fill="#fff"
-          d="M386.006 369.893c-5.776 16.19-28.778 29.68-47.221 33.605-12.557 2.665-28.838 4.782-94.364-19.976-79.136-30.927-129.905-107.066-133.847-112.153-3.942-5.086-31.919-42.52-31.919-81.088s19.725-57.62 26.732-65.66c6.974-8.04 15.095-10.1 20.13-10.1 5.034 0 10.06.052 14.484.265 4.64.232 10.847-.566 16.957 12.948 6.11 13.54 20.765 47.02 22.58 50.44 1.815 3.43 3.03 7.439.58 12.055-2.451 4.617-3.654 7.442-7.172 11.41-3.518 3.99-7.403 8.93-10.564 12.025-3.518 3.535-7.18 7.31-3.053 14.305 4.13 6.984 18.398 30.25 39.488 48.974 27.165 24.074 49.58 31.543 57.011 34.988 7.432 3.445 11.722 2.945 15.853-1.732 4.141-4.676 18.214-21.254 23.06-28.507 4.846-7.254 9.693-6.069 16.379-3.513 6.666 2.555 42.13 19.863 49.293 23.467 7.183 3.604 11.96 5.349 13.67 8.318 1.699 2.96 1.699 17.16-4.066 33.35z"
-        />
-      </svg>
-    </span>
-    <span className="text-sm font-semibold">Helpline: +91 6360 064 505</span>
-  </a>
-</div>
+      <div className="mt-2 mb-4">
+        <a
+          href="https://wa.me/919480111889"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white shadow hover:bg-green-700 transition-all"
+        >
+          <span className="inline-flex items-center justify-center bg-white rounded-full p-1">
+            {/* ✅ Perfect WhatsApp Logo */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              width="22"
+              height="22"
+              aria-hidden="true"
+            >
+              <path
+                fill="#25D366"
+                d="M256.064 0C114.849 0 0 114.844 0 256.056c0 45.177 11.854 89.385 34.353 128.277L24.067 512l131.757-34.537c37.421 20.463 79.486 31.234 122.313 31.234h.001C397.266 508.697 512 393.85 512 252.637 512 113.016 397.112 0 256.064 0z"
+              />
+              <path
+                fill="#fff"
+                d="M386.006 369.893c-5.776 16.19-28.778 29.68-47.221 33.605-12.557 2.665-28.838 4.782-94.364-19.976-79.136-30.927-129.905-107.066-133.847-112.153-3.942-5.086-31.919-42.52-31.919-81.088s19.725-57.62 26.732-65.66c6.974-8.04 15.095-10.1 20.13-10.1 5.034 0 10.06.052 14.484.265 4.64.232 10.847-.566 16.957 12.948 6.11 13.54 20.765 47.02 22.58 50.44 1.815 3.43 3.03 7.439.58 12.055-2.451 4.617-3.654 7.442-7.172 11.41-3.518 3.99-7.403 8.93-10.564 12.025-3.518 3.535-7.18 7.31-3.053 14.305 4.13 6.984 18.398 30.25 39.488 48.974 27.165 24.074 49.58 31.543 57.011 34.988 7.432 3.445 11.722 2.945 15.853-1.732 4.141-4.676 18.214-21.254 23.06-28.507 4.846-7.254 9.693-6.069 16.379-3.513 6.666 2.555 42.13 19.863 49.293 23.467 7.183 3.604 11.96 5.349 13.67 8.318 1.699 2.96 1.699 17.16-4.066 33.35z"
+              />
+            </svg>
+          </span>
+          <span className="text-sm font-semibold">Helpline:   +919480111889</span>
+        </a>
+      </div>
 
 
       <div className="-mt-2 mb-6">
         <a
-          href="tel:+916360064505"
+          href="tel:+919480111889"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600 text-white shadow hover:bg-orange-700 transition-all"
         >
           <span className="inline-flex items-center justify-center bg-white rounded-full p-1">
@@ -217,10 +216,10 @@ export default function Home() {
               height="22"
               aria-hidden="true"
             >
-              <path fill="#ea580c" d="M6.62 10.79a15.053 15.053 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.31.57 3.58.57a1 1 0 0 1 1 1V21a1 1 0 0 1-1 1C11.85 22 2 12.15 2 1a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.27.2 2.47.57 3.58a1 1 0 0 1-.24 1.01l-2.2 2.2z"/>
+              <path fill="#ea580c" d="M6.62 10.79a15.053 15.053 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.31.57 3.58.57a1 1 0 0 1 1 1V21a1 1 0 0 1-1 1C11.85 22 2 12.15 2 1a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.27.2 2.47.57 3.58a1 1 0 0 1-.24 1.01l-2.2 2.2z" />
             </svg>
           </span>
-          <span className="text-sm font-semibold">Call: +91 6360 064 505</span>
+          <span className="text-sm font-semibold">Call:   +919480111889</span>
         </a>
       </div>
 
@@ -229,7 +228,7 @@ export default function Home() {
         className="mt-4 mb-0 w-full text-gray-200 text-xs text-center py-2 px-4 rounded-none shadow-lg border-4 border-solid"
         style={{ borderColor: logoBorderColor }}
       >
-      
+
         <div className="mt-2 text-[12px] leading-relaxed text-gray-300 max-w-3xl mx-auto">
           {/* <div className="font-semibold text-gray-100 mb-1">ಮಾಗಮದಶಮನ & ಅಪಪಣ ಯಿಂತ</div>
           <div className="mb-2">1008 ಶಿರೀರ್ದ್ಕ್ಾಶಿ ಜಗದುುರು ಶಿರೀಡಾ, ಚಿಂದರ ಶ ೀಖರ ಶಿವಾಚಾಯ ಮಭಗವತಾಪದರು.</div>
