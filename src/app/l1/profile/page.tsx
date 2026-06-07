@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -65,20 +65,28 @@ export default function Profile() {
     try {
       const response = await fetch(`/api/l1/updateProfile/${userData?.userId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editedData.name,
           dob: editedData.dob,
-          peeta: editedData.peeta,
+          contactNo: editedData.contactNo,
+          peetarohanaDate: editedData.peetarohanaDate,
+          gender: editedData.gender,
+          karthruGuru: editedData.karthruGuru,
           dhekshaGuru: editedData.dhekshaGuru,
+          peeta: editedData.peeta,
+          bhage: editedData.bhage,
+          gothra: editedData.gothra,
+          mariPresent: editedData.mariPresent,
+          imageUrl: editedData.imageUrl,
+          address: editedData.address,
         }),
       });
 
       if (response.ok) {
         const updatedData = await response.json();
         setUserData(updatedData);
+        setEditedData(updatedData);
         setIsEditing(false);
         setMessage("Profile updated successfully!");
       } else {
@@ -139,13 +147,30 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">User ID</label>
-                  <p className="p-2 bg-gray-50 rounded-md">{userData.userId}</p>
+                  <label className="text-sm font-medium text-gray-600 flex items-center gap-1">
+                    User ID
+                    <span className="text-xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">🔒 fixed</span>
+                  </label>
+                  <p className="p-2 bg-gray-100 rounded-md text-gray-500 font-mono text-sm">{userData.userId}</p>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-600">Phone Number</label>
-                  <p className="p-2 bg-gray-50 rounded-md">{userData.contactNo}</p>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      value={editedData.contactNo || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setEditedData({ ...editedData, contactNo: val });
+                      }}
+                      maxLength={10}
+                      placeholder="10-digit phone number"
+                      className="w-full p-2 border rounded-md"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded-md">{userData.contactNo}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

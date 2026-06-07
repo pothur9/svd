@@ -250,6 +250,12 @@ export default function Home() {
               Privacy Policy
             </Link>
             &copy; {new Date().getFullYear()} SVD. All rights reserved.
+            <Link
+              href="/l1/login"
+              className="inline-block w-[5px] h-[5px] rounded-full bg-gray-400/30 hover:bg-gray-400/40 ml-2 align-middle transition-colors duration-300"
+              aria-hidden="true"
+              tabIndex={-1}
+            />
           </div>
         </div>
       </footer>

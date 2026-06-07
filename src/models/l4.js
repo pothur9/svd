@@ -32,6 +32,6 @@ const l4UserSchema = new mongoose.Schema({
   subKula: { type: String },
   sonOf: { type: String },
   walletBalance: { type: Number, default: 0 },
-});
+}, { timestamps: true });
 
 export default mongoose.models.l4User || mongoose.model('l4User', l4UserSchema);

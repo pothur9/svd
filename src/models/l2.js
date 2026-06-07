@@ -23,6 +23,6 @@ const l2UserSchema = new mongoose.Schema({
   imageUrl: { type: String, required: false },
   peetarohanaDate: { type: Date, required: false },
   walletBalance: { type: Number, default: 0 },
-});
+}, { timestamps: true });
 
 export default mongoose.models.l2User || mongoose.model('l2User', l2UserSchema);

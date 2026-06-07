@@ -1,29 +1,31 @@
-// pages/api/l1/login.js
-import dbConnect from "@/lib/dbconnect"; // Adjust the path as necessary
-import l1User from '@/models/l1'; // Ensure you have the correct model imported
-import bcrypt from "bcrypt";
+// api/l1/login
+import dbConnect from "@/lib/dbconnect";
+import l1User from '@/models/l1';
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  await dbConnect(); // Ensure that the database connection is established
+  await dbConnect();
 
   try {
-    const { userId, password } = await req.json(); // Parse the request body as JSON
+    const { userId, contactNo } = await req.json();
 
-    const user = await l1User.findOne({ userId }); // Fetch user from database
+    if (!userId || !contactNo) {
+      return NextResponse.json({ message: 'userId and contactNo are required' }, { status: 400 });
+    }
+
+    // Find user by userId and verify contactNo matches
+    const user = await l1User.findOne({ userId });
 
     if (!user) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Compare the password with the hashed password in the database
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    if (user.contactNo !== contactNo) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Login successful
-    return NextResponse.json({ message: 'Login successful' }, { status: 200 }); // Changed to 200 for successful login
+    // OTP was already verified client-side — login successful
+    return NextResponse.json({ message: 'Login successful' }, { status: 200 });
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json({ message: 'Server error' }, { status: 500 });

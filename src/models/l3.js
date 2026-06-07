@@ -31,6 +31,6 @@ const l3UserSchema = new mongoose.Schema({
   subKula: { type: String },
   sonOf: { type: String },
   walletBalance: { type: Number, default: 0 },
-});
+}, { timestamps: true });
 
 export default mongoose.models.l3User || mongoose.model('l3User', l3UserSchema);

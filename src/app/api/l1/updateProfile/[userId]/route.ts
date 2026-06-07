@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import  connectToDatabase  from '@/lib/dbconnect';
+import connectToDatabase from '@/lib/dbconnect';
 import L1User from '@/models/l1';
 
 export async function PUT(
@@ -11,33 +11,32 @@ export async function PUT(
     const { userId } = params;
     const data = await request.json();
 
-    // Only allow updates to specific fields
-    const updateData = {
-      name: data.name,
-      dob: data.dob,
-      peeta: data.peeta,
-      dhekshaGuru: data.dhekshaGuru,
-    };
+    // Allow updates to all fields EXCEPT userId
+    const updateData: Record<string, unknown> = {};
+    const allowedFields = [
+      'name', 'dob', 'contactNo', 'peetarohanaDate', 'gender',
+      'karthruGuru', 'dhekshaGuru', 'peeta', 'bhage', 'gothra',
+      'mariPresent', 'imageUrl', 'address',
+    ];
+    for (const field of allowedFields) {
+      if (data[field] !== undefined) {
+        updateData[field] = data[field];
+      }
+    }
 
     const updatedUser = await L1User.findOneAndUpdate(
-      { userId: userId },
+      { userId },
       { $set: updateData },
       { new: true }
     );
 
     if (!updatedUser) {
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error('Error updating profile:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
-}
+}

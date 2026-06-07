@@ -18,6 +18,6 @@ const l1UserSchema = new mongoose.Schema({
   firebaseUid: { type: String, required: false },
   imageUrl:{ type: String, required: true },
   address:{ type: String, required: true },
-});
+}, { timestamps: true });
 
 export default mongoose.models.l1User || mongoose.model('l1User', l1UserSchema);
