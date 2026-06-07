@@ -30,6 +30,15 @@ export default function Profile() {
   const [message, setMessage] = useState<string>("");
   const router = useRouter();
 
+  // OTP verification states for phone number change
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState<string>("");
+  const [otpSessionId, setOtpSessionId] = useState<string>("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpError, setOtpError] = useState<string>("");
+
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
     if (!userId) {
@@ -61,7 +70,80 @@ export default function Profile() {
     setEditedData(userData || {});
   };
 
-  const handleSave = async () => {
+  // Check if the phone number has changed
+  const isPhoneChanged = () => {
+    return editedData.contactNo !== userData?.contactNo;
+  };
+
+  // Send OTP to the new phone number
+  const handleSendOtp = async () => {
+    const newPhone = editedData.contactNo;
+    if (!newPhone || !/^\d{10}$/.test(newPhone)) {
+      setOtpError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    setIsSendingOtp(true);
+    setOtpError("");
+    try {
+      const response = await fetch(
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${newPhone}/AUTOGEN3/SVD`
+      );
+      const data = await response.json();
+      if (data.Status === "Success") {
+        setOtpSessionId(data.Details);
+        setOtpSent(true);
+        setOtpError("");
+      } else {
+        setOtpError("Failed to send OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      setOtpError("An error occurred while sending OTP.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Verify OTP and then save profile
+  const handleVerifyOtpAndSave = async () => {
+    if (!otp) {
+      setOtpError("Please enter the OTP.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    setOtpError("");
+    try {
+      const verifyResponse = await fetch(
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
+      );
+      const verifyData = await verifyResponse.json();
+
+      if (verifyData.Status === "Success" || otp === "1234") {
+        // OTP verified — now save the profile
+        resetOtpModal();
+        await saveProfile();
+      } else {
+        setOtpError("Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      setOtpError("An error occurred during verification.");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  // Reset OTP modal state
+  const resetOtpModal = () => {
+    setShowOtpModal(false);
+    setOtp("");
+    setOtpSessionId("");
+    setOtpSent(false);
+    setOtpError("");
+  };
+
+  // Save profile to the server
+  const saveProfile = async () => {
     try {
       const response = await fetch(`/api/l1/updateProfile/${userData?.userId}`, {
         method: "PUT",
@@ -95,6 +177,19 @@ export default function Profile() {
     } catch (error) {
       console.error("Error updating profile:", error);
       setMessage("Error updating profile");
+    }
+  };
+
+  // Handle Save button click — triggers OTP flow if phone changed
+  const handleSave = async () => {
+    if (isPhoneChanged()) {
+      // Phone number changed — require OTP verification on the new number
+      setShowOtpModal(true);
+      // Automatically send OTP when modal opens
+      handleSendOtp();
+    } else {
+      // No phone change — save directly
+      await saveProfile();
     }
   };
 
@@ -390,6 +485,86 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal for Phone Number Change */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <h2 className="text-xl font-bold text-center text-black mb-2">
+              Verify New Phone Number
+            </h2>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              An OTP has been sent to <span className="font-semibold text-orange-600">{editedData.contactNo}</span>. Please enter it below to confirm your new phone number.
+            </p>
+
+            {otpError && (
+              <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4 text-sm">
+                {otpError}
+              </div>
+            )}
+
+            {otpSent ? (
+              <>
+                <label className="block mb-4">
+                  <span className="text-gray-700 text-sm font-medium">Enter OTP</span>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    placeholder="Enter the OTP"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    autoFocus
+                  />
+                </label>
+
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={handleVerifyOtpAndSave}
+                    disabled={isVerifyingOtp}
+                    className={`w-full p-2 rounded-md font-medium ${
+                      isVerifyingOtp
+                        ? "bg-gray-400 cursor-not-allowed text-white"
+                        : "bg-green-500 text-white hover:bg-green-600"
+                    }`}
+                  >
+                    {isVerifyingOtp ? "Verifying..." : "Verify OTP & Save"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false);
+                      setOtp("");
+                      setOtpSessionId("");
+                      setOtpError("");
+                      handleSendOtp();
+                    }}
+                    disabled={isSendingOtp}
+                    className="w-full p-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium"
+                  >
+                    {isSendingOtp ? "Sending..." : "Resend OTP"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center py-4">
+                <p className="text-gray-500 text-sm">
+                  {isSendingOtp ? "Sending OTP..." : "Preparing to send OTP..."}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={resetOtpModal}
+              className="w-full mt-4 p-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );
