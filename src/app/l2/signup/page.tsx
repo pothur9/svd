@@ -254,13 +254,13 @@ export default function SignupForm() {
             onClick={() => changeLanguage("kn")}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
           >
-            à²•à²¨à³à²¨à²¡
+            Kannada
           </button>
           <button
             onClick={() => changeLanguage("hi")}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
           >
-            à¤¹à¤¿à¤‚à¤¦à¥€
+           Hindi
           </button>
         </div>
       </div>

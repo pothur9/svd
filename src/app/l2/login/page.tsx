@@ -42,14 +42,23 @@ const LoginPage: React.FC = () => {
     setErrorMsg("");
     try {
       // ── Step 1: Check if account exists before sending OTP ──
-      const checkRes = await fetch("/api/l2/check-accounts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactNo }),
-      });
+      let checkRes;
+      try {
+        checkRes = await fetch("/api/l2/check-accounts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contactNo }),
+        });
+      } catch {
+        setErrorMsg("Account does not exist with this phone number.");
+        setToast({ message: "Account does not exist with this phone number.", type: "error" });
+        setIsLoading(false);
+        return;
+      }
+
       if (!checkRes.ok) {
-        setErrorMsg("No account found for this number. Please create an account first.");
-        setToast({ message: "No account found for this number. Please create an account first.", type: "error" });
+        setErrorMsg("Account does not exist with this phone number.");
+        setToast({ message: "Account does not exist with this phone number.", type: "error" });
         setIsLoading(false);
         return;
       }
@@ -70,7 +79,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      setToast({ message: "An error occurred while sending OTP.", type: "error" });
+      setToast({ message: "Failed to send OTP. Please try again.", type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -316,10 +325,28 @@ const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {/* <div className="text-center mt-4">
-          <span className="text-gray-700">Don&apos;t have an account? </span>
-          <a href="/l2/signup" className="text-blue-500 hover:text-blue-700 font-medium">Sign up</a>
-        </div> */}
+        {/* Hidden secret dot - opens signup */}
+        <div className="flex justify-end mt-2">
+          <a
+            href="/l2/signup"
+            title=""
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(150,150,150,0.25)",
+              display: "inline-block",
+              cursor: "default",
+              transition: "background-color 0.3s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(150,150,150,0.5)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(150,150,150,0.25)")
+            }
+          />
+        </div>
       </div>
     </div>
   );
