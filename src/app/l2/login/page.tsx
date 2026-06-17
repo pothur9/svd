@@ -24,11 +24,22 @@ const LoginPage: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const router = useRouter();
 
-  // Redirect to dashboard if already logged in
+  // Redirect to dashboard only if the stored user is an L2 account
   useEffect(() => {
-    if (AuthManager.isAuthenticated()) {
-      router.push("/l2/dashboard");
-    }
+    const user = AuthManager.getAuthUser();
+    if (!user?.userId) return;
+
+    // Verify this userId actually belongs to L2 before redirecting
+    fetch(`/api/l2/dashboard/${user.userId}`)
+      .then((res) => {
+        if (res.ok) {
+          router.push("/l2/dashboard");
+        }
+        // If not ok (L3/L4 user or invalid), stay on login page — do nothing
+      })
+      .catch(() => {
+        // Network error — stay on login page
+      });
   }, [router]);
 
   // Send OTP
