@@ -935,7 +935,7 @@ export default function Dashboard() {
 
                   {/* Footer strip */}
                   <div style={{ background: "linear-gradient(90deg,#fef3c7,#fde68a)", padding: "4px 10px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-                    <span style={{ fontSize: "6px", color: "#92400e", fontWeight: 700 }}>SANATHANA VEERA SHIVA LINGAYATHA DHARMA</span>
+                    <span style={{ fontSize: "6px", color: "#92400e", fontWeight: 700 }}>{userData.contactNo||""}</span>
                     <span style={{ fontSize: "8px", color: "#92400e" }}>🔱</span>
                   </div>
                 </div>
