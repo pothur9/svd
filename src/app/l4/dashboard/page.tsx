@@ -127,11 +127,16 @@ export default function Dashboard() {
       try {
         const localAuth = localStorage.getItem("svd_auth_user");
         if (localAuth) {
-          const parsed = JSON.parse(localAuth) as { userId?: string };
-          if (parsed?.userId) {
+          const parsed = JSON.parse(localAuth) as { userId?: string; level?: string };
+          // Only restore session if the token belongs to L4
+          if (parsed?.userId && (!parsed.level || parsed.level === "l4")) {
             sessionStorage.setItem("userId", parsed.userId);
             sessionStorage.setItem("svd_auth_user", localAuth);
             userId = parsed.userId;
+          } else if (parsed?.level && parsed.level !== "l4") {
+            // Wrong level token — go to L4 login, don't restore
+            router.push("/l4/login");
+            return;
           }
         }
       } catch {}

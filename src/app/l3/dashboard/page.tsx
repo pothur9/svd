@@ -142,6 +142,13 @@ export default function Dashboard() {
       return;
     }
 
+    // Level mismatch: token belongs to a different level — redirect to login instead of loading forever
+    const currentUser = AuthManager.getAuthUser();
+    if (currentUser?.level && currentUser.level !== "l3") {
+      router.replace("/l3/login");
+      return;
+    }
+
     if (sessionStorage.getItem("showWelcomeBonus") === "true") {
       setToast({
         message: "Welcome! 🎉\n508 Rudhars have been added to your wallet!",

@@ -23,13 +23,22 @@ const LoginPage = () => {
   const router = useRouter();
 
 
-  // Redirect to dashboard if already logged in
+  // Redirect to dashboard if already logged in as L4
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUserId = sessionStorage.getItem("userId");
       const localAuth = localStorage.getItem('svd_auth_user');
       if (storedUserId || localAuth) {
-        router.push("/l4/dashboard");
+        try {
+          const parsed = localAuth ? JSON.parse(localAuth) as { level?: string } : null;
+          // Only auto-redirect if this is specifically an L4 token
+          if (!parsed?.level || parsed.level === "l4") {
+            router.push("/l4/dashboard");
+          }
+          // Otherwise stay on this login page (L2/L3 user visiting L4 login)
+        } catch {
+          router.push("/l4/dashboard");
+        }
       }
     }
   }, [router]);
@@ -139,7 +148,9 @@ const LoginPage = () => {
       sessionStorage.setItem("userId", accountId);
       try {
         if (typeof window !== 'undefined') {
-          const authObj = loginData?.user ? loginData.user : { userId: accountId };
+          const authObj = loginData?.user
+            ? { ...loginData.user, level: "l4" }
+            : { userId: accountId, level: "l4" };
           localStorage.setItem('svd_auth_user', JSON.stringify(authObj));
           sessionStorage.setItem('svd_auth_user', JSON.stringify(authObj));
         }

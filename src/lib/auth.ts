@@ -4,6 +4,7 @@ export interface AuthUser {
   name: string;
   contactNo: string;
   peeta?: string;
+  level?: string; // 'l2' | 'l3' | 'l4' — stored at login to prevent cross-level loading
 }
 
 class AuthManager {

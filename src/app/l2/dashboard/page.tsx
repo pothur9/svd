@@ -68,6 +68,12 @@ export default function Dashboard(): JSX.Element {
       return;
     }
 
+    // Level mismatch: token belongs to a different level — redirect to login instead of loading forever
+    if (currentUser.level && currentUser.level !== "l2") {
+      router.push("/l2/login");
+      return;
+    }
+
     if (sessionStorage.getItem("showWelcomeBonus") === "true") {
       setToast({
         message: "Welcome! 🎉\n500 Rudhars have been added to your wallet!",

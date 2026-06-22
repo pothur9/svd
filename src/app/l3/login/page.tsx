@@ -25,13 +25,18 @@ const LoginPage = () => {
   const hasCheckedAuth = useRef<boolean>(false); // Track if auth has been checked
   const router = useRouter();
 
-  // Redirect to dashboard if already logged in
+  // Redirect to dashboard if already logged in as L3
   useEffect(() => {
-    if (!hasCheckedAuth.current && AuthManager.isAuthenticated()) {
+    if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
-      router.replace("/l3/dashboard");
-    } else {
-      hasCheckedAuth.current = true;
+      if (AuthManager.isAuthenticated()) {
+        const user = AuthManager.getAuthUser();
+        // Only auto-redirect if this is specifically an L3 token
+        if (!user?.level || user.level === "l3") {
+          router.replace("/l3/dashboard");
+        }
+        // Otherwise stay on this login page (L2/L4 user visiting L3 login)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -137,12 +142,13 @@ const LoginPage = () => {
       const loginData = await loginResponse.json();
 
       if (loginResponse.ok) {
-        // Store user data persistently
+        // Store user data persistently (with level so dashboards can verify)
         AuthManager.setAuthUser({
           userId: accountId,
           name: loginData.user.name,
           contactNo: loginData.user.contactNo,
           peeta: loginData.user.peeta,
+          level: "l3",
         });
 
         setToast({

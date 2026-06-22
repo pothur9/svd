@@ -158,12 +158,13 @@ const LoginPage: React.FC = () => {
       const loginData = await loginResponse.json();
 
       if (loginResponse.ok) {
-        // Store user data persistently
+        // Store user data persistently (with level so dashboards can verify)
         AuthManager.setAuthUser({
           userId: accountId,
           name: loginData.user.name,
           contactNo: loginData.user.contactNo,
           peeta: loginData.user.peeta,
+          level: "l2",
         });
 
         setToast({
