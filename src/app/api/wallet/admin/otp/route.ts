@@ -11,12 +11,12 @@ export async function POST(req: NextRequest) {
     if (action === "send") {
       // Send OTP to admin phone
       const response = await axios.get(
-        `https://2factor.in/API/V1/${OTP_API_KEY}/SMS/${ADMIN_PHONE}/AUTOGEN2/SVDAdmin`
+        `https://2factor.in/API/V1/${OTP_API_KEY}/SMS/${ADMIN_PHONE}/AUTOGEN3/SVDAdmin`
       );
       if (response.data.Status === "Success") {
-        return NextResponse.json({ 
+        return NextResponse.json({
           message: "OTP sent successfully",
-          sessionId: response.data.Details 
+          sessionId: response.data.Details
         });
       }
       return NextResponse.json({ message: "Failed to send OTP" }, { status: 500 });

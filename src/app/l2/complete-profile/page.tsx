@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -6,10 +6,21 @@ import Image from "next/image";
 import AuthManager from "@/lib/auth";
 import Navbar from "../navbar/page";
 
+const calculateAge = (dobString: string) => {
+  if (!dobString) return 999;
+  const today = new Date();
+  const birthDate = new Date(dobString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age;
+};
+
 interface ProfileForm {
   name: string;
   contactNo: string;
   dob: string; // ISO date string yyyy-mm-dd
+  guardianId?: string; // required only when age < 18
   address: string;
   dhekshaGuru: string;
   karthruGuru: string;
@@ -34,6 +45,7 @@ export default function CompleteProfilePage() {
     name: "",
     contactNo: "",
     dob: "",
+    guardianId: "",
     address: "",
     dhekshaGuru: "",
     karthruGuru: "",
@@ -70,6 +82,7 @@ export default function CompleteProfilePage() {
           name: u.name ?? "",
           contactNo: u.contactNo ?? "",
           dob: u.dob ? new Date(u.dob).toISOString().slice(0, 10) : "",
+          guardianId: u.guardianId ?? "",
           address: u.address ?? "",
           dhekshaGuru: u.dhekshaGuru ?? "",
           karthruGuru: u.karthruGuru ?? "",
@@ -122,6 +135,7 @@ export default function CompleteProfilePage() {
           name: form.name,
           contactNo: form.contactNo,
           dob: form.dob ? new Date(form.dob).toISOString() : null,
+          guardianId: (form.dob && calculateAge(form.dob) < 18) ? form.guardianId : undefined,
           address: form.address,
           dhekshaGuru: form.dhekshaGuru,
           karthruGuru: form.karthruGuru,
@@ -212,6 +226,12 @@ export default function CompleteProfilePage() {
               <label className="block mb-1">Date of Birth</label>
               <input type="date" value={form.dob} onChange={e=>handleChange('dob', e.target.value)} className="w-full border p-2 rounded bg-white" />
             </div>
+            {form.dob && calculateAge(form.dob) < 18 && (
+              <div>
+                <label className="block mb-1">Guardian ID / ಪೋಷಕರ ಐಡಿ</label>
+                <input type="text" value={form.guardianId ?? ''} onChange={e=>handleChange('guardianId', e.target.value)} placeholder="Enter Guardian ID" className="w-full border p-2 rounded bg-white" />
+              </div>
+            )}
             <div>
               <label className="block mb-1">Address</label>
               <textarea value={form.address} onChange={e=>handleChange('address', e.target.value)} className="w-full border p-2 rounded bg-white" />

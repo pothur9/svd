@@ -11,6 +11,7 @@ const l2UserSchema = new mongoose.Schema({
   firebaseUid: { type: String, required: false },
   // Optional profile fields
   dob: { type: Date, required: false },
+  guardianId: { type: String, required: false },
   address: { type: String, required: false },
   dhekshaGuru: { type: String, required: false },
   karthruGuru: { type: String, required: false },

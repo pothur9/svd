@@ -63,7 +63,7 @@ export default function SignupForm() {
   const sendOtp = async () => {
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN2/SVD`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       console.log("OTP sent:", response.data);
       setOtpSessionId(response.data.Details);
@@ -116,7 +116,7 @@ export default function SignupForm() {
           body: JSON.stringify(submitData),
         });
         const responseData = await result.json();
-        
+
         if (result.ok) {
           const newUserId: string = responseData.userId;
           setUserId(newUserId);
@@ -140,7 +140,7 @@ export default function SignupForm() {
               sessionStorage.setItem("userId", newUserId);
               localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
               sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
-            } catch {}
+            } catch { }
           }
 
           // ── Check multiple accounts ──
@@ -260,7 +260,7 @@ export default function SignupForm() {
             onClick={() => changeLanguage("hi")}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
           >
-           Hindi
+            Hindi
           </button>
         </div>
       </div>
@@ -361,37 +361,58 @@ export default function SignupForm() {
                   background: termsAccepted ? "#fff7ed" : "#fafafa",
                   border: `1.5px solid ${termsAccepted ? "#ea580c" : "#e5e7eb"}`,
                   borderRadius: "10px",
-                  padding: "12px 14px",
+                  padding: "16px 18px",
                   marginBottom: "12px",
                   transition: "all 0.2s ease",
                 }}
               >
-                <label
-                  htmlFor="termsAcceptedL2"
-                  style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}
-                >
-                  <input
-                    type="checkbox"
-                    id="termsAcceptedL2"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    style={{
-                      accentColor: "#ea580c",
-                      width: "16px",
-                      height: "16px",
-                      marginTop: "2px",
-                      flexShrink: 0,
-                      cursor: "pointer",
-                    }}
-                  />
-                  <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.5 }}>
-                    I have read and agree to the{" "}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+                  {/* Large standalone checkbox — does NOT wrap links */}
+                  <div
+                    style={{ flexShrink: 0, paddingTop: "1px", cursor: "pointer" }}
+                    onClick={() => setTermsAccepted((v) => !v)}
+                  >
+                    <div
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "6px",
+                        border: `2px solid ${termsAccepted ? "#ea580c" : "#d1d5db"}`,
+                        background: termsAccepted ? "#ea580c" : "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s",
+                        boxShadow: termsAccepted ? "0 2px 8px rgba(234,88,12,0.3)" : "none",
+                      }}
+                    >
+                      {termsAccepted && (
+                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                          <path d="M2 7l3.5 3.5L12 3" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="termsAcceptedL2"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                    />
+                  </div>
+                  {/* Text — clicking plain text also toggles; links open separately */}
+                  <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setTermsAccepted((v) => !v)}
+                    >
+                      I have read and agree to the{" "}
+                    </span>
                     <a
                       href="/privacy-policy"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
-                      onClick={(e) => e.stopPropagation()}
                     >
                       Privacy Policy
                     </a>
@@ -401,15 +422,20 @@ export default function SignupForm() {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
-                      onClick={(e) => e.stopPropagation()}
                     >
                       Terms &amp; Conditions
                     </a>
-                    {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setTermsAccepted((v) => !v)}
+                    >
+                      {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                    </span>
                   </span>
-                </label>
+                </div>
               </div>
             )}
+
 
             {isOtpSent ? (
               <>
@@ -491,13 +517,19 @@ export default function SignupForm() {
 
       {/* ── Account Picker (shown when multiple accounts on same number) ── */}
       {showAccountPicker && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ background: "#fff", width: "100%", maxWidth: "480px",
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100
+        }}>
+          <div style={{
+            background: "#fff", width: "100%", maxWidth: "480px",
             borderRadius: "1.25rem 1.25rem 0 0", padding: "1.25rem 1.1rem 2.5rem",
-            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)" }}>
-            <div style={{ width: "36px", height: "4px", background: "#e5e7eb",
-              borderRadius: "2px", margin: "0 auto 1rem" }} />
+            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)"
+          }}>
+            <div style={{
+              width: "36px", height: "4px", background: "#e5e7eb",
+              borderRadius: "2px", margin: "0 auto 1rem"
+            }} />
             <div style={{ textAlign: "center", marginBottom: "1rem" }}>
               <div style={{ fontSize: "1.8rem" }}>🎉</div>
               <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#1e1b4b", margin: "0.25rem 0 0" }}>
@@ -509,17 +541,21 @@ export default function SignupForm() {
                 </p>
               )}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem",
-              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem" }}>
+            <div style={{
+              display: "flex", flexDirection: "column", gap: "0.5rem",
+              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem"
+            }}>
               {accounts.map((acct) => {
                 const isNew = acct.userId === userId;
                 const active = selectedAccount === acct.userId;
                 return (
                   <label key={acct.userId}
-                    style={{ display: "flex", alignItems: "center", gap: "0.75rem",
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.75rem",
                       padding: "0.7rem 0.9rem", borderRadius: "0.75rem", cursor: "pointer",
                       border: `2px solid ${active ? "#7c3aed" : "#e5e7eb"}`,
-                      background: active ? "#f5f3ff" : "#f9fafb" }}>
+                      background: active ? "#f5f3ff" : "#f9fafb"
+                    }}>
                     <input type="radio" name="account" value={acct.userId} checked={active}
                       onChange={() => setSelectedAccount(acct.userId)}
                       style={{ accentColor: "#7c3aed", width: "16px", height: "16px" }} />
@@ -549,7 +585,7 @@ export default function SignupForm() {
                     sessionStorage.setItem("userId", selectedAccount);
                     localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
                     sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
-                  } catch {}
+                  } catch { }
                   if (selectedAccount === userId) {
                     sessionStorage.setItem("showWelcomeBonus", "true");
                   }
@@ -562,16 +598,18 @@ export default function SignupForm() {
                   console.log(loginData.message || "Login failed.");
                 }
               }}
-              style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
+              style={{
+                width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
                 border: "none", background: "linear-gradient(135deg,#ff9933,#7c3aed)",
                 color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
+                boxShadow: "0 4px 16px rgba(124,58,237,0.3)"
+              }}>
               Continue to Dashboard →
             </button>
           </div>
         </div>
       )}
-    
+
     </>
   );
 }

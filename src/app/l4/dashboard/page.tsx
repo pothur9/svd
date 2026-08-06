@@ -8,6 +8,16 @@ import { QRCodeSVG } from "qrcode.react";
 import CenteredLoader from "../../../components/CenteredLoader";
 import Toast from "../../../components/Toast";
 
+const calculateAge = (dobString: string) => {
+  if (!dobString) return 999;
+  const today = new Date();
+  const birthDate = new Date(dobString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age;
+};
+
 interface MemberData {
   l1User: {
     _id: string;
@@ -232,6 +242,14 @@ export default function Dashboard() {
       const v = record[k];
       return v === undefined || v === null || (typeof v === "string" && (v as string).trim() === "");
     });
+    // If dob is present and user is under 18, guardianId is also required
+    const dobValue = (record['dob'] as string) || '';
+    if (dobValue && calculateAge(dobValue) < 18) {
+      const guardianId = record['guardianId'] as string | undefined;
+      if (!guardianId || guardianId.trim() === '') {
+        if (!miss.includes('guardianId')) miss.push('guardianId');
+      }
+    }
     setMissingFields(miss);
     if (miss.length === 0) {
       setProfileIncomplete(false);
@@ -507,9 +525,27 @@ export default function Dashboard() {
                             {displayLabel(field)}
                           </label>
                           {field === "dob" ? (
-                            <input type="date" value={formData[field] || ""} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                              style={{ width: "100%", padding: "10px 12px", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "14px", background: "#fff", color: "#1e293b", boxSizing: "border-box" }} />
-                          ) : field === "gender" ? (
+                            <>
+                              <input type="date" value={formData[field] || ""} onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => {
+                                  const next = { ...prev, [field]: val };
+                                  if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
+                                    next['guardianId'] = '';
+                                  }
+                                  return next;
+                                });
+                              }}
+                                style={{ width: "100%", padding: "10px 12px", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "14px", background: "#fff", color: "#1e293b", boxSizing: "border-box" }} />
+                              {formData[field] && calculateAge(formData[field]) < 18 && (
+                                <div style={{ marginTop: '12px' }}>
+                                  <label style={{ fontSize: "12px", color: "#64748b", fontWeight: 600, display: "block", marginBottom: "5px" }}>Guardian ID / ಪೋಷಕರ ಐಡಿ</label>
+                                  <input type="text" value={formData['guardianId'] || ''} onChange={(e) => setFormData({ ...formData, guardianId: e.target.value })} placeholder="Enter Guardian ID"
+                                    style={{ width: "100%", padding: "10px 12px", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "14px", background: "#fff", color: "#1e293b", boxSizing: "border-box" }} />
+                                </div>
+                              )}
+                            </>
+                          ) : field === "guardianId" ? null : field === "gender" ? (
                             <select value={formData[field] || ""} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
                               style={{ width: "100%", padding: "10px 12px", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "14px", background: "#fff", color: "#1e293b" }}>
                               <option value="">Select gender</option>
@@ -1066,8 +1102,25 @@ export default function Dashboard() {
                       <div key={field} className="flex flex-col">
                         <label className="text-sm text-gray-700 mb-1">{displayLabel(field)}</label>
                         {field === "dob" ? (
-                          <input type="date" value={formData[field] || ""} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black" />
-                        ) : field === "gender" ? (
+                          <>
+                            <input type="date" value={formData[field] || ""} onChange={(e) => {
+                              const val = e.target.value;
+                              setFormData((prev) => {
+                                const next = { ...prev, [field]: val };
+                                if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
+                                  next['guardianId'] = '';
+                                }
+                                return next;
+                              });
+                            }} className="p-2 border rounded bg-white text-black" />
+                            {formData[field] && calculateAge(formData[field]) < 18 && (
+                              <div className="mt-3">
+                                <label className="text-sm text-gray-700 mb-1 block">Guardian ID / ಪೋಷಕರ ಐಡಿ</label>
+                                <input type="text" value={formData['guardianId'] || ''} onChange={(e) => setFormData({ ...formData, guardianId: e.target.value })} placeholder="Enter Guardian ID" className="p-2 border rounded bg-white text-black w-full" />
+                              </div>
+                            )}
+                          </>
+                        ) : field === "guardianId" ? null : field === "gender" ? (
                           <select value={formData[field] || ""} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} className="p-2 border rounded bg-white text-black">
                             <option value="">Select</option>
                             <option value="Male">Male</option>

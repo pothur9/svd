@@ -22,7 +22,6 @@ interface FormData {
   karthruGuru: string;
   // Optional fields for completion later (kept here so inputs can bind without TS errors)
   selectedL2User?: string;
-  dob?: string;
   gender?: string;
   mailId?: string;
   bhage?: string;
@@ -36,21 +35,11 @@ interface FormData {
   photoUrl?: File | string | null;
   kula?: string;
   subKula?: string;
-  guardianId?: string;
   customGuru?: string;
 }
 
-const calculateAge = (dobString: string) => {
-  if (!dobString) return 0;
-  const today = new Date();
-  const birthDate = new Date(dobString);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
-};
+
+
 
 export const dynamic = "force-dynamic"; // Prevent pre-rendering issues
 
@@ -80,7 +69,6 @@ export default function PersonalDetailsForm() {
     peeta: "",
     karthruGuru: "",
     selectedL2User: "",
-    dob: "",
     gender: "",
     mailId: "",
     bhage: "",
@@ -94,7 +82,6 @@ export default function PersonalDetailsForm() {
     photoUrl: null,
     kula: "",
     subKula: "",
-    guardianId: "",
     customGuru: "",
   });
   const { t } = useTranslation();
@@ -236,16 +223,8 @@ export default function PersonalDetailsForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.dob) {
-      setToast({ message: "Date of Birth is required.", type: "error" });
-      return;
-    }
     if (formData.karthruGuru === "Other" && !formData.customGuru) {
       setToast({ message: "Please enter the Guru name manually.", type: "error" });
-      return;
-    }
-    if (calculateAge(formData.dob) < 18 && !formData.guardianId) {
-      setToast({ message: "Guardian ID is required for users under 18.", type: "error" });
       return;
     }
     if (!formData.contactNo || !/^\d{10}$/.test(formData.contactNo)) {
@@ -387,8 +366,6 @@ export default function PersonalDetailsForm() {
             peeta: formData.peeta,
             karthruGuru: formData.karthruGuru === "Other" ? formData.customGuru : formData.karthruGuru,
             firebaseUid,
-            dob: formData.dob,
-            guardianId: (formData.dob && calculateAge(formData.dob) < 18) ? formData.guardianId : undefined,
             ...(uploadedPhotoUrl ? { photoUrl: uploadedPhotoUrl } : {}),
           }),
         });
@@ -700,39 +677,6 @@ export default function PersonalDetailsForm() {
                 required
               />
             </div>
-
-            <div>
-              <label htmlFor="dob" className="block text-sm font-semibold">
-                {t("signupl3.dob")} / ಹುಟ್ಟಿದ ದಿನಾಂಕ
-              </label>
-              <input
-                type="date"
-                name="dob"
-                id="dob"
-                value={formData.dob}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                required
-              />
-            </div>
-
-            {formData.dob && calculateAge(formData.dob) < 18 && (
-              <div>
-                <label htmlFor="guardianId" className="block text-sm font-semibold">
-                  Guardian ID / ಪೋಷಕರ ಐಡಿ
-                </label>
-                <input
-                  type="text"
-                  name="guardianId"
-                  id="guardianId"
-                  value={formData.guardianId}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                  placeholder="Enter Guardian ID"
-                  required
-                />
-              </div>
-            )}
 
             <div className="hidden">
               <label htmlFor="gender" className="block text-sm font-semibold">
@@ -1086,36 +1030,54 @@ export default function PersonalDetailsForm() {
                 background: termsAccepted ? "#fff7ed" : "#fafafa",
                 border: `1.5px solid ${termsAccepted ? "#ea580c" : "#e5e7eb"}`,
                 borderRadius: "10px",
-                padding: "12px 14px",
+                padding: "16px 18px",
                 transition: "all 0.2s ease",
               }}
             >
-              <label
-                htmlFor="termsAccepted"
-                style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}
-              >
-                <input
-                  type="checkbox"
-                  id="termsAccepted"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  style={{
-                    accentColor: "#ea580c",
-                    width: "16px",
-                    height: "16px",
-                    marginTop: "2px",
-                    flexShrink: 0,
-                    cursor: "pointer",
-                  }}
-                />
-                <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.5 }}>
-                  I have read and agree to the{" "}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+                {/* Large standalone checkbox */}
+                <div
+                  style={{ flexShrink: 0, paddingTop: "1px", cursor: "pointer" }}
+                  onClick={() => setTermsAccepted((v) => !v)}
+                >
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "6px",
+                      border: `2px solid ${termsAccepted ? "#ea580c" : "#d1d5db"}`,
+                      background: termsAccepted ? "#ea580c" : "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s",
+                      boxShadow: termsAccepted ? "0 2px 8px rgba(234,88,12,0.3)" : "none",
+                    }}
+                  >
+                    {termsAccepted && (
+                      <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                        <path d="M2 7l3.5 3.5L12 3" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <input
+                    type="checkbox"
+                    id="termsAccepted"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                  />
+                </div>
+                {/* Text — plain text toggles checkbox, links open separately */}
+                <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
+                  <span style={{ cursor: "pointer" }} onClick={() => setTermsAccepted((v) => !v)}>
+                    I have read and agree to the{" "}
+                  </span>
                   <a
                     href="/privacy-policy"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     Privacy Policy
                   </a>
@@ -1125,14 +1087,16 @@ export default function PersonalDetailsForm() {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     Terms &amp; Conditions
                   </a>
-                  {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                  <span style={{ cursor: "pointer" }} onClick={() => setTermsAccepted((v) => !v)}>
+                    {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                  </span>
                 </span>
-              </label>
+              </div>
             </div>
+
 
             <button
               type="submit"

@@ -16,22 +16,11 @@ interface FormData {
   contactNo: string;
   peeta: string;
   karthruGuru: string;
-  dob?: string;
-  guardianId?: string;
   customGuru?: string;
 }
 
-const calculateAge = (dobString: string) => {
-  if (!dobString) return 0;
-  const today = new Date();
-  const birthDate = new Date(dobString);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
-};
+
+
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<FormData>({
@@ -39,8 +28,6 @@ export default function SignupForm() {
     contactNo: "",
     peeta: "",
     karthruGuru: "",
-    dob: "",
-    guardianId: "",
     customGuru: "",
   });
   const [otp, setOtp] = useState<string>("");
@@ -108,7 +95,7 @@ export default function SignupForm() {
   const sendOtp = async () => {
     try {
       const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN2/SVD`
+        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
       );
       console.log("OTP sent:", response.data);
       setOtpSessionId(response.data.Details);
@@ -156,7 +143,6 @@ export default function SignupForm() {
         const submitData = {
           ...formData,
           karthruGuru: formData.karthruGuru === "Other" ? formData.customGuru : formData.karthruGuru,
-          guardianId: (formData.dob && calculateAge(formData.dob) < 18) ? formData.guardianId : undefined,
           firebaseUid,
         };
         const result = await fetch("/api/l3/signup", {
@@ -184,7 +170,7 @@ export default function SignupForm() {
               sessionStorage.setItem("userId", newUserId);
               localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
               sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
-            } catch {}
+            } catch { }
           }
 
           // ── Check multiple accounts ──
@@ -225,16 +211,12 @@ export default function SignupForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.contactNo || !formData.peeta || !formData.karthruGuru || !formData.dob) {
+    if (!formData.name || !formData.contactNo || !formData.peeta || !formData.karthruGuru) {
       setToast({ message: "Please fill in all fields.", type: "error" });
       return;
     }
     if (formData.karthruGuru === "Other" && !formData.customGuru) {
       setToast({ message: "Please enter the Guru name manually.", type: "error" });
-      return;
-    }
-    if (calculateAge(formData.dob) < 18 && !formData.guardianId) {
-      setToast({ message: "Guardian ID is required for users under 18.", type: "error" });
       return;
     }
     if (!/^\d{10}$/.test(formData.contactNo)) {
@@ -303,7 +285,7 @@ export default function SignupForm() {
           {[
             { code: "en", flag: "🇬🇧", label: "English", native: "English" },
             { code: "kn", flag: "🇮🇳", label: "Kannada", native: "ಕನ್ನಡ" },
-            { code: "hi", flag: "🇮🇳", label: "Hindi",   native: "हिंदी" },
+            { code: "hi", flag: "🇮🇳", label: "Hindi", native: "हिंदी" },
           ].map(({ code, flag, label, native }) => {
             const isActive = activeLanguage === code;
             return (
@@ -353,286 +335,277 @@ export default function SignupForm() {
       </div>
 
       <div className="bg-gradient-to-b from-slate-50 to-orange-50 min-h-screen py-6 sm:py-10">
-      <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
-        <div className="flex justify-center">
-          <Image src="/logo.png" alt="Logo" width={100} height={100} />
-        </div>
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          {t("signupl3.title")}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-semibold mb-1">
-              {t("signupl1.name")}
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              placeholder="Enter your full name"
-              required
-            />
+        <div className="max-w-lg mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl text-gray-800">
+          <div className="flex justify-center">
+            <Image src="/logo.png" alt="Logo" width={100} height={100} />
           </div>
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            {t("signupl3.title")}
+          </h2>
 
-          <div>
-            <label htmlFor="contactNo" className="block text-sm font-semibold mb-1">
-              {t("signupl1.contactNo")}
-            </label>
-            <input
-              type="text"
-              name="contactNo"
-              id="contactNo"
-              value={formData.contactNo}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, "").slice(0, 10);
-                setFormData({ ...formData, contactNo: value });
-              }}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              placeholder="Enter your 10-digit phone number"
-              maxLength={10}
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="dob" className="block text-sm font-semibold mb-1">
-              Date of Birth / ಹುಟ್ಟಿದ ದಿನಾಂಕ
-            </label>
-            <input
-              type="date"
-              name="dob"
-              id="dob"
-              value={formData.dob}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              required
-            />
-          </div>
-
-          {formData.dob && calculateAge(formData.dob) < 18 && (
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="guardianId" className="block text-sm font-semibold mb-1">
-                Guardian ID / ಪೋಷಕರ ಐಡಿ
+              <label htmlFor="name" className="block text-sm font-semibold mb-1">
+                {t("signupl1.name")}
               </label>
               <input
                 type="text"
-                name="guardianId"
-                id="guardianId"
-                value={formData.guardianId}
+                name="name"
+                id="name"
+                value={formData.name}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-                placeholder="Enter Guardian ID"
+                placeholder="Enter your full name"
                 required
               />
             </div>
-          )}
 
-          <div>
-            <label htmlFor="peeta" className="block text-sm font-semibold mb-1">
-              {t("signupl3.peeta")}
-            </label>
-            <select
-              name="peeta"
-              id="peeta"
-              value={formData.peeta}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              required
-            >
-              <option value="">Select Peeta</option>
-              {peetaOptions.map((peeta, index) => (
-                <option key={index} value={peeta}>
-                  {peeta}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="karthruGuru" className="block text-sm font-semibold mb-1">
-              {t("signupl3.karthruGuru")}
-            </label>
-            <select
-              name="karthruGuru"
-              id="karthruGuru"
-              value={formData.karthruGuru}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-              required
-            >
-              <option value="">Select Guru</option>
-              {l2Users.map((name, idx) => (
-                <option key={idx} value={name}>{name}</option>
-              ))}
-              <option value="Other">Other / ಇತರೆ / अन्य</option>
-            </select>
-          </div>
-
-          {formData.karthruGuru === "Other" && (
             <div>
-              <label htmlFor="customGuru" className="block text-sm font-semibold mb-1">
-                Enter Guru Name Manually / ಗುರು ಹೆಸರನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ನಮೂದಿಸಿ
+              <label htmlFor="contactNo" className="block text-sm font-semibold mb-1">
+                {t("signupl1.contactNo")}
               </label>
               <input
                 type="text"
-                name="customGuru"
-                id="customGuru"
-                value={formData.customGuru}
-                onChange={handleChange}
+                name="contactNo"
+                id="contactNo"
+                value={formData.contactNo}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setFormData({ ...formData, contactNo: value });
+                }}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-                placeholder="Enter Guru Name"
+                placeholder="Enter your 10-digit phone number"
+                maxLength={10}
                 required
               />
             </div>
-          )}
 
-          {/* Terms & Conditions + Privacy Policy Checkbox */}
-          {!isOtpSent && (
-            <div
-              style={{
-                background: termsAccepted ? "#fff7ed" : "#fafafa",
-                border: `1.5px solid ${termsAccepted ? "#ea580c" : "#e5e7eb"}`,
-                borderRadius: "10px",
-                padding: "12px 14px",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <label
-                htmlFor="termsAcceptedL3"
-                style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}
+            <div>
+              <label htmlFor="peeta" className="block text-sm font-semibold mb-1">
+                {t("signupl3.peeta")}
+              </label>
+              <select
+                name="peeta"
+                id="peeta"
+                value={formData.peeta}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                required
               >
-                <input
-                  type="checkbox"
-                  id="termsAcceptedL3"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  style={{
-                    accentColor: "#ea580c",
-                    width: "16px",
-                    height: "16px",
-                    marginTop: "2px",
-                    flexShrink: 0,
-                    cursor: "pointer",
-                  }}
-                />
-                <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.5 }}>
-                  I have read and agree to the{" "}
-                  <a
-                    href="/privacy-policy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Privacy Policy
-                  </a>
-                  {" "}and{" "}
-                  <a
-                    href="/privacy-policy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Terms &amp; Conditions
-                  </a>
-                  {" "}of Sanathana Veerashaiva Lingayatha Trust.
-                </span>
-              </label>
+                <option value="">Select Peeta</option>
+                {peetaOptions.map((peeta, index) => (
+                  <option key={index} value={peeta}>
+                    {peeta}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
 
-          {!isOtpSent ? (
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full p-3 rounded-md text-white font-semibold ${
-                isSubmitting
-                  ? "bg-orange-300 cursor-not-allowed"
-                  : "bg-orange-600 hover:bg-orange-700"
-              }`}
-              style={{ opacity: termsAccepted ? 1 : 0.7 }}
-            >
-              {isSubmitting ? "Sending OTP..." : "Send OTP"}
-            </button>
-          ) : (
-            <div className="space-y-3">
+            <div>
+              <label htmlFor="karthruGuru" className="block text-sm font-semibold mb-1">
+                {t("signupl3.karthruGuru")}
+              </label>
+              <select
+                name="karthruGuru"
+                id="karthruGuru"
+                value={formData.karthruGuru}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                required
+              >
+                <option value="">Select Guru</option>
+                {l2Users.map((name, idx) => (
+                  <option key={idx} value={name}>{name}</option>
+                ))}
+                <option value="Other">Other / ಇತರೆ / अन्य</option>
+              </select>
+            </div>
+
+            {formData.karthruGuru === "Other" && (
               <div>
-                <label htmlFor="otp" className="block text-sm font-semibold mb-1">
-                  Enter OTP
+                <label htmlFor="customGuru" className="block text-sm font-semibold mb-1">
+                  Enter Guru Name Manually / ಗುರು ಹೆಸರನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ನಮೂದಿಸಿ
                 </label>
                 <input
                   type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  name="customGuru"
+                  id="customGuru"
+                  value={formData.customGuru}
+                  onChange={handleChange}
                   className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
-                  placeholder="Enter OTP"
+                  placeholder="Enter Guru Name"
                   required
                 />
               </div>
+            )}
 
-              <button
-                type="button"
-                onClick={verifyOtp}
-                disabled={isVerifyingOtp}
-                className={`w-full p-3 rounded-md text-white font-semibold ${
-                  isVerifyingOtp
-                    ? "bg-green-300 cursor-not-allowed"
-                    : "bg-green-500 hover:bg-green-600"
-                }`}
-              >
-                {isVerifyingOtp ? "Verifying..." : "Verify OTP & Signup"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOtpSent(false);
-                  setOtp("");
-                  setOtpSessionId("");
+            {/* Terms & Conditions + Privacy Policy Checkbox */}
+            {!isOtpSent && (
+              <div
+                style={{
+                  background: termsAccepted ? "#fff7ed" : "#fafafa",
+                  border: `1.5px solid ${termsAccepted ? "#ea580c" : "#e5e7eb"}`,
+                  borderRadius: "10px",
+                  padding: "16px 18px",
+                  transition: "all 0.2s ease",
                 }}
-                className="w-full p-3 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400"
               >
-                Resend OTP
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+                  {/* Large standalone checkbox */}
+                  <div
+                    style={{ flexShrink: 0, paddingTop: "1px", cursor: "pointer" }}
+                    onClick={() => setTermsAccepted((v) => !v)}
+                  >
+                    <div
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "6px",
+                        border: `2px solid ${termsAccepted ? "#ea580c" : "#d1d5db"}`,
+                        background: termsAccepted ? "#ea580c" : "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s",
+                        boxShadow: termsAccepted ? "0 2px 8px rgba(234,88,12,0.3)" : "none",
+                      }}
+                    >
+                      {termsAccepted && (
+                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                          <path d="M2 7l3.5 3.5L12 3" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="termsAcceptedL3"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                    />
+                  </div>
+                  {/* Text — plain text toggles checkbox, links open separately */}
+                  <span style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
+                    <span style={{ cursor: "pointer" }} onClick={() => setTermsAccepted((v) => !v)}>
+                      I have read and agree to the{" "}
+                    </span>
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
+                    >
+                      Privacy Policy
+                    </a>
+                    {" "}and{" "}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#ea580c", fontWeight: 600, textDecoration: "underline" }}
+                    >
+                      Terms &amp; Conditions
+                    </a>
+                    <span style={{ cursor: "pointer" }} onClick={() => setTermsAccepted((v) => !v)}>
+                      {" "}of Sanathana Veerashaiva Lingayatha Trust.
+                    </span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+
+            {!isOtpSent ? (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full p-3 rounded-md text-white font-semibold ${isSubmitting
+                    ? "bg-orange-300 cursor-not-allowed"
+                    : "bg-orange-600 hover:bg-orange-700"
+                  }`}
+                style={{ opacity: termsAccepted ? 1 : 0.7 }}
+              >
+                {isSubmitting ? "Sending OTP..." : "Send OTP"}
               </button>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-semibold mb-1">
+                    Enter OTP
+                  </label>
+                  <input
+                    type="text"
+                    id="otp"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-black"
+                    placeholder="Enter OTP"
+                    required
+                  />
+                </div>
 
-          {isUserIdVisible && (
-            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-md">
-              <p className="text-green-800 font-semibold">
-                Signup successful! Your User ID: <span className="font-mono">{userId}</span>
-              </p>
-              <p className="text-green-700 text-sm mt-1">
-                Please save this User ID for future login.
-              </p>
-            </div>
-          )}
-        </form>
+                <button
+                  type="button"
+                  onClick={verifyOtp}
+                  disabled={isVerifyingOtp}
+                  className={`w-full p-3 rounded-md text-white font-semibold ${isVerifyingOtp
+                      ? "bg-green-300 cursor-not-allowed"
+                      : "bg-green-500 hover:bg-green-600"
+                    }`}
+                >
+                  {isVerifyingOtp ? "Verifying..." : "Verify OTP & Signup"}
+                </button>
 
-        <div className="text-center mt-6">
-          <span className="text-gray-700">Already have an account? </span>
-          <a href="/l3/login" className="text-orange-600 hover:text-orange-800 font-medium">
-            Login here
-          </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOtpSent(false);
+                    setOtp("");
+                    setOtpSessionId("");
+                  }}
+                  className="w-full p-3 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400"
+                >
+                  Resend OTP
+                </button>
+              </div>
+            )}
+
+            {isUserIdVisible && (
+              <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-md">
+                <p className="text-green-800 font-semibold">
+                  Signup successful! Your User ID: <span className="font-mono">{userId}</span>
+                </p>
+                <p className="text-green-700 text-sm mt-1">
+                  Please save this User ID for future login.
+                </p>
+              </div>
+            )}
+          </form>
+
+          <div className="text-center mt-6">
+            <span className="text-gray-700">Already have an account? </span>
+            <a href="/l3/login" className="text-orange-600 hover:text-orange-800 font-medium">
+              Login here
+            </a>
+          </div>
         </div>
-      </div>
       </div>
 
       {/* ── Account Picker (shown when multiple accounts on same number) ── */}
       {showAccountPicker && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ background: "#fff", width: "100%", maxWidth: "480px",
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100
+        }}>
+          <div style={{
+            background: "#fff", width: "100%", maxWidth: "480px",
             borderRadius: "1.25rem 1.25rem 0 0", padding: "1.25rem 1.1rem 2.5rem",
-            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)" }}>
-            <div style={{ width: "36px", height: "4px", background: "#e5e7eb",
-              borderRadius: "2px", margin: "0 auto 1rem" }} />
+            boxShadow: "0 -4px 30px rgba(0,0,0,0.15)"
+          }}>
+            <div style={{
+              width: "36px", height: "4px", background: "#e5e7eb",
+              borderRadius: "2px", margin: "0 auto 1rem"
+            }} />
             <div style={{ textAlign: "center", marginBottom: "1rem" }}>
               <div style={{ fontSize: "1.8rem" }}>🎉</div>
               <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#1e1b4b", margin: "0.25rem 0 0" }}>
@@ -644,17 +617,21 @@ export default function SignupForm() {
                 </p>
               )}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem",
-              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem" }}>
+            <div style={{
+              display: "flex", flexDirection: "column", gap: "0.5rem",
+              maxHeight: "40vh", overflowY: "auto", marginBottom: "0.9rem"
+            }}>
               {accounts.map((acct) => {
                 const isNew = acct.userId === userId;
                 const active = selectedAccount === acct.userId;
                 return (
                   <label key={acct.userId}
-                    style={{ display: "flex", alignItems: "center", gap: "0.75rem",
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.75rem",
                       padding: "0.7rem 0.9rem", borderRadius: "0.75rem", cursor: "pointer",
                       border: `2px solid ${active ? "#7c3aed" : "#e5e7eb"}`,
-                      background: active ? "#f5f3ff" : "#f9fafb" }}>
+                      background: active ? "#f5f3ff" : "#f9fafb"
+                    }}>
                     <input type="radio" name="account" value={acct.userId} checked={active}
                       onChange={() => setSelectedAccount(acct.userId)}
                       style={{ accentColor: "#7c3aed", width: "16px", height: "16px" }} />
@@ -684,7 +661,7 @@ export default function SignupForm() {
                     sessionStorage.setItem("userId", selectedAccount);
                     localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
                     sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
-                  } catch {}
+                  } catch { }
                   if (selectedAccount === userId) {
                     sessionStorage.setItem("showWelcomeBonus", "true");
                   }
@@ -697,10 +674,12 @@ export default function SignupForm() {
                 }
               }}
 
-              style={{ width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
+              style={{
+                width: "100%", padding: "0.88rem", borderRadius: "0.85rem",
                 border: "none", background: "linear-gradient(135deg,#ff9933,#7c3aed)",
                 color: "#fff", fontWeight: 700, fontSize: "1rem", cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
+                boxShadow: "0 4px 16px rgba(124,58,237,0.3)"
+              }}>
               Continue to Dashboard →
             </button>
           </div>
