@@ -80,7 +80,7 @@ export default function PersonalDetailsForm() {
     occupation: "",
     languageKnown: "",
     photoUrl: null,
-    kula: "",
+    kula: "Veerashaiva Lingayatha",
     subKula: "",
     customGuru: "",
   });
@@ -613,56 +613,37 @@ export default function PersonalDetailsForm() {
               </div>
             )}
 
+            {/* Kula — only one option so we set it silently and show Sub Kula directly */}
+            <input type="hidden" name="kula" value="Veerashaiva Lingayatha" />
+
             <div>
-              <label htmlFor="kula" className="block text-sm font-semibold">
-                Kula / ಕುಲ
+              <label htmlFor="subKula" className="block text-sm font-semibold">
+                Sub Kula / ಉಪಕುಲ
               </label>
               <select
-                name="kula"
-                id="kula"
-                value={formData.kula}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({ ...prev, kula: value, subKula: "" }));
-                }}
+                name="subKula"
+                id="subKula"
+                value={formData.subKula}
+                onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-md bg-white"
                 required
               >
-                <option value="">Select Kula</option>
-                <option value="Veerashaiva Lingayatha">Veerashaiva Lingayatha / ವೀರಶೈವ ಲಿಂಗಾಯತ</option>
+                <option value="">Select Sub Kula</option>
+                <option value="Panchamasaligaru">Panchamasaligaru / ಪಂಚಮಸಾಲಿಗರು</option>
+                <option value="Banajigaru">Banajigaru / ಬಣಜಿಗರು</option>
+                <option value="Kadi - vakkaligaru">Kadi - vakkaligaru / ಕಡಿ - ವಕ್ಕಲಿಗರು</option>
+                <option value="Kumbararu">Kumbararu / ಕುಂಬಾರರು</option>
+                <option value="Madivalaru">Madivalaru / ಮಡಿವಾಳರು</option>
+                <option value="Lalagondaru">Lalagondaru / ಲಾಲಗೊಂಡರು</option>
+                <option value="Pakanaka reddy">Pakanaka reddy / ಪಕನಕ ರೆಡ್ಡಿ</option>
+                <option value="Reddy">Reddy / ರೆಡ್ಡಿ</option>
+                <option value="Gaanigaru">Gaanigaru / ಗಾಣಿಗರು</option>
+                <option value="Sadharu">Sadharu / ಸಧರು</option>
+                <option value="Nonabaru">Nonabaru / ನೊನಬಾರು</option>
+                <option value="Shetty ligayatha">Shetty ligayatha / ಶೆಟ್ಟಿ ಲಿಗಾಯತ</option>
+                <option value="Gouda lingyatha">Gouda lingyatha / ಗೌಡ ಲಿಂಗಾಯತ</option>
               </select>
             </div>
-
-            {formData.kula && (
-              <div>
-                <label htmlFor="subKula" className="block text-sm font-semibold">
-                  Sub Kula / ಉಪಕುಲ
-                </label>
-                <select
-                  name="subKula"
-                  id="subKula"
-                  value={formData.subKula}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md bg-white"
-                  required
-                >
-                  <option value="">Select Sub Kula</option>
-                  <option value="Panchamasaligaru">Panchamasaligaru / ಪಂಚಮಸಾಲಿಗರು</option>
-                  <option value="Banajigaru">Banajigaru / ಬಣಜಿಗರು</option>
-                  <option value="Kadi - vakkaligaru">Kadi - vakkaligaru / ಕಡಿ - ವಕ್ಕಲಿಗರು</option>
-                  <option value="Kumbararu">Kumbararu / ಕುಂಬಾರರು</option>
-                  <option value="Madivalaru">Madivalaru / ಮಡಿವಾಳರು</option>
-                  <option value="Lalagondaru">Lalagondaru / ಲಾಲಗೊಂಡರು</option>
-                  <option value="Pakanaka reddy">Pakanaka reddy / ಪಕನಕ ರೆಡ್ಡಿ</option>
-                  <option value="Reddy">Reddy / ರೆಡ್ಡಿ</option>
-                  <option value="Gaanigaru">Gaanigaru / ಗಾಣಿಗರು</option>
-                  <option value="Sadharu">Sadharu / ಸಧರು</option>
-                  <option value="Nonabaru">Nonabaru / ನೊನಬಾರು</option>
-                  <option value="Shetty ligayatha">Shetty ligayatha / ಶೆಟ್ಟಿ ಲಿಗಾಯತ</option>
-                  <option value="Gouda lingyatha">Gouda lingyatha / ಗೌಡ ಲಿಂಗಾಯತ</option>
-                </select>
-              </div>
-            )}
             <div>
               <label htmlFor="name" className="block text-sm font-semibold">
                 {t("signupl3.name")}
