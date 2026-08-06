@@ -613,8 +613,25 @@ export default function PersonalDetailsForm() {
               </div>
             )}
 
-            {/* Kula — only one option so we set it silently and show Sub Kula directly */}
-            <input type="hidden" name="kula" value="Veerashaiva Lingayatha" />
+            {/* Kula — pre-selected to the only valid value */}
+            <div>
+              <label htmlFor="kula" className="block text-sm font-semibold">
+                Kula / ಕುಲ
+              </label>
+              <select
+                name="kula"
+                id="kula"
+                value={formData.kula}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({ ...prev, kula: value, subKula: "" }));
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md bg-white"
+                required
+              >
+                <option value="Veerashaiva Lingayatha">Veerashaiva Lingayatha / ವೀರಶೈವ ಲಿಂಗಾಯತ</option>
+              </select>
+            </div>
 
             <div>
               <label htmlFor="subKula" className="block text-sm font-semibold">
