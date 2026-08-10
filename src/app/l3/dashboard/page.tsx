@@ -73,6 +73,44 @@ export default function Dashboard() {
   const [selectedPeethaIndex, setSelectedPeethaIndex] = useState<number>(0);
   const [l3CardSide, setL3CardSide] = useState<'front' | 'back'>('front');
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      let url = '';
+      if (cloudName && uploadPreset) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', uploadPreset);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        url = data.secure_url as string;
+      } else {
+        throw new Error('Image upload not configured');
+      }
+      const userId = typeof window !== 'undefined' ? sessionStorage.getItem('userId') || '' : '';
+      const updateRes = await fetch(`/api/l3/update-profile/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoUrl: url }),
+      });
+      if (!updateRes.ok) throw new Error('Failed to update profile');
+      const refreshed = await fetch(`/api/l3/dashboard/${userId}?timestamp=${Date.now()}`, { cache: 'no-store' });
+      if (refreshed.ok) {
+        const ud = await refreshed.json();
+        setUserData(ud);
+      }
+      setToast({ message: 'Profile photo uploaded successfully! 🎉', type: 'success' });
+    } catch (e) {
+      console.error(e);
+      setToast({ message: 'Failed to upload photo. Please try again.', type: 'error' });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
 
   // Cloudinary config (same approach as L2)
@@ -451,6 +489,32 @@ export default function Dashboard() {
                 <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '6px' }}>Total Members</span>
               </div>
             </div>
+
+            {/* Image Upload — shown only when photo is missing */}
+            {(!userData.photoUrl || !userData.photoUrl.startsWith('http')) && (
+              <div className="l3a0" style={{ background: '#fff', border: '2px dashed #ea580c', borderRadius: '16px', padding: '16px', marginBottom: '14px', textAlign: 'center' }}>
+                <div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div>
+                <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>Upload Your Photo</p>
+                <p style={{ margin: '0 0 12px', fontSize: '11px', color: '#64748b' }}>Add a profile photo to complete your membership card</p>
+                <label htmlFor="l3-photo-upload-mobile" style={{
+                  display: 'inline-block', padding: '10px 20px',
+                  background: isUploadingPhoto ? '#9ca3af' : 'linear-gradient(135deg,#ea580c,#c2410c)',
+                  color: '#fff', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                  cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 12px rgba(234,88,12,0.3)',
+                }}>
+                  {isUploadingPhoto ? '⏳ Uploading...' : '📂 Choose Photo'}
+                </label>
+                <input
+                  id="l3-photo-upload-mobile"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  disabled={isUploadingPhoto}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+                />
+              </div>
+            )}
 
             {/* Count Chips */}
             <p className="l3lbl l3a1">Member counts</p>
@@ -1080,6 +1144,34 @@ export default function Dashboard() {
             Download Card
           </button>
         </div>
+
+        {/* Image Upload Section — desktop, shown only when photo is missing */}
+        {(!userData.photoUrl || !userData.photoUrl.startsWith('http')) && (
+          <div style={{ margin: '24px auto 0', maxWidth: '480px', background: 'linear-gradient(135deg,#fff7ed,#fff)', border: '2px dashed #ea580c', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '40px', marginBottom: '8px' }}>📷</div>
+            <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Upload Your Profile Photo</h3>
+            <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#64748b' }}>Your membership card requires a photo. Upload one to complete your profile.</p>
+            <label htmlFor="l3-photo-upload-desktop" style={{
+              display: 'inline-block', padding: '12px 28px',
+              background: isUploadingPhoto ? '#9ca3af' : 'linear-gradient(135deg,#ea580c,#c2410c)',
+              color: '#fff', borderRadius: '12px', fontSize: '14px', fontWeight: 600,
+              cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+              boxShadow: '0 6px 16px rgba(234,88,12,0.35)', letterSpacing: '0.02em',
+              transition: 'opacity 0.2s',
+            }}>
+              {isUploadingPhoto ? '⏳ Uploading...' : '📂 Choose & Upload Photo'}
+            </label>
+            <input
+              id="l3-photo-upload-desktop"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              disabled={isUploadingPhoto}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+            />
+            <p style={{ marginTop: '10px', fontSize: '11px', color: '#94a3b8' }}>Supported: JPG, PNG, WEBP • Max 5MB</p>
+          </div>
+        )}
         {/* Card section */}
         <div id="card-print-area" className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-2">
           <div className="flex flex-col sm:flex-row justify-center gap-8">

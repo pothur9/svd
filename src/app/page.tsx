@@ -162,7 +162,7 @@ export default function Home() {
         <div className="relative w-full h-screen sm:h-64 md:h-72">
           <iframe
             className="absolute inset-0 w-full h-full rounded-lg shadow"
-            src="https://www.youtube.com/embed/6pKNEqrw16A"
+            src="https://www.youtube.com/embed/4wK_sGEHL6g?si=OZ3Y-VB3AaHtbQzv"
             title="How to create account"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
