@@ -238,17 +238,27 @@ export default function PersonalDetailsForm() {
 
     setIsLoading(true);
     try {
-      const otpResponse = await fetch(
-        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN3/SVD`
-      );
+      // ── Old 2factor.in send OTP (commented out) ──────────────────────────
+      // const otpResponse = await fetch(
+      //   `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN3/SVD`
+      // );
+      // const otpData = await otpResponse.json();
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP via Meta Graph API ──────────────────────────────────
+      const otpResponse = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone: formData.contactNo }),
+      });
       const otpData = await otpResponse.json();
 
       if (otpData.Status === "Success") {
-        setSessionId(otpData.Details);
+        setSessionId(otpData.Details); // Details = "91XXXXXXXXXX" (phone acts as session key)
         setOtp("");
         setOtpTimer(60);
         setShowOtpPopup(true);
-        setToast({ message: "OTP sent successfully! 📱", type: "success" });
+        setToast({ message: "OTP sent via WhatsApp! 📱", type: "success" });
       } else {
         setToast({ message: "Failed to send OTP. Please try again.", type: "error" });
       }
@@ -276,15 +286,25 @@ export default function PersonalDetailsForm() {
     if (!formData.contactNo) return;
     setIsResending(true);
     try {
-      const otpResponse = await fetch(
-        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN3/SVD`
-      );
+      // ── Old 2factor.in resend OTP (commented out) ─────────────────────────
+      // const otpResponse = await fetch(
+      //   `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/${formData.contactNo}/AUTOGEN3/SVD`
+      // );
+      // const otpData = await otpResponse.json();
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP via Meta Graph API ──────────────────────────────────
+      const otpResponse = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone: formData.contactNo }),
+      });
       const otpData = await otpResponse.json();
       if (otpData.Status === "Success") {
         setSessionId(otpData.Details);
         setOtp("");
         setOtpTimer(60);
-        setToast({ message: "OTP resent successfully! 📱", type: "success" });
+        setToast({ message: "OTP resent via WhatsApp! 📱", type: "success" });
       } else {
         setToast({ message: "Failed to resend OTP. Please try again.", type: "error" });
       }
@@ -304,12 +324,22 @@ export default function PersonalDetailsForm() {
 
     setIsVerifyingOtp(true);
     try {
-      const verifyResponse = await fetch(
-        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`
-      );
+      // ── Old 2factor.in verify OTP (commented out) ─────────────────────────
+      // const verifyResponse = await fetch(
+      //   `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_OTP_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`
+      // );
+      // const verifyData = await verifyResponse.json();
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP verify via centralized API ───────────────────────────
+      const verifyResponse = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", phone: formData.contactNo, otp }),
+      });
       const verifyData = await verifyResponse.json();
 
-      if (verifyData.Status === "Success" || otp === "1234") {
+      if (verifyData.Status === "Success") {
         console.log("OTP verified successfully. Completing signup...");
 
         // Conditionally upload photo if provided

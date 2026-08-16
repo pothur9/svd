@@ -94,13 +94,24 @@ export default function SignupForm() {
 
   const sendOtp = async () => {
     try {
-      const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
-      );
-      console.log("OTP sent:", response.data);
-      setOtpSessionId(response.data.Details);
+      // ── Old 2factor.in send OTP (commented out) ──────────────────────────
+      // const response = await axios.get(
+      //   `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${formData.contactNo}/AUTOGEN3/SVD`
+      // );
+      // setOtpSessionId(response.data.Details);
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP via Meta Graph API ──────────────────────────────────
+      const response = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone: formData.contactNo }),
+      });
+      const data = await response.json();
+      console.log("OTP sent:", data);
+      setOtpSessionId(data.Details);
       setIsOtpSent(true);
-      setToast({ message: "OTP sent successfully! 📱", type: "success" });
+      setToast({ message: "OTP sent via WhatsApp! 📱", type: "success" });
     } catch (error) {
       console.error("Error sending OTP:", error);
       setToast({ message: "Failed to send OTP. Please check your phone number.", type: "error" });
@@ -112,11 +123,22 @@ export default function SignupForm() {
   const verifyOtp = async () => {
     setIsVerifyingOtp(true);
     try {
-      const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
-      );
-      console.log("OTP verified response:", response.data);
-      if (response.data.Status === "Success" || otp === "1234") {
+      // ── Old 2factor.in verify OTP (commented out) ─────────────────────────
+      // const response = await axios.get(
+      //   `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
+      // );
+      // if (response.data.Status === "Success" || otp === "1234") { ... }
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP verify via centralized API ───────────────────────────
+      const response = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", phone: formData.contactNo, otp }),
+      });
+      console.log("OTP verified response:", response);
+      const data = await response.json();
+      if (data.Status === "Success") {
 
         // Create Firebase user or generate custom UID
         let firebaseUid = "";

@@ -34,14 +34,24 @@ const LoginPage: React.FC = () => {
     }
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN3/SVD`
-      );
+      // ── Old 2factor.in send OTP (commented out) ──────────────────────────
+      // const response = await fetch(
+      //   `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN3/SVD`
+      // );
+      // const data = await response.json();
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP via Meta Graph API ──────────────────────────────────
+      const response = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone: contactNo }),
+      });
       const data = await response.json();
       if (data.Status === "Success") {
         setOtpSessionId(data.Details);
         setIsOtpSent(true);
-        console.log("OTP sent successfully!");
+        console.log("OTP sent via WhatsApp successfully!");
       } else {
         console.log("Failed to send OTP. Please try again.");
       }
@@ -61,12 +71,22 @@ const LoginPage: React.FC = () => {
     }
     setIsVerifying(true);
     try {
-      const verifyResponse = await fetch(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
-      );
+      // ── Old 2factor.in verify OTP (commented out) ─────────────────────────
+      // const verifyResponse = await fetch(
+      //   `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
+      // );
+      // const verifyData = await verifyResponse.json();
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP verify via centralized API ───────────────────────────
+      const verifyResponse = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", phone: contactNo, otp }),
+      });
       const verifyData = await verifyResponse.json();
       
-      if (verifyData.Status === "Success" || otp === "1234") {
+      if (verifyData.Status === "Success") {
         // OTP verified, now login with userId and contactNo
         const loginResponse = await fetch("/api/l1/login", {
           method: "POST",

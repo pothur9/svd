@@ -26,13 +26,24 @@ const ForgotPasswordPage: React.FC = () => {
 
   const sendOtp = async () => {
     try {
-      const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN/SVD`
-      );
-      setOtpSessionId(response.data.Details);
+      // ── Old 2factor.in send OTP (commented out) ──────────────────────────
+      // const response = await axios.get(
+      //   `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/${contactNo}/AUTOGEN/SVD`
+      // );
+      // setOtpSessionId(response.data.Details);
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP via Meta Graph API ──────────────────────────────────
+      const response = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone: contactNo }),
+      });
+      const data = await response.json();
+      setOtpSessionId(data.Details);
       setIsOtpSent(true);
       setResendTimer(30);
-      setMessage("OTP sent successfully!");
+      setMessage("OTP sent via WhatsApp!");
     } catch {
       setMessage("Failed to send OTP. Please check your phone number.");
     }
@@ -40,10 +51,21 @@ const ForgotPasswordPage: React.FC = () => {
 
   const verifyOtp = async () => {
     try {
-      const response = await axios.get(
-        `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
-      );
-      if (response.data.Status === "Success" || otp === "1234") {
+      // ── Old 2factor.in verify OTP (commented out) ─────────────────────────
+      // const response = await axios.get(
+      //   `https://2factor.in/API/V1/3e5558da-7432-11ef-8b17-0200cd936042/SMS/VERIFY/${otpSessionId}/${otp}`
+      // );
+      // if (response.data.Status === "Success" || otp === "1234") { ... }
+      // ────────────────────────────────────────────────────────────────────
+
+      // ── WhatsApp OTP verify via centralized API ───────────────────────────
+      const response = await fetch("/api/whatsapp-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", phone: contactNo, otp }),
+      });
+      const data = await response.json();
+      if (data.Status === "Success") {
         setIsOtpVerified(true);
         setMessage("OTP verified successfully.");
       } else {
