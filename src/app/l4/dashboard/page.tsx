@@ -76,6 +76,7 @@ export default function Dashboard() {
   const [cardSide, setCardSide] = useState<"front" | "back">("front");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -136,12 +137,56 @@ export default function Dashboard() {
     }
   };
 
-  const handleDownloadCard = () => {
-    document.body.classList.add("print-card-only");
-    setTimeout(() => {
-      window.print();
-      document.body.classList.remove("print-card-only");
-    }, 50);
+  const handleDownloadCard = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const el = document.getElementById('card-print-area');
+      if (!el) {
+        setToast({ message: 'Card not ready. Please wait and try again.', type: 'error' });
+        return;
+      }
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(el as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 15000,
+      });
+      const link = document.createElement('a');
+      link.download = `${userData?.name || 'membership-card'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setToast({ message: 'Card downloaded successfully! 🎉', type: 'success' });
+    } catch (e) {
+      console.error('Download failed', e);
+      setToast({ message: 'Download failed. Please try again.', type: 'error' });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const openEditForm = () => {
+    if (!userData) return;
+    const ALL_EDIT_FIELDS = [
+      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality',
+      'presentAddress','permanentAddress','qualification','occupation','languageKnown',
+      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','sonOf'
+    ];
+    const userRecord = userData as unknown as Record<string, unknown>;
+    const prefilled: Record<string, string> = {};
+    ALL_EDIT_FIELDS.forEach((k) => {
+      const v = userRecord[k];
+      prefilled[k] = (v !== null && v !== undefined) ? String(v) : '';
+    });
+    setMissingFields(ALL_EDIT_FIELDS);
+    setFormData(prefilled);
+    setCurrentStep(0);
+    setShowCompleteForm(true);
   };
 
   const router = useRouter();
@@ -363,6 +408,26 @@ export default function Dashboard() {
             onClose={() => setToast(null)}
           />
         )}
+
+        {/* Full-screen download overlay */}
+        {isDownloading && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+            zIndex: 9999, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: '16px',
+          }}>
+            <style>{`@keyframes l4spin { to { transform: rotate(360deg); } }`}</style>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%',
+              border: '5px solid rgba(255,255,255,0.25)',
+              borderTop: '5px solid #fff',
+              animation: 'l4spin 0.75s linear infinite',
+            }} />
+            <p style={{ color: '#fff', fontSize: '16px', fontWeight: 700, margin: 0 }}>Preparing your card...</p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', margin: 0 }}>Please wait, do not close this page</p>
+          </div>
+        )}
+
         <Navbar />
 
         <style jsx global>{`
@@ -493,8 +558,8 @@ export default function Dashboard() {
               <span style={{ fontSize: "13px", color: "#78350f", flex: 1 }}>
                 Profile incomplete — {missingFields.length} fields missing
               </span>
-              <button
-                onClick={() => setShowCompleteForm(true)}
+              {/* <button
+                onClick={openEditForm}
                 style={{
                   background: "#f59e0b", color: "#fff", border: "none",
                   borderRadius: "8px", padding: "6px 12px", fontSize: "12px",
@@ -502,12 +567,12 @@ export default function Dashboard() {
                 }}
               >
                 Fill now
-              </button>
+              </button> */}
             </div>
           )}
 
           {/* ── Complete Profile Modal ── */}
-          {showCompleteForm && profileIncomplete && missingFields.length > 0 && (
+          {showCompleteForm && (
             <div style={{
               position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
               zIndex: 100, display: "flex", alignItems: "flex-end",
@@ -566,8 +631,8 @@ export default function Dashboard() {
                             <>
                               <input type="date" value={formData[field] || ""} onChange={(e) => {
                                 const val = e.target.value;
-                                setFormData((prev) => {
-                                  const next = { ...prev, [field]: val };
+                                setFormData((prev: Record<string, string>) => {
+                                  const next: Record<string, string> = { ...prev, [field]: val };
                                   if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                     next['guardianId'] = '';
                                   }
@@ -922,6 +987,29 @@ export default function Dashboard() {
               ))}
             </div>
 
+            {/* Edit Photo Button — mobile */}
+            <div className="anim-4" style={{ marginBottom: '12px' }}>
+              <label htmlFor="l4-photo-edit-mobile" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '11px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                border: '1.5px solid #ea580c',
+                background: isUploadingPhoto ? '#f1f5f9' : 'rgba(234,88,12,0.06)',
+                color: isUploadingPhoto ? '#94a3b8' : '#ea580c',
+                transition: 'all 0.2s',
+              }}>
+                {isUploadingPhoto ? '⏳ Uploading...' : '📷 Edit Photo'}
+              </label>
+              <input
+                id="l4-photo-edit-mobile"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                disabled={isUploadingPhoto}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+              />
+            </div>
+
             <div id="card-print-area" ref={cardRef}>
 
               {/* ── FRONT — PAN card size 85.6×53.98mm → 324×204px at 96dpi ── */}
@@ -1050,19 +1138,20 @@ export default function Dashboard() {
 
             {/* ── Action Buttons ── */}
             <div className="anim-5" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-              <button
+              {/* <button
                 onClick={handleDownloadCard}
+                disabled={isDownloading}
                 style={{
                   flex: 1, padding: "14px", borderRadius: "12px",
-                  border: "none", background: "#ea580c", color: "#fff",
-                  fontSize: "14px", fontWeight: 600, cursor: "pointer",
+                  border: "none", background: isDownloading ? '#9ca3af' : "#ea580c", color: "#fff",
+                  fontSize: "14px", fontWeight: 600, cursor: isDownloading ? 'not-allowed' : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
                 }}
               >
-                ⬇ Download card
-              </button>
-              <button
-                onClick={() => setShowCompleteForm(true)}
+                {isDownloading ? '⏳ Downloading...' : '⬇ Download card'}
+              </button> */}
+              {/* <button
+                onClick={openEditForm}
                 style={{
                   flex: 1, padding: "14px", borderRadius: "12px",
                   border: "1.5px solid #e2e8f0", background: "#fff", color: "#1e293b",
@@ -1071,7 +1160,7 @@ export default function Dashboard() {
                 }}
               >
                 ✏ Edit profile
-              </button>
+              </button> */}
             </div>
 
           </div>
@@ -1114,6 +1203,26 @@ export default function Dashboard() {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* Full-screen download overlay */}
+      {isDownloading && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+          zIndex: 9999, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: '16px',
+        }}>
+          <style>{`@keyframes l4spind { to { transform: rotate(360deg); } }`}</style>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            border: '6px solid rgba(255,255,255,0.25)',
+            borderTop: '6px solid #fff',
+            animation: 'l4spind 0.75s linear infinite',
+          }} />
+          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0 }}>Preparing your card...</p>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>Please wait, do not close this page</p>
+        </div>
+      )}
+
       <Navbar />
       <div className="bg-slate-100 pt-4 sm:pt-6">
         {profileIncomplete && (
@@ -1124,7 +1233,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        {showCompleteForm && profileIncomplete && missingFields.length > 0 && (
+        {showCompleteForm && (
           <div className="fixed inset-0 flex items-start justify-center pt-24 pointer-events-none">
             <div className="relative z-[60] bg-white rounded-lg shadow-lg w-[95%] max-w-2xl p-5 pointer-events-auto">
               {(() => {
@@ -1169,8 +1278,8 @@ export default function Dashboard() {
                           <>
                             <input type="date" value={formData[field] || ""} onChange={(e) => {
                               const val = e.target.value;
-                              setFormData((prev) => {
-                                const next = { ...prev, [field]: val };
+                              setFormData((prev: Record<string, string>) => {
+                                const next: Record<string, string> = { ...prev, [field]: val };
                                 if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                   next['guardianId'] = '';
                                 }
@@ -1340,48 +1449,41 @@ export default function Dashboard() {
           </h1>
         </div>
         <br />
-        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 flex justify-end">
-          <button
+        {/* Download Button + Edit Photo — desktop */}
+        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 flex justify-end gap-3">
+          <label htmlFor="l4-photo-edit-desktop" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '7px',
+            padding: '9px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+            cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+            border: '1.5px solid #ea580c',
+            background: isUploadingPhoto ? '#f1f5f9' : 'rgba(234,88,12,0.06)',
+            color: isUploadingPhoto ? '#94a3b8' : '#ea580c',
+            transition: 'all 0.2s',
+          }}>
+            {isUploadingPhoto ? '⏳ Uploading...' : '📷 Edit Photo'}
+          </label>
+          <input
+            id="l4-photo-edit-desktop"
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            disabled={isUploadingPhoto}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+          />
+          {/* <button
             onClick={handleDownloadCard}
+            disabled={isDownloading}
             style={{
               padding: "10px 24px", borderRadius: "10px", border: "none",
-              background: "linear-gradient(135deg,#ea580c,#c2410c)", color: "#fff",
-              fontSize: "14px", fontWeight: 600, cursor: "pointer",
+              background: isDownloading ? '#9ca3af' : "linear-gradient(135deg,#ea580c,#c2410c)", color: "#fff",
+              fontSize: "14px", fontWeight: 600, cursor: isDownloading ? 'not-allowed' : "pointer",
               boxShadow: "0 4px 16px rgba(234,88,12,0.35)",
               display: "flex", alignItems: "center", gap: "8px",
             }}
           >
-            ⬇ Download Card
-          </button>
+            {isDownloading ? '⏳ Downloading...' : '⬇ Download Card'}
+          </button> */}
         </div>
-
-        {/* Image Upload Section — desktop, shown only when photo is missing */}
-        {(!userData.photoUrl || !userData.photoUrl.startsWith('http')) && (
-          <div style={{ margin: '24px auto 0', maxWidth: '480px', background: 'linear-gradient(135deg,#fff7ed,#fff)', border: '2px dashed #ea580c', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '40px', marginBottom: '8px' }}>📷</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Upload Your Profile Photo</h3>
-            <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#64748b' }}>Your membership card requires a photo. Upload one to complete your profile.</p>
-            <label htmlFor="l4-photo-upload-desktop" style={{
-              display: 'inline-block', padding: '12px 28px',
-              background: isUploadingPhoto ? '#9ca3af' : 'linear-gradient(135deg,#ea580c,#c2410c)',
-              color: '#fff', borderRadius: '12px', fontSize: '14px', fontWeight: 600,
-              cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
-              boxShadow: '0 6px 16px rgba(234,88,12,0.35)', letterSpacing: '0.02em',
-              transition: 'opacity 0.2s',
-            }}>
-              {isUploadingPhoto ? '⏳ Uploading...' : '📂 Choose & Upload Photo'}
-            </label>
-            <input
-              id="l4-photo-upload-desktop"
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              disabled={isUploadingPhoto}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
-            />
-            <p style={{ marginTop: '10px', fontSize: '11px', color: '#94a3b8' }}>Supported: JPG, PNG, WEBP • Max 5MB</p>
-          </div>
-        )}
 
         {/* ID Card — front + back side by side */}
         <div id="card-print-area" className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 mb-10" ref={cardRef}>

@@ -502,6 +502,29 @@ export default function Dashboard(): JSX.Element {
               ))}
             </div>
 
+            {/* Edit Photo Button — mobile */}
+            <div className="l2a4" style={{ marginBottom: '12px' }}>
+              <label htmlFor="l2-photo-edit-mobile" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '11px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                border: '1.5px solid #ea580c',
+                background: isUploadingPhoto ? '#f1f5f9' : 'rgba(234,88,12,0.06)',
+                color: isUploadingPhoto ? '#94a3b8' : '#ea580c',
+                transition: 'all 0.2s',
+              }}>
+                {isUploadingPhoto ? '⏳ Uploading...' : '📷 Edit Photo'}
+              </label>
+              <input
+                id="l2-photo-edit-mobile"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                disabled={isUploadingPhoto}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+              />
+            </div>
+
             <div id="card-print-area">
               {/* Front Card — PAN card size 324×204px */}
               {l2CardSide === 'front' && (
@@ -602,8 +625,8 @@ export default function Dashboard(): JSX.Element {
 
             {/* Actions */}
             <div className="l2a4" style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
-              <button onClick={downloadUserCard} disabled={isDownloading} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: isDownloading ? '#9ca3af' : '#ea580c', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: isDownloading ? 'not-allowed' : 'pointer' }}>{isDownloading ? 'Generating...' : '⬇ Download card'}</button>
-              <button onClick={goToCompleteProfile} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#1e293b', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>✎ Edit profile</button>
+              {/* <button onClick={downloadUserCard} disabled={isDownloading} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: isDownloading ? '#9ca3af' : '#ea580c', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: isDownloading ? 'not-allowed' : 'pointer' }}>{isDownloading ? 'Generating...' : '⬇ Download card'}</button> */}
+              {/* <button onClick={goToCompleteProfile} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#1e293b', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>✎ Edit profile</button> */}
             </div>
           </div>
         </div>
@@ -639,14 +662,12 @@ export default function Dashboard(): JSX.Element {
 
         {/* Actions */}
         <div className="flex justify-end gap-3 mb-4 mr-6">
-          {profileIncomplete && (
-            <button
-              onClick={goToCompleteProfile}
-              className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors"
-            >
-              Complete Profile
-            </button>
-          )}
+          {/* <button
+            onClick={goToCompleteProfile}
+            className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors"
+          >
+            Edit Profile
+          </button> */}
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
@@ -880,6 +901,29 @@ export default function Dashboard(): JSX.Element {
               ))}
             </div>
 
+            {/* Edit Photo Button — desktop */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+              <label htmlFor="l2-photo-edit-desktop" style={{
+                display: 'inline-flex', alignItems: 'center', gap: '7px',
+                padding: '9px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+                cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                border: '1.5px solid #ea580c',
+                background: isUploadingPhoto ? '#f1f5f9' : 'rgba(234,88,12,0.06)',
+                color: isUploadingPhoto ? '#94a3b8' : '#ea580c',
+                transition: 'all 0.2s',
+              }}>
+                {isUploadingPhoto ? '⏳ Uploading...' : '📷 Edit Photo'}
+              </label>
+              <input
+                id="l2-photo-edit-desktop"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                disabled={isUploadingPhoto}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+              />
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               {l2CardSide === 'front' && (
                 <div style={{
@@ -956,9 +1000,9 @@ export default function Dashboard(): JSX.Element {
               )}
             </div>
             <div className="flex justify-center mt-6">
-              <button onClick={downloadUserCard} disabled={isDownloading} style={{ backgroundColor: isDownloading ? '#9ca3af' : '#ea580c', color: '#ffffff', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', cursor: isDownloading ? 'not-allowed' : 'pointer', border: 'none', fontWeight: 'bold', opacity: isDownloading ? 0.7 : 1 }} onMouseOver={(e) => { if (!isDownloading) e.currentTarget.style.backgroundColor = '#c2410c'; }} onMouseOut={(e) => { if (!isDownloading) e.currentTarget.style.backgroundColor = '#ea580c'; }}>
+              {/* <button onClick={downloadUserCard} disabled={isDownloading} style={{ backgroundColor: isDownloading ? '#9ca3af' : '#ea580c', color: '#ffffff', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', cursor: isDownloading ? 'not-allowed' : 'pointer', border: 'none', fontWeight: 'bold', opacity: isDownloading ? 0.7 : 1 }} onMouseOver={(e) => { if (!isDownloading) e.currentTarget.style.backgroundColor = '#c2410c'; }} onMouseOut={(e) => { if (!isDownloading) e.currentTarget.style.backgroundColor = '#ea580c'; }}>
                 {isDownloading ? <div className="flex items-center gap-2"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>Generating PDF...</div> : 'Download ID Card as PDF'}
-              </button>
+              </button> */}
             </div>
 
             {/* Image Upload Section — desktop, shown only when photo is missing */}

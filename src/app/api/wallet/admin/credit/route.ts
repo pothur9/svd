@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     await WalletTransaction.create({
       fromUserId: "ADMIN",
       toUserId: user.userId,
-      fromName: "Admin",
+      fromName: "Sanathana Veerashaiva Ligayatha Trust",
       toName: user.name,
       amount: creditAmount,
       type: "admin_credit",

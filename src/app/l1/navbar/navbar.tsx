@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -80,11 +80,7 @@ function Navbar() {
         </div>
 
         <div className="navbar-end">
-          {totalUsers !== null && (
-            <div className="text-black p-1 text-center">
-              Total Users: {totalUsers}
-            </div>
-          )}
+
           <button onClick={handleLogout} className="btn">
             Logout
           </button>

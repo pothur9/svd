@@ -411,11 +411,7 @@ function Navbar() {
         </div>
 
         <div className="navbar-end">
-          {totalUsers !== null && (
-            <div style={{ color: '#000', padding: '0.5rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-              Total Users: {totalUsers}
-            </div>
-          )}
+
           <Link
             href="/l4/wallet"
             style={{

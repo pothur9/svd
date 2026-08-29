@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar/navbar";
 import Footer from "../footer/footer";
@@ -74,6 +74,8 @@ export default function Dashboard() {
   const [l3CardSide, setL3CardSide] = useState<'front' | 'back'>('front');
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const handlePhotoUpload = async (file: File) => {
     if (!file) return;
@@ -141,12 +143,56 @@ export default function Dashboard() {
     }
   };
 
-  const handleDownloadCard = () => {
-    document.body.classList.add('print-card-only');
-    setTimeout(() => {
-      window.print();
-      document.body.classList.remove('print-card-only');
-    }, 50);
+  const openEditForm = () => {
+    if (!userData) return;
+    const ALL_EDIT_FIELDS = [
+      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality',
+      'presentAddress','permanentAddress','qualification','occupation','languageKnown',
+      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','sonOf'
+    ];
+    const userRecord = userData as unknown as Record<string, unknown>;
+    const prefilled: Record<string, string> = {};
+    ALL_EDIT_FIELDS.forEach((k) => {
+      const v = userRecord[k];
+      prefilled[k] = (v !== null && v !== undefined) ? String(v) : '';
+    });
+    setMissingFields(ALL_EDIT_FIELDS);
+    setFormData(prefilled);
+    setCurrentStep(0);
+    setShowCompleteForm(true);
+  };
+
+  const handleDownloadCard = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const el = document.getElementById('card-print-area');
+      if (!el) {
+        setToast({ message: 'Card not ready. Please wait and try again.', type: 'error' });
+        return;
+      }
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(el as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 15000,
+      });
+      const link = document.createElement('a');
+      link.download = `${userData?.name || 'membership-card'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setToast({ message: 'Card downloaded successfully! 🎉', type: 'success' });
+    } catch (e) {
+      console.error('Download failed', e);
+      setToast({ message: 'Download failed. Please try again.', type: 'error' });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const router = useRouter();
@@ -351,6 +397,26 @@ export default function Dashboard() {
             onClose={() => setToast(null)}
           />
         )}
+
+        {/* Full-screen download overlay */}
+        {isDownloading && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+            zIndex: 9999, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: '16px',
+          }}>
+            <style>{`@keyframes l3spin { to { transform: rotate(360deg); } }`}</style>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%',
+              border: '5px solid rgba(255,255,255,0.25)',
+              borderTop: '5px solid #fff',
+              animation: 'l3spin 0.75s linear infinite',
+            }} />
+            <p style={{ color: '#fff', fontSize: '16px', fontWeight: 700, margin: 0 }}>Preparing your card...</p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', margin: 0 }}>Please wait, do not close this page</p>
+          </div>
+        )}
+
         <Navbar />
 
         <style jsx global>{`
@@ -386,7 +452,7 @@ export default function Dashboard() {
               <button onClick={() => setShowCompleteForm(true)} style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>Fill now</button>
             </div>
           )}
-          {showCompleteForm && profileIncomplete && missingFields.length > 0 && (
+          {showCompleteForm && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
               <div style={{ background: '#fff', width: '100%', borderRadius: '20px 20px 0 0', padding: '20px 16px 32px', maxHeight: '85vh', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -403,7 +469,7 @@ export default function Dashboard() {
                       try {
                         const stored = typeof window !== 'undefined' ? sessionStorage.getItem('userId') || '' : '';
                         const payload: Record<string, string> = {};
-                        missingFields.forEach((k) => { if (formData[k] !== undefined && formData[k] !== '') payload[k] = formData[k]; });
+                        missingFields.forEach((k) => { if (formData[k] !== undefined) payload[k] = formData[k]; });
                         const res = await fetch(`/api/l3/update-profile/${stored}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                         const data = await res.json();
                         if (!res.ok) throw new Error(data?.message || 'Failed');
@@ -418,9 +484,8 @@ export default function Dashboard() {
                             <>
                               <input type="date" value={formData[field] || ''} onChange={(e) => {
                                 const val = e.target.value;
-                                setFormData((prev) => {
-                                  const next = { ...prev, [field]: val };
-                                  // If age < 18, ensure guardianId is in the form data
+                                setFormData((prev: Record<string, string>) => {
+                                  const next: Record<string, string> = { ...prev, [field]: val };
                                   if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                     next['guardianId'] = '';
                                   }
@@ -584,6 +649,29 @@ export default function Dashboard() {
               ))}
             </div>
 
+            {/* Edit Photo Button — mobile */}
+            <div className="l3a4" style={{ marginBottom: '12px' }}>
+              <label htmlFor="l3-photo-edit-mobile" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '11px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                border: '1.5px solid #ea580c',
+                background: isUploadingPhoto ? '#f1f5f9' : 'rgba(234,88,12,0.06)',
+                color: isUploadingPhoto ? '#94a3b8' : '#ea580c',
+                transition: 'all 0.2s',
+              }}>
+                {isUploadingPhoto ? '⏳ Uploading...' : '📷 Edit Photo'}
+              </label>
+              <input
+                id="l3-photo-edit-mobile"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                disabled={isUploadingPhoto}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+              />
+            </div>
+
             <div id="card-print-area">
               {/* Front Card — PAN card size 324×204px */}
               {l3CardSide === 'front' && (
@@ -684,8 +772,8 @@ export default function Dashboard() {
 
             {/* Actions */}
             <div className="l3a4" style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
-              <button onClick={handleDownloadCard} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: '#ea580c', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>⬇ Download card</button>
-              <button onClick={() => setShowCompleteForm(true)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#1e293b', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>✏ Edit profile</button>
+              {/* <button onClick={handleDownloadCard} disabled={isDownloading} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: isDownloading ? '#9ca3af' : '#ea580c', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: isDownloading ? 'not-allowed' : 'pointer' }}>{isDownloading ? '⏳ Downloading...' : '⬇ Download card'}</button> */}
+              {/* <button onClick={openEditForm} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#1e293b', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>✏ Edit profile</button> */}
             </div>
           </div>
         </div>
@@ -703,6 +791,26 @@ export default function Dashboard() {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* Full-screen download overlay */}
+      {isDownloading && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+          zIndex: 9999, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: '16px',
+        }}>
+          <style>{`@keyframes l3spind { to { transform: rotate(360deg); } }`}</style>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            border: '6px solid rgba(255,255,255,0.25)',
+            borderTop: '6px solid #fff',
+            animation: 'l3spind 0.75s linear infinite',
+          }} />
+          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0 }}>Preparing your card...</p>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0 }}>Please wait, do not close this page</p>
+        </div>
+      )}
+
       <Navbar />
 
       <div className="bg-slate-100 pt-4 sm:pt-6">
@@ -710,11 +818,11 @@ export default function Dashboard() {
           <div className="mx-auto max-w-[90%] sm:max-w-[95%] mt-0 mb-2 p-3 rounded bg-yellow-100 text-yellow-900 flex items-center justify-between shadow">
             <span>Your profile is incomplete. Please fill the remaining details.</span>
             <div className="flex gap-2">
-              <button onClick={() => setShowCompleteForm(true)} className="bg-green-600 text-white px-3 py-1 rounded">Complete Now</button>
+              {/* <button onClick={openEditForm} className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors">Edit Profile</button> */}
             </div>
           </div>
         )}
-        {showCompleteForm && profileIncomplete && missingFields.length > 0 && (
+        {showCompleteForm && (
           <div className="fixed inset-0 flex items-start justify-center pt-24 pointer-events-none">
             <div className="relative z-[60] bg-white rounded-lg shadow-lg w-[95%] max-w-2xl p-5 pointer-events-auto">
              
@@ -765,8 +873,8 @@ export default function Dashboard() {
                           <>
                             <input type="date" value={formData[field] || ''} onChange={(e) => {
                               const val = e.target.value;
-                              setFormData((prev) => {
-                                const next = { ...prev, [field]: val };
+                              setFormData((prev: Record<string, string>) => {
+                                const next: Record<string, string> = { ...prev, [field]: val };
                                 if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                   next['guardianId'] = '';
                                 }
@@ -1138,42 +1246,34 @@ export default function Dashboard() {
         </div>
         <br/>
        
-        {/* Download Button */}
-        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 flex justify-end">
-          <button onClick={handleDownloadCard} className="px-4 py-2 bg-orange-600 text-white rounded shadow hover:bg-orange-700 transition-all">
-            Download Card
-          </button>
+        {/* Download Button + Edit Photo — desktop */}
+        <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 flex justify-end gap-3">
+          <label htmlFor="l3-photo-edit-desktop" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '7px',
+            padding: '9px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+            cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+            border: '1.5px solid #ea580c',
+            background: isUploadingPhoto ? '#f1f5f9' : 'rgba(234,88,12,0.06)',
+            color: isUploadingPhoto ? '#94a3b8' : '#ea580c',
+            transition: 'all 0.2s',
+          }}>
+            {isUploadingPhoto ? '⏳ Uploading...' : '📷 Edit Photo'}
+          </label>
+          <input
+            id="l3-photo-edit-desktop"
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            disabled={isUploadingPhoto}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+          />
+          {/* <button onClick={handleDownloadCard} disabled={isDownloading} className="px-4 py-2 rounded shadow transition-all" style={{ background: isDownloading ? '#9ca3af' : '#ea580c', color: '#fff', cursor: isDownloading ? 'not-allowed' : 'pointer' }}>
+            {isDownloading ? '⏳ Downloading...' : 'Download Card'}
+          </button> */}
         </div>
 
-        {/* Image Upload Section — desktop, shown only when photo is missing */}
-        {(!userData.photoUrl || !userData.photoUrl.startsWith('http')) && (
-          <div style={{ margin: '24px auto 0', maxWidth: '480px', background: 'linear-gradient(135deg,#fff7ed,#fff)', border: '2px dashed #ea580c', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '40px', marginBottom: '8px' }}>📷</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Upload Your Profile Photo</h3>
-            <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#64748b' }}>Your membership card requires a photo. Upload one to complete your profile.</p>
-            <label htmlFor="l3-photo-upload-desktop" style={{
-              display: 'inline-block', padding: '12px 28px',
-              background: isUploadingPhoto ? '#9ca3af' : 'linear-gradient(135deg,#ea580c,#c2410c)',
-              color: '#fff', borderRadius: '12px', fontSize: '14px', fontWeight: 600,
-              cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
-              boxShadow: '0 6px 16px rgba(234,88,12,0.35)', letterSpacing: '0.02em',
-              transition: 'opacity 0.2s',
-            }}>
-              {isUploadingPhoto ? '⏳ Uploading...' : '📂 Choose & Upload Photo'}
-            </label>
-            <input
-              id="l3-photo-upload-desktop"
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              disabled={isUploadingPhoto}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
-            />
-            <p style={{ marginTop: '10px', fontSize: '11px', color: '#94a3b8' }}>Supported: JPG, PNG, WEBP • Max 5MB</p>
-          </div>
-        )}
         {/* Card section */}
-        <div id="card-print-area" className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-2">
+        <div id="card-print-area" ref={cardRef} className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-2">
           <div className="flex flex-col sm:flex-row justify-center gap-8">
            
             <div

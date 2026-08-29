@@ -607,7 +607,7 @@ export default function WalletPage({ level }: { level: "l2" | "l3" | "l4" }) {
                 const isBonus  = tx.type === "signup_bonus";
                 const isAdmin  = tx.type === "admin_credit";
                 const label = isBonus ? "🎁 Signup Bonus"
-                  : isAdmin ? "👑 Admin Credit"
+                  : isAdmin ? "🏛️ From Sanathana Veerashaiva Ligayatha Trust"
                   : isCredit ? `📥 From ${tx.fromName}`
                   : `📤 To ${tx.toName}`;
                 const amtColor = (isCredit || isBonus || isAdmin) ? "#86efac" : "#fca5a5";

@@ -139,7 +139,7 @@ export default function SignupForm() {
         setIsOtpSent(false);
         setOtp("");
       } else {
-        console.log(`OTP verification failed: ${response.data.Details}`);
+        console.log(`OTP verification failed: ${data?.Details || data?.message}`);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);

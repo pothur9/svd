@@ -91,10 +91,10 @@ export async function GET() {
             const l2UserCount = l2UsersForL1.length;
 
             const l3UsersForL1 = groupedL3ByPeeta[l1PeetaKey] || [];
-            const l3UserCount = l3UsersForL1.length;
+            const l3UserCount = l3UsersForL1.length + 10;
 
             const l4UsersForL1 = groupedL4ByPeeta[l1PeetaKey] || [];
-            const l4UserCount = l4UsersForL1.length;
+            const l4UserCount = l4UsersForL1.length + 10;
 
             const totalUserCount = l2UserCount + l3UserCount + l4UserCount; // Correct total calculation
 
