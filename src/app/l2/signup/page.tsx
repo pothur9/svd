@@ -192,7 +192,7 @@ export default function SignupForm() {
         }
       } else {
         setToast({ message: "Invalid OTP. Please try again.", type: "error" });
-        console.log(`OTP verification failed: ${data?.Details || "failed"}`);
+        console.log(`OTP verification failed: ${response.data.Details}`);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);

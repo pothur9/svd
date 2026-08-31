@@ -37,7 +37,7 @@ export async function GET() {
         const l3Users = (await l3User.find().lean()) as unknown as L3User[]; // Cast to unknown first, then L3User[]
         const l4Users = (await l4User.find().lean()) as unknown as L4User[]; // Cast to unknown first, then L4User[]
 
-      
+
 
         // Group L2 users by their peeta (L1 user peeta, case-insensitive, trimmed)
         const groupedL2Users = l2Users.reduce((acc, user: L2User) => {
@@ -114,20 +114,20 @@ export async function GET() {
         return new NextResponse(JSON.stringify(response), {
             status: 200,
             headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-              Pragma: "no-cache",
-              Expires: "0",
-              "Surrogate-Control": "no-store",
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                Pragma: "no-cache",
+                Expires: "0",
+                "Surrogate-Control": "no-store",
             },
-          });
+        });
     } catch (error) {
         console.log(error)
-    return new NextResponse(JSON.stringify({ message: "Server error" }), {
-      status: 500,
-      headers: {
-        "Cache-Control": "no-store",
-      },
-    });
-  }
+        return new NextResponse(JSON.stringify({ message: "Server error" }), {
+            status: 500,
+            headers: {
+                "Cache-Control": "no-store",
+            },
+        });
+    }
 }

@@ -81,21 +81,12 @@ export default function AdminWalletPage() {
   const [dashLoading, setDashLoading] = useState(false);
 
   // Credit form
-  const [creditTab, setCreditTab] = useState<"single" | "bulk">("single");
   const [creditUserId, setCreditUserId] = useState("");
   const [creditPhone, setCreditPhone] = useState("");
   const [creditAmount, setCreditAmount] = useState("");
   const [creditNote, setCreditNote] = useState("");
   const [creditMsg, setCreditMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [crediting, setCrediting] = useState(false);
-
-  // Bulk Credit form
-  const [bulkAmount, setBulkAmount] = useState("");
-  const [bulkNote, setBulkNote] = useState("");
-  const [bulkTargetLevel, setBulkTargetLevel] = useState<"all" | "l2" | "l3" | "l4">("all");
-  const [bulkMsg, setBulkMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [bulkCrediting, setBulkCrediting] = useState(false);
-  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   // ── STEP 1: Send OTP ──────────────────────────────────────────────────────
   const handleSendOtp = async () => {
@@ -224,40 +215,6 @@ export default function AdminWalletPage() {
       setCreditMsg({ type: "error", text: "Network error" });
     } finally {
       setCrediting(false);
-    }
-  };
-
-  // ── Bulk Credit all users ──────────────────────────────────────────────────
-  const handleBulkCredit = async () => {
-    const amt = Number(bulkAmount);
-    if (isNaN(amt) || amt <= 0) {
-      setBulkMsg({ type: "error", text: "Please enter a valid amount" });
-      return;
-    }
-    setBulkCrediting(true);
-    setBulkMsg(null);
-    try {
-      const res = await fetch("/api/wallet/admin/credit-all", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-token": adminToken },
-        body: JSON.stringify({
-          amount: amt,
-          note: bulkNote || undefined,
-          targetLevel: bulkTargetLevel,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setBulkMsg({ type: "success", text: data.message });
-        setBulkAmount(""); setBulkNote(""); setShowBulkConfirm(false);
-        await fetchTransactions(page);
-      } else {
-        setBulkMsg({ type: "error", text: data.message || "Bulk credit failed" });
-      }
-    } catch {
-      setBulkMsg({ type: "error", text: "Network error" });
-    } finally {
-      setBulkCrediting(false);
     }
   };
 
@@ -637,187 +594,51 @@ export default function AdminWalletPage() {
             border: "1px solid rgba(255,255,255,0.1)",
             padding: "20px",
           }}>
-            {/* Mode selector tabs */}
-            <div style={{
-              display: "flex",
-              background: "rgba(0,0,0,0.3)",
-              borderRadius: "10px",
-              padding: "4px",
-              marginBottom: "18px",
-            }}>
-              <button
-                onClick={() => setCreditTab("single")}
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: creditTab === "single" ? "linear-gradient(135deg, #ea580c, #c2410c)" : "transparent",
-                  color: creditTab === "single" ? "#fff" : "rgba(255,255,255,0.5)",
+            <h3 style={{ color: "#fff", fontSize: "15px", fontWeight: 700, margin: "0 0 16px" }}>
+              👑 Credit User
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div>
+                <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>User ID</label>
+                <input value={creditUserId} onChange={(e) => setCreditUserId(e.target.value)}
+                  placeholder="e.g. ABCD1234" style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
+              </div>
+              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>— OR —</div>
+              <div>
+                <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Phone Number</label>
+                <input value={creditPhone} onChange={(e) => setCreditPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  placeholder="10-digit phone" maxLength={10} style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
+              </div>
+              <div>
+                <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Amount (₹)</label>
+                <input type="number" value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)}
+                  placeholder="Amount to credit" min={1} style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
+              </div>
+              <div>
+                <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Note (optional)</label>
+                <input value={creditNote} onChange={(e) => setCreditNote(e.target.value)}
+                  placeholder="Reason for credit…" style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
+              </div>
+              {creditMsg && (
+                <div style={{
+                  padding: "10px 14px", borderRadius: "8px",
+                  background: creditMsg.type === "success" ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
+                  border: `1px solid ${creditMsg.type === "success" ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"}`,
+                  color: creditMsg.type === "success" ? "#86efac" : "#fca5a5",
                   fontSize: "12px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-              >
-                👤 Single User
-              </button>
+                }}>
+                  {creditMsg.type === "success" ? "✅ " : "❌ "}{creditMsg.text}
+                </div>
+              )}
               <button
-                onClick={() => setCreditTab("bulk")}
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: creditTab === "bulk" ? "linear-gradient(135deg, #ea580c, #c2410c)" : "transparent",
-                  color: creditTab === "bulk" ? "#fff" : "rgba(255,255,255,0.5)",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
+                id="admin-credit-submit"
+                onClick={handleCredit}
+                disabled={crediting}
+                style={{ ...btnStyle(crediting), marginTop: "4px", fontSize: "13px", padding: "11px" }}
               >
-                🌐 All Users (Bulk)
+                {crediting ? "Crediting..." : "Credit Rudhra ₹"}
               </button>
             </div>
-
-            {creditTab === "single" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>User ID</label>
-                  <input value={creditUserId} onChange={(e) => setCreditUserId(e.target.value)}
-                    placeholder="e.g. ABCD1234" style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
-                </div>
-                <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>— OR —</div>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Phone Number</label>
-                  <input value={creditPhone} onChange={(e) => setCreditPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    placeholder="10-digit phone" maxLength={10} style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
-                </div>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Amount (₹)</label>
-                  <input type="number" value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)}
-                    placeholder="Amount to credit" min={1} style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
-                </div>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Note (optional)</label>
-                  <input value={creditNote} onChange={(e) => setCreditNote(e.target.value)}
-                    placeholder="Reason for credit…" style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
-                </div>
-                {creditMsg && (
-                  <div style={{
-                    padding: "10px 14px", borderRadius: "8px",
-                    background: creditMsg.type === "success" ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
-                    border: `1px solid ${creditMsg.type === "success" ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"}`,
-                    color: creditMsg.type === "success" ? "#86efac" : "#fca5a5",
-                    fontSize: "12px",
-                  }}>
-                    {creditMsg.type === "success" ? "✅ " : "❌ "}{creditMsg.text}
-                  </div>
-                )}
-                <button
-                  id="admin-credit-submit"
-                  onClick={handleCredit}
-                  disabled={crediting}
-                  style={{ ...btnStyle(crediting), marginTop: "4px", fontSize: "13px", padding: "11px" }}
-                >
-                  {crediting ? "Crediting..." : "Credit Single User ₹"}
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Target Audience</label>
-                  <select
-                    value={bulkTargetLevel}
-                    onChange={(e) => setBulkTargetLevel(e.target.value as "all" | "l2" | "l3" | "l4")}
-                    style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px", color: "#fff", cursor: "pointer" }}
-                  >
-                    <option value="all" style={{ background: "#1e1b4b", color: "#fff" }}>🌐 All Levels (L2 + L3 + L4 Users)</option>
-                    <option value="l2" style={{ background: "#1e1b4b", color: "#fff" }}>🟢 L2 Users Only</option>
-                    <option value="l3" style={{ background: "#1e1b4b", color: "#fff" }}>🔵 L3 Users Only</option>
-                    <option value="l4" style={{ background: "#1e1b4b", color: "#fff" }}>🟡 L4 Users Only</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Amount Per User (₹)</label>
-                  <input type="number" value={bulkAmount} onChange={(e) => setBulkAmount(e.target.value)}
-                    placeholder="e.g. 100" min={1} style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
-                </div>
-                <div>
-                  <label style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Note (optional)</label>
-                  <input value={bulkNote} onChange={(e) => setBulkNote(e.target.value)}
-                    placeholder="e.g. Festival Gift" style={{ ...inputStyle, fontSize: "13px", padding: "10px 14px" }} />
-                </div>
-
-                {bulkMsg && (
-                  <div style={{
-                    padding: "10px 14px", borderRadius: "8px",
-                    background: bulkMsg.type === "success" ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
-                    border: `1px solid ${bulkMsg.type === "success" ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"}`,
-                    color: bulkMsg.type === "success" ? "#86efac" : "#fca5a5",
-                    fontSize: "12px",
-                  }}>
-                    {bulkMsg.type === "success" ? "✅ " : "❌ "}{bulkMsg.text}
-                  </div>
-                )}
-
-                {!showBulkConfirm ? (
-                  <button
-                    onClick={() => {
-                      if (!bulkAmount || Number(bulkAmount) <= 0) {
-                        setBulkMsg({ type: "error", text: "Enter a valid amount" });
-                        return;
-                      }
-                      setBulkMsg(null);
-                      setShowBulkConfirm(true);
-                    }}
-                    style={{ ...btnStyle(false), marginTop: "4px", fontSize: "13px", padding: "11px" }}
-                  >
-                    🎁 Credit All Users (Bulk) ₹
-                  </button>
-                ) : (
-                  <div style={{
-                    background: "rgba(234,88,12,0.15)",
-                    border: "1px solid rgba(234,88,12,0.4)",
-                    borderRadius: "12px",
-                    padding: "14px",
-                    marginTop: "4px",
-                  }}>
-                    <p style={{ color: "#fff", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
-                      ⚠️ Confirm Bulk Credit?
-                    </p>
-                    <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "12px", margin: "0 0 12px" }}>
-                      Are you sure you want to credit <strong>₹{bulkAmount}</strong> to {bulkTargetLevel === "all" ? "ALL users" : `${bulkTargetLevel.toUpperCase()} users`}?
-                    </p>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        onClick={handleBulkCredit}
-                        disabled={bulkCrediting}
-                        style={{
-                          flex: 1, padding: "9px", borderRadius: "8px", border: "none",
-                          background: "#ea580c", color: "#fff", fontSize: "12px", fontWeight: 700,
-                          cursor: bulkCrediting ? "not-allowed" : "pointer"
-                        }}
-                      >
-                        {bulkCrediting ? "Processing..." : "Yes, Send Money ₹"}
-                      </button>
-                      <button
-                        onClick={() => setShowBulkConfirm(false)}
-                        disabled={bulkCrediting}
-                        style={{
-                          padding: "9px 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.2)",
-                          background: "transparent", color: "rgba(255,255,255,0.7)", fontSize: "12px",
-                          cursor: "pointer"
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>

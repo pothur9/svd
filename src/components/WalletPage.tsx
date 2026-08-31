@@ -40,43 +40,43 @@ const DENOM_NOTE_SRC: Record<number, string> = {
   500: "/500.jpeg",
   200: "/200.jpg.jpeg",
   100: "/100.jpeg",
-  50:  "/50.jpg.jpeg",
-  20:  "/20.jpeg",
-  10:  "/10.jpeg",
-  5:   "/5.jpeg",
-  2:   "/2.jpeg",
-  1:   "/1.jpeg",
+  50: "/50.jpg.jpeg",
+  20: "/20.jpeg",
+  10: "/10.jpeg",
+  5: "/5.jpeg",
+  2: "/2.jpeg",
+  1: "/1.jpeg",
 };
 
 const DENOM_TINT: Record<number, string> = {
   500: "transparent",
   200: "transparent",
   100: "transparent",
-  50:  "transparent",
-  20:  "transparent",
-  10:  "transparent",
-  5:   "transparent",
-  2:   "transparent",
-  1:   "transparent",
+  50: "transparent",
+  20: "transparent",
+  10: "transparent",
+  5: "transparent",
+  2: "transparent",
+  1: "transparent",
 };
 
 const DENOM_SHADOW: Record<number, string> = {
   500: "rgba(26,35,126,0.40)",
   200: "rgba(27,94,32,0.40)",
   100: "rgba(13,71,161,0.40)",
-  50:  "rgba(161,101,13,0.40)",
-  20:  "rgba(126,13,84,0.40)",
-  10:  "rgba(46,125,50,0.40)",
-  5:   "rgba(180,83,9,0.40)",
-  2:   "rgba(120,53,15,0.40)",
-  1:   "rgba(92,40,9,0.40)",
+  50: "rgba(161,101,13,0.40)",
+  20: "rgba(126,13,84,0.40)",
+  10: "rgba(46,125,50,0.40)",
+  5: "rgba(180,83,9,0.40)",
+  2: "rgba(120,53,15,0.40)",
+  1: "rgba(92,40,9,0.40)",
 };
 
 // ─── Currency Note Component ──────────────────────────────────────────────────
 function RudhraNote({ denom, count }: { denom: number; count: number }) {
-  const src    = DENOM_NOTE_SRC[denom] ?? "/100.jpeg";
-  const tint   = DENOM_TINT[denom]    ?? "transparent";
-  const shadow = DENOM_SHADOW[denom]  ?? "rgba(0,0,0,0.3)";
+  const src = DENOM_NOTE_SRC[denom] ?? "/100.jpeg";
+  const tint = DENOM_TINT[denom] ?? "transparent";
+  const shadow = DENOM_SHADOW[denom] ?? "rgba(0,0,0,0.3)";
 
   return (
     <div style={{ position: "relative", marginBottom: "8px" }}>
@@ -373,7 +373,7 @@ export default function WalletPage({ level }: { level: "l2" | "l3" | "l4" }) {
       }}>
         {([
           { key: "notes", label: "💵 Notes" },
-          { key: "send",  label: "📤 Send" },
+          { key: "send", label: "📤 Send" },
           { key: "history", label: "📋 History" },
         ] as const).map(({ key, label }) => (
           <button
@@ -604,14 +604,14 @@ export default function WalletPage({ level }: { level: "l2" | "l3" | "l4" }) {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {transactions.map((tx) => {
                 const isCredit = tx.toUserId === userId;
-                const isBonus  = tx.type === "signup_bonus";
-                const isAdmin  = tx.type === "admin_credit";
+                const isBonus = tx.type === "signup_bonus";
+                const isAdmin = tx.type === "admin_credit";
                 const label = isBonus ? "🎁 Signup Bonus"
-                  : isAdmin ? "🏛️ From Sanathana Veerashaiva Ligayatha Trust"
-                  : isCredit ? `📥 From ${tx.fromName}`
-                  : `📤 To ${tx.toName}`;
+                  : isAdmin ? "👑 Admin Credit"
+                    : isCredit ? `📥 From ${tx.fromName}`
+                      : `📤 To ${tx.toName}`;
                 const amtColor = (isCredit || isBonus || isAdmin) ? "#86efac" : "#fca5a5";
-                const amtSign  = (isCredit || isBonus || isAdmin) ? "+" : "-";
+                const amtSign = (isCredit || isBonus || isAdmin) ? "+" : "-";
 
                 return (
                   <div key={tx._id} style={{

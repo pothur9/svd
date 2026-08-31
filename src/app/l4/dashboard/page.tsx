@@ -173,9 +173,9 @@ export default function Dashboard() {
   const openEditForm = () => {
     if (!userData) return;
     const ALL_EDIT_FIELDS = [
-      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality',
-      'presentAddress','permanentAddress','qualification','occupation','languageKnown',
-      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','sonOf'
+      'dob', 'gender', 'mailId', 'karthruGuru', 'peeta', 'bhage', 'gothra', 'nationality',
+      'presentAddress', 'permanentAddress', 'qualification', 'occupation', 'languageKnown',
+      'kula', 'married', 'higherDegree', 'maneDhevaruName', 'maneDhevaruAddress', 'subKula', 'sonOf'
     ];
     const userRecord = userData as unknown as Record<string, unknown>;
     const prefilled: Record<string, string> = {};
@@ -232,7 +232,7 @@ export default function Dashboard() {
             return;
           }
         }
-      } catch {}
+      } catch { }
     }
 
     if (!userId) {
@@ -256,7 +256,7 @@ export default function Dashboard() {
             localStorage.setItem("svd_auth_user", JSON.stringify(minimal));
             sessionStorage.setItem("svd_auth_user", JSON.stringify(minimal));
           }
-        } catch {}
+        } catch { }
 
         const memberResponse = await fetch(
           `/api/l1/dashboard?timestamp=${Date.now()}`,
@@ -304,7 +304,7 @@ export default function Dashboard() {
             localStorage.setItem("svd_auth_user", JSON.stringify(authObj));
             sessionStorage.setItem("svd_auth_user", JSON.stringify(authObj));
           }
-        } catch {}
+        } catch { }
       } catch (error) {
         console.error("Error fetching member data:", error);
       }
@@ -316,9 +316,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userData) return;
     const ALL_FIELDS: string[] = [
-      "dob","gender","mailId","karthruGuru","peeta","bhage","gothra","nationality",
-      "presentAddress","permanentAddress","qualification","occupation","languageKnown","photoUrl",
-      "kula","married","higherDegree","maneDhevaruName","maneDhevaruAddress","subKula","sonOf",
+      "dob", "gender", "mailId", "karthruGuru", "peeta", "bhage", "gothra", "nationality",
+      "presentAddress", "permanentAddress", "qualification", "occupation", "languageKnown", "photoUrl",
+      "kula", "married", "higherDegree", "maneDhevaruName", "maneDhevaruAddress", "subKula", "sonOf",
     ];
     const record = userData as unknown as Record<string, unknown>;
     const miss: string[] = ALL_FIELDS.filter((k) => {
@@ -393,8 +393,8 @@ export default function Dashboard() {
     selectedPeethaIndex !== null ? memberData[selectedPeethaIndex] : null;
   const selTotal = selectedMember
     ? (selectedMember.l2UserCount ?? 0) +
-      (selectedMember.l3UserCount ?? 0) +
-      (selectedMember.l4UserCount ?? 0)
+    (selectedMember.l3UserCount ?? 0) +
+    (selectedMember.l4UserCount ?? 0)
     : 0;
 
   // ── MOBILE LAYOUT ────────────────────────────────────────────────────────────
@@ -631,8 +631,8 @@ export default function Dashboard() {
                             <>
                               <input type="date" value={formData[field] || ""} onChange={(e) => {
                                 const val = e.target.value;
-                                setFormData((prev: Record<string, string>) => {
-                                  const next: Record<string, string> = { ...prev, [field]: val };
+                                setFormData((prev) => {
+                                  const next = { ...prev, [field]: val };
                                   if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                     next['guardianId'] = '';
                                   }
@@ -1104,8 +1104,8 @@ export default function Dashboard() {
                       {[
                         { lbl: "Guru", val: userData.karthruGuru || "N/A" },
                         { lbl: "Address", val: userData.permanentAddress || "N/A" },
-                        { lbl: "Nationality", val: (userData as unknown as Record<string,string>).nationality || "Indian" },
-                        { lbl: "Kula", val: (userData as unknown as Record<string,string>).kula || "N/A" },
+                        { lbl: "Nationality", val: (userData as unknown as Record<string, string>).nationality || "Indian" },
+                        { lbl: "Kula", val: (userData as unknown as Record<string, string>).kula || "N/A" },
                       ].map((row, i) => (
                         <div key={i} style={{ marginBottom: "6px" }}>
                           <span style={{ fontSize: "6.5px", color: "#94a3b8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", display: "block" }}>{row.lbl}</span>
@@ -1128,7 +1128,7 @@ export default function Dashboard() {
 
                   {/* Footer strip */}
                   <div style={{ background: "linear-gradient(90deg,#fef3c7,#fde68a)", padding: "4px 10px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-                    <span style={{ fontSize: "6px", color: "#92400e", fontWeight: 700 }}>{userData.contactNo||""}</span>
+                    <span style={{ fontSize: "6px", color: "#92400e", fontWeight: 700 }}>{userData.contactNo || ""}</span>
                     <span style={{ fontSize: "8px", color: "#92400e" }}>🔱</span>
                   </div>
                 </div>
@@ -1278,8 +1278,8 @@ export default function Dashboard() {
                           <>
                             <input type="date" value={formData[field] || ""} onChange={(e) => {
                               const val = e.target.value;
-                              setFormData((prev: Record<string, string>) => {
-                                const next: Record<string, string> = { ...prev, [field]: val };
+                              setFormData((prev) => {
+                                const next = { ...prev, [field]: val };
                                 if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                   next['guardianId'] = '';
                                 }
@@ -1397,7 +1397,7 @@ export default function Dashboard() {
                   Sri 1008 Jagdguru Peeta श्री 1008 जगद्गुरु पीठ ಶ್ರೀ ೧೦೦೮ ಜಗದ್ಗುರು ಪೀಠ
                 </th>
                 {memberData.map((member, index) => {
-                  const bgColors = ["bg-green-400","bg-red-400","bg-blue-400","bg-gray-300","bg-yellow-300","bg-orange-400"];
+                  const bgColors = ["bg-green-400", "bg-red-400", "bg-blue-400", "bg-gray-300", "bg-yellow-300", "bg-orange-400"];
                   const pNorm = norm(member.l1User.peeta || "");
                   const imgM = peetaImageBySubstring.find(({ key }) => pNorm.includes(key));
                   const imageUrl = imgM ? imgM.img : "/img2.jpg";
@@ -1575,8 +1575,8 @@ export default function Dashboard() {
                     {[
                       { lbl: "Guru", val: userData.karthruGuru || "N/A" },
                       { lbl: "Permanent Address", val: userData.permanentAddress || "N/A" },
-                      { lbl: "Nationality", val: (userData as unknown as Record<string,string>).nationality || "Indian" },
-                      { lbl: "Kula", val: (userData as unknown as Record<string,string>).kula || "N/A" },
+                      { lbl: "Nationality", val: (userData as unknown as Record<string, string>).nationality || "Indian" },
+                      { lbl: "Kula", val: (userData as unknown as Record<string, string>).kula || "N/A" },
                     ].map((row, i) => (
                       <div key={i} style={{ marginBottom: "9px" }}>
                         <span style={{ fontSize: "7.5px", color: "#94a3b8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", display: "block" }}>{row.lbl}</span>

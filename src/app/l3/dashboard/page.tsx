@@ -146,9 +146,9 @@ export default function Dashboard() {
   const openEditForm = () => {
     if (!userData) return;
     const ALL_EDIT_FIELDS = [
-      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality',
-      'presentAddress','permanentAddress','qualification','occupation','languageKnown',
-      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','sonOf'
+      'dob', 'gender', 'mailId', 'karthruGuru', 'peeta', 'bhage', 'gothra', 'nationality',
+      'presentAddress', 'permanentAddress', 'qualification', 'occupation', 'languageKnown',
+      'kula', 'married', 'higherDegree', 'maneDhevaruName', 'maneDhevaruAddress', 'subKula', 'sonOf'
     ];
     const userRecord = userData as unknown as Record<string, unknown>;
     const prefilled: Record<string, string> = {};
@@ -221,7 +221,7 @@ export default function Dashboard() {
     loadDistricts();
   }, []);
 
-  
+
 
   useEffect(() => {
     // Check authentication using AuthManager
@@ -304,9 +304,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userData) return;
     const ALL_L3_FIELDS: string[] = [
-      'dob','gender','mailId','karthruGuru','peeta','bhage','gothra','nationality','presentAddress','permanentAddress','qualification','occupation','languageKnown','photoUrl',
+      'dob', 'gender', 'mailId', 'karthruGuru', 'peeta', 'bhage', 'gothra', 'nationality', 'presentAddress', 'permanentAddress', 'qualification', 'occupation', 'languageKnown', 'photoUrl',
       // newly added optional profile fields
-      'kula','married','higherDegree','maneDhevaruName','maneDhevaruAddress','subKula','sonOf'
+      'kula', 'married', 'higherDegree', 'maneDhevaruName', 'maneDhevaruAddress', 'subKula', 'sonOf'
     ];
     const userRecord = userData as unknown as Record<string, unknown>;
     const missing: string[] = ALL_L3_FIELDS.filter((k) => {
@@ -484,8 +484,9 @@ export default function Dashboard() {
                             <>
                               <input type="date" value={formData[field] || ''} onChange={(e) => {
                                 const val = e.target.value;
-                                setFormData((prev: Record<string, string>) => {
-                                  const next: Record<string, string> = { ...prev, [field]: val };
+                                setFormData((prev) => {
+                                  const next = { ...prev, [field]: val };
+                                  // If age < 18, ensure guardianId is in the form data
                                   if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                     next['guardianId'] = '';
                                   }
@@ -763,7 +764,7 @@ export default function Dashboard() {
                   </div>
                   {/* Footer strip */}
                   <div style={{ background: 'linear-gradient(90deg,#fef3c7,#fde68a)', padding: '4px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '6px', color: '#92400e', fontWeight: 700 }}>{userData.contactNo||""}</span>
+                    <span style={{ fontSize: '6px', color: '#92400e', fontWeight: 700 }}>{userData.contactNo || ""}</span>
                     <span style={{ fontSize: '8px', color: '#92400e' }}>🔱</span>
                   </div>
                 </div>
@@ -825,7 +826,7 @@ export default function Dashboard() {
         {showCompleteForm && (
           <div className="fixed inset-0 flex items-start justify-center pt-24 pointer-events-none">
             <div className="relative z-[60] bg-white rounded-lg shadow-lg w-[95%] max-w-2xl p-5 pointer-events-auto">
-             
+
               {(() => {
                 const perStep = 5;
                 const totalSteps = Math.ceil(missingFields.length / perStep);
@@ -873,8 +874,8 @@ export default function Dashboard() {
                           <>
                             <input type="date" value={formData[field] || ''} onChange={(e) => {
                               const val = e.target.value;
-                              setFormData((prev: Record<string, string>) => {
-                                const next: Record<string, string> = { ...prev, [field]: val };
+                              setFormData((prev) => {
+                                const next = { ...prev, [field]: val };
                                 if (val && calculateAge(val) < 18 && next['guardianId'] === undefined) {
                                   next['guardianId'] = '';
                                 }
@@ -1078,95 +1079,95 @@ export default function Dashboard() {
         <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
           {/* Desktop Table */}
           {!isMobile && (
-          <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
-            <thead>
-              <tr>
-                <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
-                  Sri 1008 Jagdguru Peeta à¤¶à¥à¤°à¥€ 1008 à¤œà¤—à¤¦à¥à¤—à¥à¤°à¥ à¤ªà¥€à¤  à²¶à³à²°à³€ à³§à³¦à³¦à³® à²œà²—à²¦à³à²—à³à²°à³ à²ªà³€à² 
-                </th>
-                {memberData.map((member, index) => {
-                  const bgColors = [
-                    "bg-green-400",
-                    "bg-red-400",
-                    "bg-blue-400",
-                    "bg-gray-300",
-                    "bg-yellow-300",
-                    "bg-orange-400",
-                  ];
-                  // More robust image selection using substring matching on normalized name
-                  const norm = (s: string) => s
-                    .toLowerCase()
-                    .normalize('NFKD')
-                    .replace(/[^a-z]/g, '');
-                  const peetaNorm = norm(member.l1User.peeta || '');
-                  const peetaImageBySubstring: { key: string; img: string }[] = [
-                    { key: 'rambh', img: '/img1.jpg' },
-                    { key: 'ujjay', img: '/img2.jpg' },
-                    { key: 'kedhar', img: '/img3.jpg' },
-                    { key: 'srishail', img: '/img4.jpg' },
-                    { key: 'kashi', img: '/img5.jpg' },
-                    { key: 'virakth', img: '/img6.jpg' },
-                  ];
-                  const matched = peetaImageBySubstring.find(({ key }) => peetaNorm.includes(key));
-                  const imageUrl = matched ? matched.img : '/img2.jpg';
-                  return (
-                    <th
-                      key={index}
-                      className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${bgColors[index % bgColors.length]}`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <img
-                          src={imageUrl}
-                          alt={member.l1User.peeta}
-                          className="rounded-full mb-1 object-cover"
-                          style={{ width: "65px", height: "100px" }}
-                          onError={(e) => {
-                            e.currentTarget.src = "/img2.jpg";
-                          }}
-                        />
-                      </div>
-                      <span className="block mt-1 text-sm font-semibold">{member.l1User.peeta}</span>
-                    </th>
-                  );
-                })}
-                <th className="border border-gray-800 p-1 sm:p-2 bg-yellow-600 text-white text-center min-w-[80px]">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* L2 Row - counts */}
-              <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri 108 Prabhu shivachrya</td>
-                {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount ?? 0}</td>
-                ))}
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l2TotalAll}</td>
-              </tr>
-              {/* L3 Row - counts */}
-              <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri guru Jangam</td>
-                {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l3UserCount ?? 0}</td>
-                ))}
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l3TotalAll}</td>
-              </tr>
-              {/* L4 Row - counts */}
-              <tr className="border border-gray-800 hover:bg-yellow-100">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri Veerashiva</td>
-                {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l4UserCount ?? 0}</td>
-                ))}
-                <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l4TotalAll}</td>
-              </tr>
-            
-              <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
-                <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
-                {memberData.map((member, index) => (
-                  <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{(member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)}</td>
-                ))}
-                <td className="border border-gray-800 p-1 sm:p-2 text-center">{grandTotalAll}</td>
-              </tr>
-            </tbody>
-          </table>
+            <table className="w-full border-collapse border border-gray-800 bg-white shadow-lg text-xs sm:text-sm">
+              <thead>
+                <tr>
+                  <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
+                    Sri 1008 Jagdguru Peeta à¤¶à¥à¤°à¥€ 1008 à¤œà¤—à¤¦à¥à¤—à¥à¤°à¥ à¤ªà¥€à¤  à²¶à³à²°à³€ à³§à³¦à³¦à³® à²œà²—à²¦à³à²—à³à²°à³ à²ªà³€à²
+                  </th>
+                  {memberData.map((member, index) => {
+                    const bgColors = [
+                      "bg-green-400",
+                      "bg-red-400",
+                      "bg-blue-400",
+                      "bg-gray-300",
+                      "bg-yellow-300",
+                      "bg-orange-400",
+                    ];
+                    // More robust image selection using substring matching on normalized name
+                    const norm = (s: string) => s
+                      .toLowerCase()
+                      .normalize('NFKD')
+                      .replace(/[^a-z]/g, '');
+                    const peetaNorm = norm(member.l1User.peeta || '');
+                    const peetaImageBySubstring: { key: string; img: string }[] = [
+                      { key: 'rambh', img: '/img1.jpg' },
+                      { key: 'ujjay', img: '/img2.jpg' },
+                      { key: 'kedhar', img: '/img3.jpg' },
+                      { key: 'srishail', img: '/img4.jpg' },
+                      { key: 'kashi', img: '/img5.jpg' },
+                      { key: 'virakth', img: '/img6.jpg' },
+                    ];
+                    const matched = peetaImageBySubstring.find(({ key }) => peetaNorm.includes(key));
+                    const imageUrl = matched ? matched.img : '/img2.jpg';
+                    return (
+                      <th
+                        key={index}
+                        className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${bgColors[index % bgColors.length]}`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <img
+                            src={imageUrl}
+                            alt={member.l1User.peeta}
+                            className="rounded-full mb-1 object-cover"
+                            style={{ width: "65px", height: "100px" }}
+                            onError={(e) => {
+                              e.currentTarget.src = "/img2.jpg";
+                            }}
+                          />
+                        </div>
+                        <span className="block mt-1 text-sm font-semibold">{member.l1User.peeta}</span>
+                      </th>
+                    );
+                  })}
+                  <th className="border border-gray-800 p-1 sm:p-2 bg-yellow-600 text-white text-center min-w-[80px]">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* L2 Row - counts */}
+                <tr className="border border-gray-800 hover:bg-yellow-100">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri 108 Prabhu shivachrya</td>
+                  {memberData.map((member, index) => (
+                    <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount ?? 0}</td>
+                  ))}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l2TotalAll}</td>
+                </tr>
+                {/* L3 Row - counts */}
+                <tr className="border border-gray-800 hover:bg-yellow-100">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri guru Jangam</td>
+                  {memberData.map((member, index) => (
+                    <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l3UserCount ?? 0}</td>
+                  ))}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l3TotalAll}</td>
+                </tr>
+                {/* L4 Row - counts */}
+                <tr className="border border-gray-800 hover:bg-yellow-100">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-medium bg-yellow-100">Sri Veerashiva</td>
+                  {memberData.map((member, index) => (
+                    <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l4UserCount ?? 0}</td>
+                  ))}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l4TotalAll}</td>
+                </tr>
+
+                <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
+                  {memberData.map((member, index) => (
+                    <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{(member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)}</td>
+                  ))}
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center">{grandTotalAll}</td>
+                </tr>
+              </tbody>
+            </table>
           )}
           {/* Mobile Table (Transposed) */}
           {isMobile && (
@@ -1204,16 +1205,16 @@ export default function Dashboard() {
                   const counts = getUserCounts(member);
                   return (
                     <tr key={index}>
-                      <td className={`border border-gray-800 p-1 text-center font-semibold ${bgColors[index % bgColors.length]} w-1/4 align-middle`} style={{fontSize:'0.7rem', minHeight: '48px', paddingTop: '6px'}}>
+                      <td className={`border border-gray-800 p-1 text-center font-semibold ${bgColors[index % bgColors.length]} w-1/4 align-middle`} style={{ fontSize: '0.7rem', minHeight: '48px', paddingTop: '6px' }}>
                         <div className="flex flex-col items-start h-full">
                           <div className="relative w-[32px] h-[32px] mb-1">
                             <img src={imageUrl} alt={member.l1User.peeta} className="object-cover object-top w-[32px] h-[32px] rounded-full" />
                           </div>
-                          <span className="block text-[10px] break-words whitespace-normal leading-snug min-h-[24px] text-left" style={{wordBreak: 'break-word'}}>{member.l1User.peeta}</span>
+                          <span className="block text-[10px] break-words whitespace-normal leading-snug min-h-[24px] text-left" style={{ wordBreak: 'break-word' }}>{member.l1User.peeta}</span>
                         </div>
                       </td>
                       {counts.map((count, i) => (
-                        <td key={i} className="border border-gray-800 p-1 text-center w-1/5" style={{fontSize:'0.8rem'}}>{count}</td>
+                        <td key={i} className="border border-gray-800 p-1 text-center w-1/5" style={{ fontSize: '0.8rem' }}>{count}</td>
                       ))}
                     </tr>
                   );
@@ -1239,13 +1240,13 @@ export default function Dashboard() {
         {/* Total Section (same style as L2) */}
         <div className="flex items-center justify-center gap-4 mt-6">
           <img src="/logomain1.png" style={{ width: "150px", height: "150px" }} />
-          <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center"> 
-            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>&rarr;</strong>  
+          <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center">
+            <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>&rarr;</strong>
             <span className="ml-4 text-3xl mt-3">Total: {grandTotalAll}</span>
           </h1>
         </div>
-        <br/>
-       
+        <br />
+
         {/* Download Button + Edit Photo — desktop */}
         <div className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-4 flex justify-end gap-3">
           <label htmlFor="l3-photo-edit-desktop" style={{
@@ -1275,7 +1276,7 @@ export default function Dashboard() {
         {/* Card section */}
         <div id="card-print-area" ref={cardRef} className="mx-auto max-w-[90%] sm:max-w-[1000px] mt-2">
           <div className="flex flex-col sm:flex-row justify-center gap-8">
-           
+
             <div
               className="w-[85mm] h-[55mm] mx-auto"
               style={{ backgroundColor: '#fff', color: '#000' }}
@@ -1284,7 +1285,7 @@ export default function Dashboard() {
                 className="rounded-xl w-full h-full shadow-lg overflow-hidden relative"
                 style={{ backgroundColor: '#fff', color: '#000' }}
               >
-             
+
                 <div
                   style={{
                     position: 'absolute',
@@ -1386,17 +1387,17 @@ export default function Dashboard() {
                 >
                   {/* Left side: details */}
                   <div className="flex-1" style={{ backgroundColor: '#fff', color: '#000' }}>
-                    <div className="grid grid-cols-1 gap-0.5" style={{ backgroundColor: '#fff', color: '#000', marginTop:"-55px"}} >
-                   
+                    <div className="grid grid-cols-1 gap-0.5" style={{ backgroundColor: '#fff', color: '#000', marginTop: "-55px" }} >
+
                       <p className="text-xs font-semibold"><span className="font-bold">Kula:</span> <span className="font-normal">{userData.kula || 'N/A'}</span></p>
-                    
+
                       {/* <p className="text-xs font-semibold"><span className="font-bold">Bhage:</span> <span className="font-normal">Panchavarna</span></p> */}
                       {/* <p className="text-xs font-semibold"><span className="font-bold">Nakshatra:</span> <span className="font-normal">{userData.nakshatra || 'N/A'}</span></p> */}
                       <p className="text-xs font-semibold"><span className="font-bold">Permanent Address:</span> <span className="font-normal">{userData.permanentAddress || 'N/A'}</span></p>
                     </div>
                   </div>
                   {/* Right side: QR code */}
-                  <div className="flex items-center justify-end ml-4" style={{ backgroundColor: '#fff', marginTop:"-60px"}}>
+                  <div className="flex items-center justify-end ml-4" style={{ backgroundColor: '#fff', marginTop: "-60px" }}>
                     <QRCodeSVG
                       value={JSON.stringify({
                         name: userData.name,
