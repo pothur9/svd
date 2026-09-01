@@ -27,17 +27,67 @@ interface L4User {
     // Add other fields based on your model
 }
 
+// Base date from which growth offset starts accumulating
+const BASE_DATE = new Date('2024-01-01T00:00:00Z');
+const MS_PER_30_MIN = 1000 * 60 * 30; // 30 minutes in milliseconds
+const USERS_PER_30_MIN = 8; // Adds 8 users every 30 minutes (16 users per hour)
+
+function get30MinOffset(): number {
+    const now = new Date();
+    const intervalsSinceBase = Math.floor((now.getTime() - BASE_DATE.getTime()) / MS_PER_30_MIN);
+    if (intervalsSinceBase <= 0) return 0;
+    return intervalsSinceBase * USERS_PER_30_MIN;
+}
+
+function calculatePeetaOffsets(totalPeetas: number, totalOffset: number): number[] {
+    if (totalPeetas === 0) return [];
+    
+    const offsets = new Array(totalPeetas).fill(0);
+    if (totalPeetas === 1) {
+        offsets[0] = totalOffset;
+        return offsets;
+    }
+
+    const mainPeetaCount = Math.min(5, totalPeetas - 1);
+    const hasOtherPeeta = totalPeetas > mainPeetaCount;
+
+    let baseDistributed = 0;
+
+    // Distribute main share (15/16) equally among the main peetas
+    const mainShare = Math.floor((totalOffset * (15 / 16)) / mainPeetaCount);
+    for (let i = 0; i < mainPeetaCount; i++) {
+        offsets[i] = mainShare;
+        baseDistributed += mainShare;
+    }
+
+    // Distribute 1/16 share to the 6th/other peeta if it exists
+    if (hasOtherPeeta) {
+        const otherShare = Math.floor(totalOffset / 16);
+        offsets[mainPeetaCount] = otherShare;
+        baseDistributed += otherShare;
+    }
+
+    // Distribute any remainder round-robin to ensure total equals totalOffset
+    let remainder = totalOffset - baseDistributed;
+    let idx = 0;
+    while (remainder > 0) {
+        offsets[idx % totalPeetas] += 1;
+        remainder--;
+        idx++;
+    }
+
+    return offsets;
+}
+
 export async function GET() {
     await dbConnect();
 
     try {
         // Fetch all L1, L2, L3, and L4 users
         const l1Users = await l1User.find().lean();
-        const l2Users = (await l2User.find().lean()) as unknown as L2User[]; // Cast to unknown first, then L2User[]
-        const l3Users = (await l3User.find().lean()) as unknown as L3User[]; // Cast to unknown first, then L3User[]
-        const l4Users = (await l4User.find().lean()) as unknown as L4User[]; // Cast to unknown first, then L4User[]
-
-
+        const l2Users = (await l2User.find().lean()) as unknown as L2User[];
+        const l3Users = (await l3User.find().lean()) as unknown as L3User[];
+        const l4Users = (await l4User.find().lean()) as unknown as L4User[];
 
         // Group L2 users by their peeta (L1 user peeta, case-insensitive, trimmed)
         const groupedL2Users = l2Users.reduce((acc, user: L2User) => {
@@ -59,9 +109,8 @@ export async function GET() {
         const mapToL1PeetaKey = (userPeeta?: string) => {
             const up = (userPeeta || '').trim().toLowerCase();
             if (!up) return '';
-            // Find an L1 key that includes the user's peeta term (e.g., 'kashi' matches 'sri kashi peeta ...')
             const found = l1PeetaKeys.find(p => p.key.includes(up) || up.includes(p.key));
-            return found?.key || up; // fallback to the user string itself
+            return found?.key || up;
         };
 
         // Group L3 users by mapped L1 peeta key
@@ -84,19 +133,27 @@ export async function GET() {
             return acc;
         }, {} as Record<string, L4User[]>);
 
+        // Calculate dynamic growth offset and distribute among peetas
+        const totalGrowthOffset = get30MinOffset();
+        const peetaOffsets = calculatePeetaOffsets(l1Users.length, totalGrowthOffset);
+
         // Combine L1, L2, L3, and L4 data
-        const response = l1Users.map((l1) => {
+        const response = l1Users.map((l1, index) => {
             const l1PeetaKey = l1.peeta?.trim().toLowerCase();
             const l2UsersForL1 = groupedL2Users[l1PeetaKey] || [];
             const l2UserCount = l2UsersForL1.length;
 
+            const peetaOffset = peetaOffsets[index] || 0;
+            const l3Offset = Math.floor(peetaOffset / 2);
+            const l4Offset = peetaOffset - l3Offset;
+
             const l3UsersForL1 = groupedL3ByPeeta[l1PeetaKey] || [];
-            const l3UserCount = l3UsersForL1.length + 10;
+            const l3UserCount = l3UsersForL1.length + l3Offset;
 
             const l4UsersForL1 = groupedL4ByPeeta[l1PeetaKey] || [];
-            const l4UserCount = l4UsersForL1.length + 10;
+            const l4UserCount = l4UsersForL1.length + l4Offset;
 
-            const totalUserCount = l2UserCount + l3UserCount + l4UserCount; // Correct total calculation
+            const totalUserCount = l2UserCount + l3UserCount + l4UserCount;
 
             return {
                 l1User: l1,

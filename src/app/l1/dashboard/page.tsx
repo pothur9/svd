@@ -113,6 +113,8 @@ export default function Dashboard() {
     }
 
     fetchData();
+    const interval = setInterval(fetchData, 60000); // Auto refresh counts every 1 minute
+    return () => clearInterval(interval);
   }, [router]);
 
   useEffect(() => {
