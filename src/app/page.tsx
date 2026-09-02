@@ -191,14 +191,14 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="w-full max-w-2xl mt-6 mb-4">
-        <p className="text-center text-gray-900 font-semibold mb-2">
+      <div className="w-full max-w-sm mt-6 mb-4 text-center">
+        <p className="text-center text-gray-900 font-semibold mb-3">
           To know how to create account, see this video
         </p>
-        <div className="relative w-full h-screen sm:h-64 md:h-72">
+        <div className="relative w-full aspect-[9/16] max-h-[520px] mx-auto rounded-xl overflow-hidden shadow-lg border border-gray-200">
           <iframe
-            className="absolute inset-0 w-full h-full rounded-lg shadow"
-            src="https://www.youtube.com/embed/4wK_sGEHL6g?si=OZ3Y-VB3AaHtbQzv"
+            className="w-full h-full rounded-xl"
+            src="https://www.youtube.com/embed/gPZhKs3W-jc"
             title="How to create account"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
