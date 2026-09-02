@@ -27,9 +27,9 @@ interface L4User {
     // Add other fields based on your model
 }
 
-// Start counting from today at 7:30 AM IST (~340 offset + real DB count = ~367 total at 7:30 AM)
+// Start counting from today at 7:30 AM IST (~120 offset + real peeta sum = ~367 total at 7:30 AM)
 const BASE_DATE = new Date('2026-09-02T07:30:00+05:30');
-const BASE_OFFSET = 340;
+const BASE_OFFSET = 120;
 const MS_PER_30_MIN = 1000 * 60 * 30; // 30 minutes in milliseconds
 const USERS_PER_30_MIN = 8; // Adds 8 users every 30 minutes (16 users per hour)
 
