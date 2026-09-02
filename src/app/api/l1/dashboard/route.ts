@@ -31,7 +31,7 @@ interface L4User {
 const BASE_DATE = new Date('2026-09-02T07:30:00+05:30');
 const BASE_OFFSET = 120;
 const MS_PER_30_MIN = 1000 * 60 * 30; // 30 minutes in milliseconds
-const USERS_PER_30_MIN = 8; // Adds 8 users every 30 minutes (16 users per hour)
+const USERS_PER_30_MIN = 4; // Adds 4 users every 30 minutes (8 users per hour)
 
 function get30MinOffset(): number {
     const now = new Date();
