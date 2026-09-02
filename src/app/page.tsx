@@ -17,6 +17,25 @@ export default function Home() {
   const router = useRouter();
   const [selectedLevel, setSelectedLevel] = useState(levels[0]);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+
+  // Fetch live total user count
+  useEffect(() => {
+    const fetchTotalUsers = async () => {
+      try {
+        const res = await fetch(`/api/totalUsers?timestamp=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTotalUsers(data.totalUsers);
+        }
+      } catch (err) {
+        console.error("Failed to fetch total users:", err);
+      }
+    };
+    fetchTotalUsers();
+    const interval = setInterval(fetchTotalUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Check if user is already logged in and redirect to appropriate dashboard
   useEffect(() => {
@@ -89,13 +108,30 @@ export default function Home() {
       <p className="text-gray-950 font-extrabold bg-yellow-300/90 px-3 py-1 rounded-md shadow-md ring-1 ring-yellow-400">ಧರ್ಮೋ ರಕ್ಷತಿ ರಕ್ಷಿತಃ  </p>
       <p className="text-gray-900 font-bold bg-yellow-200/70 px-3 py-1 rounded-md shadow-sm mt-2">ನಾವು ಧರ್ಮವನ್ನು ರಕ್ಷಿಸಿದರೆ ಧರ್ಮವು ನಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.</p>
       <Image
-        className="mb-4"
+        className="mb-3"
         src="/logomain1.png"
         alt="Logo"
         width={200}
         height={48}
         priority
       />
+      <div className="w-full max-w-md my-4 p-0.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 shadow-xl transform transition-transform hover:scale-[1.02]">
+        <div className="bg-white/95 backdrop-blur-md rounded-[14px] p-5 text-center border border-amber-100 flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-bold uppercase tracking-wider mb-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-600"></span>
+            </span>
+            Live User Count
+          </div>
+          <div className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 tracking-tight my-1">
+            {totalUsers !== null ? totalUsers.toLocaleString() : "..."}
+          </div>
+          <p className="text-gray-600 text-xs sm:text-sm font-semibold uppercase tracking-widest mt-0.5">
+            Total Registered Users
+          </p>
+        </div>
+      </div>
       {/* <div className="mt-2 mb-4">
         <a
           href="https://wa.me/916360064505"
