@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const BASE_DATE = new Date('2026-09-02T08:00:00+05:30');
 const BASE_OFFSET = 106;
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // IST offset (UTC+5:30)
-const USERS_PER_30_MIN = 4; // Adds 4 users per active 30-minute interval (8 users per hour)
+const USERS_PER_30_MIN = 2; // Adds 2 users per active 30-minute interval (4 users per hour)
 
 function get30MinOffset(): number {
     const now = new Date();
