@@ -188,7 +188,7 @@ export default function Dashboard() {
     member.l2UserCount ?? 0,
     member.l3UserCount ?? 0,
     member.l4UserCount ?? 0,
-    (member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)
+    (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0), // kept for getUserCounts helper
   ];
   const userTypeFullLabels = [
     'Sri 108 Prabhu shivachrya',
@@ -207,6 +207,16 @@ export default function Dashboard() {
   const adjustedL2 = grandTotalAll > 0 ? Math.round(l2TotalAll + (l2TotalAll / grandTotalAll) * _offset) : l2TotalAll;
   const adjustedL3 = grandTotalAll > 0 ? Math.round(l3TotalAll + (l3TotalAll / grandTotalAll) * _offset) : l3TotalAll;
   const adjustedL4 = (liveTotal !== null && grandTotalAll > 0) ? liveTotal - adjustedL2 - adjustedL3 : l4TotalAll;
+  // Per-peeta adjusted totals that sum exactly to liveTotal
+  const adjustedMemberTotals: number[] = (() => {
+    if (liveTotal === null || grandTotalAll === 0) return memberData.map(m => (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0));
+    const raw = memberData.map(m => (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0));
+    const scaled = raw.map(r => Math.round(r * liveTotal / grandTotalAll));
+    // Fix rounding so they sum exactly to liveTotal
+    const diff = liveTotal - scaled.reduce((a, b) => a + b, 0);
+    if (scaled.length > 0) scaled[scaled.length - 1] += diff;
+    return scaled;
+  })();
 
   const peethaColors = [
     { bg: '#fef3c7', text: '#92400e' },
@@ -229,9 +239,7 @@ export default function Dashboard() {
   // ── MOBILE LAYOUT ───────────────────────────────────────────────────
   if (isMobile) {
     const selMember = memberData[selIdx] ?? null;
-    const selTotal = selMember
-      ? (selMember.l2UserCount ?? 0) + (selMember.l3UserCount ?? 0) + (selMember.l4UserCount ?? 0)
-      : 0;
+    const selTotal = selMember ? (adjustedMemberTotals[selIdx] ?? 0) : 0;
     return (
       <>
         <Navbar />
@@ -553,9 +561,7 @@ export default function Dashboard() {
                       key={index}
                       className="border border-gray-800 p-1 sm:p-2 text-center"
                     >
-                      {(member.l2UserCount ?? 0) +
-                        (member.l3UserCount ?? 0) +
-                        (member.l4UserCount ?? 0)}
+                      {adjustedMemberTotals[index]}
                     </td>
                   ))}
                 </tr>

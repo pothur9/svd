@@ -369,6 +369,15 @@ export default function Dashboard() {
   const adjustedL2 = grandTotalAll > 0 ? Math.round(l2TotalAll + (l2TotalAll / grandTotalAll) * _offset) : l2TotalAll;
   const adjustedL3 = grandTotalAll > 0 ? Math.round(l3TotalAll + (l3TotalAll / grandTotalAll) * _offset) : l3TotalAll;
   const adjustedL4 = (liveTotal !== null && grandTotalAll > 0) ? liveTotal - adjustedL2 - adjustedL3 : l4TotalAll;
+  // Per-peeta adjusted totals that sum exactly to liveTotal
+  const adjustedMemberTotals: number[] = (() => {
+    if (liveTotal === null || grandTotalAll === 0) return memberData.map(m => (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0));
+    const raw = memberData.map(m => (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0));
+    const scaled = raw.map(r => Math.round(r * liveTotal / grandTotalAll));
+    const diff = liveTotal - scaled.reduce((a, b) => a + b, 0);
+    if (scaled.length > 0) scaled[scaled.length - 1] += diff;
+    return scaled;
+  })();
 
   // Label helper for dynamic fields
   const displayLabel = (f: string) => (f === 'mailId' ? 'Email ID' : f);
@@ -406,9 +415,7 @@ export default function Dashboard() {
     { key: 'virakth', img: '/img6.jpg' },
   ];
   const selectedMember = memberData[selectedPeethaIndex] ?? null;
-  const selTotal = selectedMember
-    ? (selectedMember.l2UserCount ?? 0) + (selectedMember.l3UserCount ?? 0) + (selectedMember.l4UserCount ?? 0)
-    : 0;
+  const selTotal = selectedMember ? (adjustedMemberTotals[selectedPeethaIndex] ?? 0) : 0;
 
   // ── MOBILE LAYOUT ────────────────────────────────────────────────────────
   if (isMobile) {
@@ -1186,7 +1193,7 @@ export default function Dashboard() {
                 <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
                   <td className="border border-gray-800 p-1 sm:p-2 text-center">Total</td>
                   {memberData.map((member, index) => (
-                    <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{(member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)}</td>
+                    <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{adjustedMemberTotals[index]}</td>
                   ))}
                   <td className="border border-gray-800 p-1 sm:p-2 text-center">{liveTotal !== null ? liveTotal : grandTotalAll}</td>
                 </tr>

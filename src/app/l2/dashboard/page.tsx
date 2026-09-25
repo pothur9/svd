@@ -271,6 +271,15 @@ export default function Dashboard(): JSX.Element {
   const adjustedL2 = grandTotalAll > 0 ? Math.round(l2TotalAll + (l2TotalAll / grandTotalAll) * _offset) : l2TotalAll;
   const adjustedL3 = grandTotalAll > 0 ? Math.round(l3TotalAll + (l3TotalAll / grandTotalAll) * _offset) : l3TotalAll;
   const adjustedL4 = (liveTotal !== null && grandTotalAll > 0) ? liveTotal - adjustedL2 - adjustedL3 : l4TotalAll;
+  // Per-peeta adjusted totals that sum exactly to liveTotal
+  const adjustedMemberTotals: number[] = (() => {
+    if (liveTotal === null || grandTotalAll === 0) return memberData.map(m => (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0));
+    const raw = memberData.map(m => (m.l2UserCount ?? 0) + (m.l3UserCount ?? 0) + (m.l4UserCount ?? 0));
+    const scaled = raw.map(r => Math.round(r * liveTotal / grandTotalAll));
+    const diff = liveTotal - scaled.reduce((a, b) => a + b, 0);
+    if (scaled.length > 0) scaled[scaled.length - 1] += diff;
+    return scaled;
+  })();
   
   // Helper to get the card preview URL for the current user
   const getCardPreviewUrl = () => {
@@ -355,9 +364,7 @@ export default function Dashboard(): JSX.Element {
   // â”€â”€ MOBILE LAYOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (isMobile) {
     const selMember = memberData[selIdx] ?? null;
-    const selTotal = selMember
-      ? (selMember.l2UserCount ?? 0) + (selMember.l3UserCount ?? 0) + (selMember.l4UserCount ?? 0)
-      : 0;
+    const selTotal = selMember ? (adjustedMemberTotals[selIdx] ?? 0) : 0;
     return (
       <>
         {toast && (
@@ -840,9 +847,7 @@ export default function Dashboard(): JSX.Element {
                       key={index}
                       className="border border-gray-800 p-1 sm:p-2 text-center"
                     >
-                      {(member.l2UserCount ?? 0) +
-                        (member.l3UserCount ?? 0) +
-                        (member.l4UserCount ?? 0)}
+                      {adjustedMemberTotals[index]}
                     </td>
                   ))}
                   {/* Grand total column */}
