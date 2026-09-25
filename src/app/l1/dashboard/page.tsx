@@ -202,6 +202,11 @@ export default function Dashboard() {
   const l3TotalAll = memberData.reduce((sum, m) => sum + (m.l3UserCount ?? 0), 0);
   const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
   const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
+  // Distribute the virtual offset proportionally so chips sum to liveTotal
+  const _offset = (liveTotal !== null && grandTotalAll > 0) ? Math.max(0, liveTotal - grandTotalAll) : 0;
+  const adjustedL2 = grandTotalAll > 0 ? Math.round(l2TotalAll + (l2TotalAll / grandTotalAll) * _offset) : l2TotalAll;
+  const adjustedL3 = grandTotalAll > 0 ? Math.round(l3TotalAll + (l3TotalAll / grandTotalAll) * _offset) : l3TotalAll;
+  const adjustedL4 = (liveTotal !== null && grandTotalAll > 0) ? liveTotal - adjustedL2 - adjustedL3 : l4TotalAll;
 
   const peethaColors = [
     { bg: '#fef3c7', text: '#92400e' },
@@ -280,7 +285,7 @@ export default function Dashboard() {
             {/* Count Chips */}
             <p className="l1lbl l1a1">Member counts</p>
             <div className="l1a1" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              {[{ val: l2TotalAll, lbl: 'Prabhu Shivacharya', color: '#ea580c' }, { val: l3TotalAll, lbl: 'Guru Jangam', color: '#16a34a' }, { val: l4TotalAll, lbl: 'Sri Veerashiva', color: '#2563eb' }].map((s, i) => (
+              {[{ val: adjustedL2, lbl: 'Prabhu Shivacharya', color: '#ea580c' }, { val: adjustedL3, lbl: 'Guru Jangam', color: '#16a34a' }, { val: adjustedL4, lbl: 'Sri Veerashiva', color: '#2563eb' }].map((s, i) => (
                 <div key={i} className="l1chip"><span style={{ fontSize: '22px', fontWeight: 600, color: s.color }}>{s.val}</span><span style={{ fontSize: '10px', color: '#64748b', textAlign: 'center', lineHeight: 1.3 }}>{s.lbl}</span></div>
               ))}
             </div>

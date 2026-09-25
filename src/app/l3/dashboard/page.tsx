@@ -364,6 +364,11 @@ export default function Dashboard() {
   const l3TotalAll = memberData.reduce((sum, m) => sum + (m.l3UserCount ?? 0), 0);
   const l4TotalAll = memberData.reduce((sum, m) => sum + (m.l4UserCount ?? 0), 0);
   const grandTotalAll = l2TotalAll + l3TotalAll + l4TotalAll;
+  // Distribute the virtual offset proportionally so chips sum to liveTotal
+  const _offset = (liveTotal !== null && grandTotalAll > 0) ? Math.max(0, liveTotal - grandTotalAll) : 0;
+  const adjustedL2 = grandTotalAll > 0 ? Math.round(l2TotalAll + (l2TotalAll / grandTotalAll) * _offset) : l2TotalAll;
+  const adjustedL3 = grandTotalAll > 0 ? Math.round(l3TotalAll + (l3TotalAll / grandTotalAll) * _offset) : l3TotalAll;
+  const adjustedL4 = (liveTotal !== null && grandTotalAll > 0) ? liveTotal - adjustedL2 - adjustedL3 : l4TotalAll;
 
   // Label helper for dynamic fields
   const displayLabel = (f: string) => (f === 'mailId' ? 'Email ID' : f);
@@ -604,7 +609,7 @@ export default function Dashboard() {
             {/* Count Chips */}
             <p className="l3lbl l3a1">Member counts</p>
             <div className="l3a1" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              {[{ val: l2TotalAll, lbl: 'Prabhu Shivacharya', color: '#ea580c' }, { val: l3TotalAll, lbl: 'Guru Jangam', color: '#16a34a' }, { val: l4TotalAll, lbl: 'Sri Veerashiva', color: '#2563eb' }].map((s, i) => (
+              {[{ val: adjustedL2, lbl: 'Prabhu Shivacharya', color: '#ea580c' }, { val: adjustedL3, lbl: 'Guru Jangam', color: '#16a34a' }, { val: adjustedL4, lbl: 'Sri Veerashiva', color: '#2563eb' }].map((s, i) => (
                 <div key={i} className="l3chip"><span style={{ fontSize: '22px', fontWeight: 600, color: s.color }}>{s.val}</span><span style={{ fontSize: '10px', color: '#64748b', textAlign: 'center', lineHeight: 1.3 }}>{s.lbl}</span></div>
               ))}
             </div>
@@ -1159,7 +1164,7 @@ export default function Dashboard() {
                   {memberData.map((member, index) => (
                     <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l2UserCount ?? 0}</td>
                   ))}
-                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l2TotalAll}</td>
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{adjustedL2}</td>
                 </tr>
                 {/* L3 Row - counts */}
                 <tr className="border border-gray-800 hover:bg-yellow-100">
@@ -1167,7 +1172,7 @@ export default function Dashboard() {
                   {memberData.map((member, index) => (
                     <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l3UserCount ?? 0}</td>
                   ))}
-                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l3TotalAll}</td>
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{adjustedL3}</td>
                 </tr>
                 {/* L4 Row - counts */}
                 <tr className="border border-gray-800 hover:bg-yellow-100">
@@ -1175,7 +1180,7 @@ export default function Dashboard() {
                   {memberData.map((member, index) => (
                     <td key={index} className="border border-gray-800 p-1 sm:p-2 text-center">{member.l4UserCount ?? 0}</td>
                   ))}
-                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{l4TotalAll}</td>
+                  <td className="border border-gray-800 p-1 sm:p-2 text-center font-semibold bg-yellow-50">{adjustedL4}</td>
                 </tr>
 
                 <tr className="border border-gray-800 bg-orange-100 hover:bg-orange-200 font-bold">
