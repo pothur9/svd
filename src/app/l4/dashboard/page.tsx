@@ -77,6 +77,7 @@ export default function Dashboard() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" | "bonus" } | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [liveTotal, setLiveTotal] = useState<number | null>(null);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -312,6 +313,24 @@ export default function Dashboard() {
 
     fetchMemberData();
   }, [router]);
+
+  // Fetch live total from /api/totalUsers (same as landing page)
+  useEffect(() => {
+    const fetchLiveTotal = async () => {
+      try {
+        const res = await fetch(`/api/totalUsers?timestamp=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLiveTotal(data.totalUsers);
+        }
+      } catch (err) {
+        console.error('Failed to fetch live total:', err);
+      }
+    };
+    fetchLiveTotal();
+    const interval = setInterval(fetchLiveTotal, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!userData) return;
@@ -834,7 +853,7 @@ export default function Dashboard() {
                 position: "relative",
                 zIndex: 1,
               }}>
-                <span style={{ fontSize: "32px", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{grandTotalAll}</span>
+                <span style={{ fontSize: "32px", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{liveTotal !== null ? liveTotal : grandTotalAll}</span>
                 <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "6px" }}>Total Members</span>
               </div>
             </div>
@@ -1436,7 +1455,7 @@ export default function Dashboard() {
                     {(member.l2UserCount ?? 0) + (member.l3UserCount ?? 0) + (member.l4UserCount ?? 0)}
                   </td>
                 ))}
-                <td className="border border-gray-800 p-1 sm:p-2 text-center">{grandTotalAll}</td>
+                <td className="border border-gray-800 p-1 sm:p-2 text-center">{liveTotal !== null ? liveTotal : grandTotalAll}</td>
               </tr>
             </tbody>
           </table>
@@ -1445,7 +1464,7 @@ export default function Dashboard() {
           <img src="/logomain1.png" alt="Logo" style={{ width: "150px", height: "150px" }} />
           <h1 className="font-bold text-black text-lg sm:text-2xl flex items-center">
             <strong className="text-6xl sm:text-8xl font-extrabold" style={{ letterSpacing: "5px" }}>&rarr;</strong>
-            <span className="ml-4 text-3xl mt-3">Total: {grandTotalAll}</span>
+            <span className="ml-4 text-3xl mt-3">Total: {liveTotal !== null ? liveTotal : grandTotalAll}</span>
           </h1>
         </div>
         <br />
