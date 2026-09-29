@@ -445,7 +445,7 @@ export default function Dashboard() {
               className="object-contain"
             />
           </div>
-          
+
         </div>
         {/* Responsive Table */}
         <div className="overflow-x-auto mx-auto max-w-[90%] sm:max-w-[95%] mt-10">
@@ -455,7 +455,7 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="border border-gray-800 p-1 sm:p-2 bg-orange-600 text-white text-center min-w-[120px] h-[150px]">
-                    Sri 1008 Jagdguru Peeta à¤¶à¥ à¤°à¥€ 1008 à¤œà¤—à¤¦à¥ à¤—à¥ à¤°à¥  à¤ªà¥€à¤  à²¶à³ à²°à³€ à³§à³¦à³¦à³® à²œà²—à¤¦à³ à¤—à³ à¤°à³  à²ªà¥€à¤ 
+                    Sri 1008 Jagdguru Peeta à¤¶à¥ à¤°à¥€ 1008 à¤œà¤—à¤¦à¥ à¤—à¥ à¤°à¥  à¤ªà¥€à¤  à²¶à³ à²°à³€ à³§à³¦à³¦à³® à²œà²—à¤¦à³ à¤—à³ à¤°à³  à²ªà¥€à¤
                   </th>
 
                   {memberData.map((member, index) => {
@@ -468,9 +468,8 @@ export default function Dashboard() {
                     return (
                       <th
                         key={index}
-                        className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${
-                          bgColors[index % bgColors.length]
-                        }`}
+                        className={`border border-gray-800 p-1 sm:p-2 text-center text-white min-w-[120px] h-[150px] ${bgColors[index % bgColors.length]
+                          }`}
                       >
                         <div className="flex flex-col items-center">
                           <div className="relative w-[65px] h-[100px]">
@@ -501,7 +500,7 @@ export default function Dashboard() {
                     <br />
                     à¤¶à¥ à¤°à¥€ 108 à¤ªà¥ à¤°à¤­à¥  à¤¶à¤¿à¤µà¤¾à¤šà¤¾à¤°à¥ à¤¯
                     <br />
-                    à²¶à³ à²°à³€ 108 à²ªà³ à²°à²­à³  à²¶à²¿à²µà²¾à²šà¤¾à²°à³ à¤¯à²°à³ 
+                    à²¶à³ à²°à³€ 108 à²ªà³ à²°à²­à³  à²¶à²¿à²µà²¾à²šà¤¾à²°à³ à¤¯à²°à³
                   </td>
                   {memberData.map((member, index) => (
                     <td
@@ -589,16 +588,16 @@ export default function Dashboard() {
                   const counts = getUserCounts(member);
                   return (
                     <tr key={index}>
-                      <td className={`border border-gray-800 p-1 text-center font-semibold ${bgColors[index % bgColors.length]} w-1/4 align-middle`} style={{fontSize:'0.7rem', minHeight: '48px', paddingTop: '6px'}}>
+                      <td className={`border border-gray-800 p-1 text-center font-semibold ${bgColors[index % bgColors.length]} w-1/4 align-middle`} style={{ fontSize: '0.7rem', minHeight: '48px', paddingTop: '6px' }}>
                         <div className="flex flex-col items-start h-full">
                           <div className="relative w-[32px] h-[32px] mb-1">
                             <Image src={imageUrl} alt={member.l1User.peeta} fill className="rounded-full object-cover object-top" />
                           </div>
-                          <span className="block text-[10px] break-words whitespace-normal leading-snug min-h-[24px] text-left" style={{wordBreak: 'break-word'}}>{member.l1User.peeta}</span>
+                          <span className="block text-[10px] break-words whitespace-normal leading-snug min-h-[24px] text-left" style={{ wordBreak: 'break-word' }}>{member.l1User.peeta}</span>
                         </div>
                       </td>
                       {counts.map((count, i) => (
-                        <td key={i} className="border border-gray-800 p-1 text-center w-1/5" style={{fontSize:'0.8rem'}}>{count}</td>
+                        <td key={i} className="border border-gray-800 p-1 text-center w-1/5" style={{ fontSize: '0.8rem' }}>{count}</td>
                       ))}
                     </tr>
                   );
@@ -668,10 +667,10 @@ export default function Dashboard() {
                       className="text-sm font-bold ml-2"
                       style={{ color: '#fff', backgroundColor: '#ea580c' }}
                     >
-                      Sanathana Veera Shiva <br/>Lingayatha Dharma
+                      Sanathana Veera Shiva <br />Lingayatha Dharma
                     </h1>
                   </div>
-                  
+
                   {/* Content Section */}
                   <div
                     className="p-3 flex justify-between"
@@ -682,9 +681,9 @@ export default function Dashboard() {
                       <p className="text-sm font-semibold mb-1" style={{ color: '#000', backgroundColor: '#fff' }}>Name: {userData.name}</p>
                       <p className="text-sm font-semibold mb-1" style={{ color: '#000', backgroundColor: '#fff' }}>ID: {userData.userId}</p>
                       <p className="text-sm font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>Peeta: {userData.peeta || "N/A"}</p>
-                     
+
                     </div>
-                    
+
                     {/* Right side - Image and QR Code */}
                     <div className="flex flex-col items-center" style={{ backgroundColor: '#fff' }}>
                       <div className="relative w-[80px] h-[80px] -mt-6" style={{ backgroundColor: '#fff' }}>
@@ -740,8 +739,8 @@ export default function Dashboard() {
                       alt="Logo Watermark"
                       fill
                       className="object-contain"
-                      style={{ 
-                        opacity: 0.20, 
+                      style={{
+                        opacity: 0.20,
                         backgroundColor: 'transparent',
                         maxWidth: '70%',
                         maxHeight: '70%'
@@ -758,10 +757,10 @@ export default function Dashboard() {
                         <p className="text-xs font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>DOB: {
                           userData.dob && !isNaN(Date.parse(userData.dob))
                             ? new Date(userData.dob).toLocaleDateString("en-GB", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                              })
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })
                             : "N/A"
                         }</p>
                         <p className="text-sm font-semibold" style={{ color: '#000', backgroundColor: '#fff' }}>Phone: {userData.contactNo}</p>

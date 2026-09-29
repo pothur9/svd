@@ -603,7 +603,7 @@ export default function Dashboard(): JSX.Element {
                   </div>
                   {/* Footer strip */}
                   <div style={{ background: 'linear-gradient(90deg,#fef3c7,#fde68a)', padding: '4px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '6.5px', color: '#92400e', fontWeight: 700 }}>SRI PRABHU SHIVACHARYA LINGAYATHA</span>
+                    {/* <span style={{ fontSize: '6.5px', color: '#92400e', fontWeight: 700 }}>SRI PRABHU SHIVACHARYA LINGAYATHA</span> */}
                     <span style={{ fontSize: '6.5px', color: '#92400e' }}>Valid ✓</span>
                   </div>
                 </div>
