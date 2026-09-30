@@ -7,42 +7,12 @@ import l3User from '@/models/l3'; // Adjust path if needed
 import l4User from '@/models/l4'; // Adjust path if needed
 export const dynamic = "force-dynamic";
 
-// Start counting from 8:00 AM IST today (106 offset + 261 real DB users = 367 total at 8:00 AM)
-const BASE_DATE = new Date('2026-09-02T08:00:00+05:30');
-const BASE_OFFSET = 106;
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // IST offset (UTC+5:30)
-const USERS_PER_30_MIN = 4; // Adds 3 users per active 30-minute interval (6 users per hour)
+// Count frozen at 2026-09-30 22:35 IST — no more auto-increment
+// Calculated: BASE_OFFSET(106) + (812 active slots × 4 users/slot) = 3354
+const FROZEN_OFFSET = 3354;
 
 function get30MinOffset(): number {
-    const now = new Date();
-
-    const baseIST = new Date(BASE_DATE.getTime() + IST_OFFSET_MS);
-    const nowIST = new Date(now.getTime() + IST_OFFSET_MS);
-
-    if (nowIST.getTime() < baseIST.getTime()) {
-        return BASE_OFFSET;
-    }
-
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const baseMidnight = Date.UTC(baseIST.getUTCFullYear(), baseIST.getUTCMonth(), baseIST.getUTCDate());
-    const nowMidnight = Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), nowIST.getUTCDate());
-    const fullDaysPassed = Math.max(0, Math.floor((nowMidnight - baseMidnight) / msPerDay));
-
-    const hour = nowIST.getUTCHours();
-    const minute = nowIST.getUTCMinutes();
-
-    let todayActiveSlots = 0;
-    if (hour >= 22) {
-        todayActiveSlots = 28; // 14 active hours * 2 intervals = 28 max intervals per day (6 users/hr)
-    } else if (hour >= 8) {
-        const activeMinutes = (hour - 8) * 60 + minute;
-        todayActiveSlots = Math.floor(activeMinutes / 30);
-    } else {
-        todayActiveSlots = 0; // Overnight before 8:00 AM
-    }
-
-    const totalActiveSlots = (fullDaysPassed * 28) + todayActiveSlots;
-    return BASE_OFFSET + (totalActiveSlots * USERS_PER_30_MIN);
+    return FROZEN_OFFSET;
 }
 
 export async function GET() {
