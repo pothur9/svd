@@ -896,7 +896,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* ── Count Pills ── */}
+       
             <p className="section-label anim-1">Member counts</p>
             <div className="anim-1" style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
               {[
