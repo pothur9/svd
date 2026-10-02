@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from "react";
 
 type AdminStep = "otp-send" | "otp-verify" | "password" | "dashboard";
+type ActiveTab = "transactions" | "users";
+type UserLevel = "all" | "l1" | "l2" | "l3" | "l4";
 
 interface Transaction {
   _id: string;
@@ -22,6 +24,25 @@ interface Stats {
   l4Total: number;
   grandTotal: number;
   totalTransactions: number;
+}
+
+interface AdminUser {
+  _id: string;
+  userId: string;
+  name: string;
+  contactNo: string;
+  peeta?: string;
+  gender?: string;
+  walletBalance?: number;
+  createdAt: string;
+  _level: "L1" | "L2" | "L3" | "L4";
+}
+
+interface LevelCounts {
+  l1: number;
+  l2: number;
+  l3: number;
+  l4: number;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -79,6 +100,19 @@ export default function AdminWalletPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [dashLoading, setDashLoading] = useState(false);
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<ActiveTab>("transactions");
+
+  // Users tab state
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userLevel, setUserLevel] = useState<UserLevel>("all");
+  const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(1);
+  const [userTotalPages, setUserTotalPages] = useState(1);
+  const [userTotal, setUserTotal] = useState(0);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [levelCounts, setLevelCounts] = useState<LevelCounts | null>(null);
 
   // Credit form
   const [creditUserId, setCreditUserId] = useState("");
@@ -179,11 +213,33 @@ export default function AdminWalletPage() {
     }
   }, [adminToken]);
 
+  // ── Users: Fetch ──────────────────────────────────────────────────────────
+  const fetchUsers = useCallback(async (p = 1, level: UserLevel = userLevel, search = userSearch) => {
+    setUsersLoading(true);
+    try {
+      const params = new URLSearchParams({ page: String(p), level, ...(search ? { search } : {}) });
+      const res = await fetch(`/api/wallet/admin/users?${params}`, {
+        headers: { "x-admin-token": adminToken },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers(data.users);
+        setUserPage(data.page);
+        setUserTotalPages(data.totalPages);
+        setUserTotal(data.total);
+        if (data.levelCounts) setLevelCounts(data.levelCounts);
+      }
+    } catch { /* noop */ }
+    finally { setUsersLoading(false); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminToken, userLevel, userSearch]);
+
   useEffect(() => {
     if (step === "dashboard" && adminToken) {
       fetchTransactions(1);
+      fetchUsers(1, "all", "");
     }
-  }, [step, adminToken, fetchTransactions]);
+  }, [step, adminToken, fetchTransactions, fetchUsers]);
 
   // ── Credit user ───────────────────────────────────────────────────────────
   const handleCredit = async () => {
@@ -447,10 +503,39 @@ export default function AdminWalletPage() {
         </button>
       </div>
 
-      <div style={{ padding: "24px", maxWidth: "1100px", margin: "0 auto" }}>
+      {/* ── Tab Bar ── */}
+      <div style={{ padding: "0 24px", maxWidth: "1100px", margin: "0 auto" }}>
+        <div style={{ display: "flex", gap: "4px", borderBottom: "1px solid rgba(255,255,255,0.1)", marginBottom: "24px", marginTop: "20px" }}>
+          {(["transactions", "users"] as ActiveTab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: "10px 22px",
+                background: activeTab === tab ? "rgba(234,88,12,0.15)" : "transparent",
+                border: "none",
+                borderBottom: activeTab === tab ? "2px solid #ea580c" : "2px solid transparent",
+                color: activeTab === tab ? "#ea580c" : "rgba(255,255,255,0.45)",
+                fontSize: "14px",
+                fontWeight: 700,
+                cursor: "pointer",
+                textTransform: "capitalize",
+                letterSpacing: "0.02em",
+                transition: "all 0.2s",
+              }}
+            >
+              {tab === "transactions" ? "💳 Transactions" : "👥 Users"}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* ── Stats Cards ── */}
-        {stats && (
+      <div style={{ padding: "0 24px 24px", maxWidth: "1100px", margin: "0 auto" }}>
+
+        {/* ── Stats Cards + Transactions (shown when transactions tab active) ── */}
+        {activeTab === "transactions" && (
+          <>
+          {stats && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "14px", marginBottom: "28px" }}>
             {[
               { label: "L2 Total Balance", value: `₹${stats.l2Total.toLocaleString("en-IN")}`, color: "#86efac" },
@@ -473,9 +558,10 @@ export default function AdminWalletPage() {
               </div>
             ))}
           </div>
-        )}
+          )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "20px", alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "20px", alignItems: "start" }}>
+
           {/* ── Transactions Table ── */}
           <div style={{
             background: "rgba(255,255,255,0.04)",
@@ -640,7 +726,162 @@ export default function AdminWalletPage() {
               </button>
             </div>
           </div>
-        </div>
+          </div>
+          </>
+        )}
+
+        {/* ══════════════════ USERS TAB ══════════════════ */}
+        {activeTab === "users" && (
+          <div>
+            {/* Level count summary */}
+            {levelCounts && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "12px", marginBottom: "20px" }}>
+                {[
+                  { label: "L1 – Swami", count: levelCounts.l1, color: "#f472b6", bg: "rgba(244,114,182,0.1)" },
+                  { label: "L2 – Prabhu Shivacharya", count: levelCounts.l2, color: "#ea580c", bg: "rgba(234,88,12,0.1)" },
+                  { label: "L3 – Guru Jangam", count: levelCounts.l3, color: "#22c55e", bg: "rgba(34,197,94,0.1)" },
+                  { label: "L4 – Sri Veerashiva", count: levelCounts.l4, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" },
+                  { label: "Total Members", count: levelCounts.l1 + levelCounts.l2 + levelCounts.l3 + levelCounts.l4, color: "#c4b5fd", bg: "rgba(196,181,253,0.1)" },
+                ].map((s) => (
+                  <div key={s.label} style={{
+                    background: s.bg,
+                    border: `1px solid ${s.color}33`,
+                    borderRadius: "14px",
+                    padding: "14px 16px",
+                    textAlign: "center",
+                  }}>
+                    <p style={{ color: s.color, fontSize: "26px", fontWeight: 800, margin: "0 0 4px" }}>{s.count}</p>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: "0.04em", lineHeight: 1.3 }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Filter + Search bar */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "4px" }}>
+                {(["all", "l1", "l2", "l3", "l4"] as UserLevel[]).map((lv) => {
+                  const colors: Record<UserLevel, string> = { all: "#c4b5fd", l1: "#f472b6", l2: "#ea580c", l3: "#22c55e", l4: "#3b82f6" };
+                  const isActive = userLevel === lv;
+                  return (
+                    <button
+                      key={lv}
+                      onClick={() => {
+                        setUserLevel(lv);
+                        setUserPage(1);
+                        setUserSearch("");
+                        fetchUsers(1, lv, "");
+                      }}
+                      style={{
+                        padding: "6px 14px",
+                        borderRadius: "999px",
+                        border: `1px solid ${colors[lv]}${ isActive ? "" : "55"}`,
+                        background: isActive ? `${colors[lv]}22` : "transparent",
+                        color: isActive ? colors[lv] : "rgba(255,255,255,0.4)",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        textTransform: "uppercase",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      {lv === "all" ? "All" : lv.toUpperCase()}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ flex: 1, minWidth: "200px" }}>
+                <input
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setUserPage(1);
+                      fetchUsers(1, userLevel, userSearch);
+                    }
+                  }}
+                  placeholder="Search by name, ID, or phone… (Enter to search)"
+                  style={{ ...inputStyle, fontSize: "13px", padding: "9px 14px", marginTop: 0 }}
+                />
+              </div>
+              <button
+                onClick={() => { setUserPage(1); fetchUsers(1, userLevel, userSearch); }}
+                style={{ padding: "9px 18px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.7)", fontSize: "13px", cursor: "pointer", whiteSpace: "nowrap" }}
+              >
+                🔍 Search
+              </button>
+              <button
+                onClick={() => fetchUsers(userPage, userLevel, userSearch)}
+                style={{ padding: "9px 14px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}
+              >
+                🔄
+              </button>
+            </div>
+
+            {/* Users Table */}
+            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
+              <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 style={{ color: "#fff", fontSize: "15px", fontWeight: 700, margin: 0 }}>All Members</h2>
+                <span style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px" }}>{userTotal} total</span>
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr style={{ background: "rgba(255,255,255,0.05)" }}>
+                      {["Level", "Name", "User ID", "Phone", "Peetha", "Gender", "Wallet", "Joined"].map((h) => (
+                        <th key={h} style={{ padding: "10px 14px", color: "rgba(255,255,255,0.45)", fontWeight: 600, textAlign: "left", fontSize: "11px", letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usersLoading ? (
+                      <tr><td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "rgba(255,255,255,0.3)" }}>Loading...</td></tr>
+                    ) : users.length === 0 ? (
+                      <tr><td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "rgba(255,255,255,0.3)" }}>No users found</td></tr>
+                    ) : users.map((u, i) => {
+                      const lvColors: Record<string, string> = { L1: "#f472b6", L2: "#ea580c", L3: "#22c55e", L4: "#3b82f6" };
+                      const c = lvColors[u._level] || "#c4b5fd";
+                      return (
+                        <tr key={u._id || i} style={{ background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                          <td style={{ padding: "10px 14px" }}>
+                            <span style={{ padding: "2px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 700, background: `${c}22`, color: c }}>{u._level}</span>
+                          </td>
+                          <td style={{ padding: "10px 14px", color: "#fff", fontWeight: 600, whiteSpace: "nowrap" }}>{u.name}</td>
+                          <td style={{ padding: "10px 14px", fontFamily: "monospace", color: "rgba(255,255,255,0.5)", fontSize: "11px", whiteSpace: "nowrap" }}>{u.userId}</td>
+                          <td style={{ padding: "10px 14px", color: "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>{u.contactNo}</td>
+                          <td style={{ padding: "10px 14px", color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>{u.peeta || "—"}</td>
+                          <td style={{ padding: "10px 14px", color: "rgba(255,255,255,0.5)", fontSize: "12px", textTransform: "capitalize" }}>{u.gender || "—"}</td>
+                          <td style={{ padding: "10px 14px", color: "#86efac", fontWeight: 700, whiteSpace: "nowrap" }}>₹{(u.walletBalance ?? 0).toLocaleString("en-IN")}</td>
+                          <td style={{ padding: "10px 14px", color: "rgba(255,255,255,0.35)", fontSize: "11px", whiteSpace: "nowrap" }}>
+                            {new Date(u.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {userTotalPages > 1 && (
+                <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+                  <button
+                    disabled={userPage === 1}
+                    onClick={() => { const p = userPage - 1; setUserPage(p); fetchUsers(p, userLevel, userSearch); }}
+                    style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: userPage === 1 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)", cursor: userPage === 1 ? "not-allowed" : "pointer", fontSize: "13px" }}
+                  >← Prev</button>
+                  <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px" }}>{userPage} / {userTotalPages}</span>
+                  <button
+                    disabled={userPage === userTotalPages}
+                    onClick={() => { const p = userPage + 1; setUserPage(p); fetchUsers(p, userLevel, userSearch); }}
+                    style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: userPage === userTotalPages ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)", cursor: userPage === userTotalPages ? "not-allowed" : "pointer", fontSize: "13px" }}
+                  >Next →</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
 
       <style>{`
